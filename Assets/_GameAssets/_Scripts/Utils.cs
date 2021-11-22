@@ -1,4 +1,5 @@
 using UnityEngine;
+using Mirror;
 
 public abstract class CachedTransform : MonoBehaviour
 {
@@ -13,16 +14,15 @@ public abstract class CachedTransform : MonoBehaviour
     }
 }
 
-[RequireComponent(typeof(CharacterController))]
-public abstract class CachedCharacterController : CachedTransform
+public abstract class CachedNetTransform : NetworkBehaviour
 {
-    CharacterController _CharCtrl;
-    protected CharacterController CharCtrl
+    Transform _MyTransform;
+    public Transform MyTransform
     {
         get
         {
-            if (_CharCtrl == null) _CharCtrl = GetComponent<CharacterController>();
-            return _CharCtrl;
+            if (_MyTransform == null) _MyTransform = transform;
+            return _MyTransform;
         }
     }
 }
