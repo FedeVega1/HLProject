@@ -1,12 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 using Mirror;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : CachedNetTransform
 {
     [SerializeField] float maxWalkSpeed, maxCrouchSpeed, crouchAmmount, maxRunSpeed, jumpHeight, horizontalSens;
+    [SerializeField] CinemachineVirtualCamera playerVCam;
+
+    [SyncVar(hook = nameof(OnFreezePlayerSet))] public bool FreezePlayer;
 
     CharacterController _CharCtrl;
     CharacterController CharCtrl
@@ -18,12 +22,25 @@ public class PlayerMovement : CachedNetTransform
         }
     }
 
-    public bool FreezePlayer { get; set; }
-
     BitFlag8 inputFlags;
     float startHeight, playerSpeed, cameraRotInput, lastCameraRotInput;
     Vector2 playerMovInput, lastPlayerMovInput;
     Vector3 velocity;
+
+    CinemachinePOV _PovComponent;
+    CinemachinePOV PovComponent
+    {
+        get
+        {
+            if (isLocalPlayer && _PovComponent == null) _PovComponent = playerVCam.GetCinemachineComponent<CinemachinePOV>();
+            return _PovComponent;
+        }
+    }
+
+    void OnFreezePlayerSet(bool oldValue, bool newValue)
+    {
+        if (isLocalPlayer) PovComponent.m_VerticalAxis.m_MaxSpeed = newValue ? 0 : 300;
+    }
 
     void Start()
     {
@@ -33,6 +50,7 @@ public class PlayerMovement : CachedNetTransform
 
     void Update()
     {
+        if (FreezePlayer) return;
         if (isLocalPlayer) CheckForInput();
 
         Move();
@@ -147,4 +165,12 @@ public class PlayerMovement : CachedNetTransform
         float rotation = MyTransform.localEulerAngles.y + cameraRotInput * horizontalSens * Time.deltaTime;
         MyTransform.rotation = Quaternion.AngleAxis(rotation, Vector3.up);
     }
+
+    public void ForceMoveCharacter(Vector3 pos, Quaternion rotation)
+    {
+        CharCtrl.Move(pos);
+        MyTransform.rotation = rotation;
+    }
+
+    public void SetFreezePlayer(bool toggle) => FreezePlayer = toggle;
 }
