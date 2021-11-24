@@ -7,7 +7,13 @@ public class TeamManager : NetworkBehaviour
 {
     public const int MAXTEAMS = 2;
     public static readonly string[] FactionNames = new string[MAXTEAMS] { "Combine", "Rebels" };
+    public static readonly Color32[] FactionColors = new Color32[MAXTEAMS]
+    {
+        new Color32(0xE9, 0xD1, 0x1E, 0xFF),
+        new Color32(0xCD, 0x71, 0x33, 0xFF)
+    };
 
+    int[] ticketsPerTeam;
     List<Player>[] playersByTeam;
     List<Player> spectators;
 
@@ -16,6 +22,12 @@ public class TeamManager : NetworkBehaviour
         spectators = new List<Player>();
         playersByTeam = new List<Player>[MAXTEAMS];
         for (int i = 0; i < MAXTEAMS; i++) playersByTeam[i] = new List<Player>();
+    }
+
+    [Server]
+    public void GetGameModeData(ref int[] ticketsPerTeam)
+    {
+        this.ticketsPerTeam = ticketsPerTeam;
     }
 
     [Server]
@@ -69,5 +81,20 @@ public class TeamManager : NetworkBehaviour
     void SetAsSpectator(ref Player playerScript)
     {
         spectators.Add(playerScript);
+    }
+
+    public int[] SeparatePlayersPerTeam(ref List<Player> players)
+    {
+        int[] playersPerTeam = new int[MAXTEAMS];
+
+        int size = players.Count;
+        for (int i = 0; i < size; i++)
+        {
+            int playerTeam = players[i].GetPlayerTeam() - 1;
+            if (playerTeam < 0) continue; // Ignore Spectators in the calculation
+            playersPerTeam[playerTeam]++;
+        }
+
+        return playersPerTeam;
     }
 }

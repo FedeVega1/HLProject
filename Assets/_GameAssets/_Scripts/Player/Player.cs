@@ -17,6 +17,7 @@ public class Player : Character
     [SyncVar(hook = nameof(OnTeamChange))] int playerTeam;
     [SyncVar] string playerName;
 
+    bool onControlPoint;
     PlayerCanvas playerCanvas;
 
     void OnTeamChange(int oldTeam, int newTeam)
@@ -79,8 +80,7 @@ public class Player : Character
     {
         movementScript.ForceMoveCharacter(spawnPosition, spawnRotation);
         //print($"NewPos: {MyTransform.position}");
-
-        movementScript.SetFreezePlayer(false);
+        movementScript.RpcToggleFreezePlayer(connectionToClient, false);
     }
 
     [TargetRpc]
@@ -88,5 +88,36 @@ public class Player : Character
     {
         if (target.connectionId != connectionToServer.connectionId) return;
         playerCanvas.ToggleTeamSelection(true);
+    }
+
+    [TargetRpc]
+    public void RpcOnControlPoint(NetworkConnection target, int currentCPController, float cpCaptureProgress, int defyingTeam)
+    {
+        if (target.connectionId != connectionToServer.connectionId) return;
+        playerCanvas.OnControlPoint(currentCPController, defyingTeam, cpCaptureProgress);
+        onControlPoint = true;
+    }
+
+    [TargetRpc]
+    public void RpcExitControlPoint(NetworkConnection target)
+    {
+        if (target.connectionId != connectionToServer.connectionId) return;
+        playerCanvas.OnExitControlPoint();
+        onControlPoint = false;
+    }
+
+    [TargetRpc]
+    public void RpcUpdateCPProgress(NetworkConnection target, float progress)
+    {
+        if (target.connectionId != connectionToServer.connectionId) return;
+        playerCanvas.UpdateCPProgress(progress);
+    }
+
+    [ClientRpc]
+    public void RpcControlPointCaptured(int cpTeam, int oldTeam, string cpName)
+    {
+        if (playerCanvas == null) return;
+        if (onControlPoint) playerCanvas.OnPointCaptured(cpTeam, oldTeam != 0 ? oldTeam : 1);
+        playerCanvas.NewCapturedControlPoint(cpTeam, cpName);
     }
 }

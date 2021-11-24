@@ -172,5 +172,10 @@ public class PlayerMovement : CachedNetTransform
         MyTransform.rotation = rotation;
     }
 
-    public void SetFreezePlayer(bool toggle) => FreezePlayer = toggle;
+    [TargetRpc]
+    public void RpcToggleFreezePlayer(NetworkConnection target, bool toggle)
+    {
+        if (target.connectionId != connectionToServer.connectionId) return;
+        FreezePlayer = toggle;
+    }
 }

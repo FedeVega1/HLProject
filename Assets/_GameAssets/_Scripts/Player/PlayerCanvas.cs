@@ -7,13 +7,22 @@ using TMPro;
 
 public class PlayerCanvas : MonoBehaviour
 {
-    [SerializeField] CanvasGroup teamSelectionCanvasGroup;
+    [SerializeField] CanvasGroup teamSelectionCanvasGroup, capturedCPNoticeCanvasGroup;
     [SerializeField] Sprite[] factionSprites;
-    [SerializeField] Image imgPointFaction;
+    [SerializeField] Image imgPointFaction, imgCPProgressBackground, imgCPProgressSlide, imgCPNotice;
+    [SerializeField] Slider cpCaptureProgress;
+    [SerializeField] TMP_Text lblNotice;
 
     [SerializeField] TMP_Text[] lblTeams;
 
+    bool onCapturePoint;
+    float controlPointProgress;
     Player playerScript;
+
+    void Update()
+    {
+        if (onCapturePoint) cpCaptureProgress.value = Mathf.Lerp(cpCaptureProgress.value, controlPointProgress, Time.deltaTime);
+    }
 
     public void Init(Player _player)
     {
@@ -29,14 +38,48 @@ public class PlayerCanvas : MonoBehaviour
         for (int i = 0; i < TeamManager.MAXTEAMS; i++) lblTeams[i].text = TeamManager.FactionNames[i];
     }
 
-    public void OnControlPoint(int pointTeam)
+    public void NewCapturedControlPoint(int cpTeam, string pointName)
     {
-        if (pointTeam == 0) imgPointFaction.sprite = null;
-        else imgPointFaction.sprite = factionSprites[pointTeam];
-        imgPointFaction.enabled = true;
+        LeanTween.cancel(capturedCPNoticeCanvasGroup.gameObject);
+        LeanTween.alphaCanvas(capturedCPNoticeCanvasGroup, 1, .5f).setEaseInSine();
+        LeanTween.alphaCanvas(capturedCPNoticeCanvasGroup, 0, .5f).setDelay(2.5f).setEaseOutSine();
+
+        imgCPNotice.sprite = factionSprites[cpTeam];
+        lblNotice.text = pointName + " captured";
     }
 
-    public void OnExitControlPoint() => imgPointFaction.enabled = false;
+    public void OnPointCaptured(int newTeam, int newDefyingTeam)
+    {
+        if (newTeam == 0)
+        {
+            imgPointFaction.sprite = null;
+            imgCPProgressBackground.color = Color.white;
+        }
+        else
+        {
+            imgPointFaction.sprite = factionSprites[newTeam];
+            imgCPProgressBackground.color = TeamManager.FactionColors[newTeam];
+        }
+
+        imgCPProgressSlide.color = newDefyingTeam == 0 ? Color.white : TeamManager.FactionColors[newDefyingTeam - 1];
+    }
+
+    public void UpdateCPProgress(float progress) => controlPointProgress = progress;
+
+    public void OnControlPoint(int pointTeam, int defyingTeam, float currentProgress)
+    {
+        OnPointCaptured(pointTeam, defyingTeam);
+
+        imgPointFaction.color = Color.white;
+        cpCaptureProgress.value = controlPointProgress = currentProgress;
+        onCapturePoint = true;
+    }
+
+    public void OnExitControlPoint()
+    {
+        imgCPProgressSlide.color = imgPointFaction.color = imgCPProgressBackground.color = new Color(1, 1, 1, 0);
+        onCapturePoint = false;
+    }
 
     public void SelectTeam(int team)
     {

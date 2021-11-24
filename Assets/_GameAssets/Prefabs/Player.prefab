@@ -99,7 +99,7 @@ GameObject:
   - component: {fileID: 1225735766619204947}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -181,6 +181,7 @@ MonoBehaviour:
   jumpHeight: 1
   horizontalSens: 100
   playerVCam: {fileID: 2527544677063496800}
+  FreezePlayer: 0
 --- !u!114 &-7027478099048125744
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -445,7 +446,7 @@ MonoBehaviour:
   m_Lens:
     FieldOfView: 90
     OrthographicSize: 5
-    NearClipPlane: 0.3
+    NearClipPlane: 0.2
     FarClipPlane: 1000
     Dutch: 0
     ModeOverride: 0
