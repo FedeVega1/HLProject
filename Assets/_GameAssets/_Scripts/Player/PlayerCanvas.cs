@@ -58,10 +58,11 @@ public class PlayerCanvas : MonoBehaviour
         else
         {
             imgPointFaction.sprite = factionSprites[newTeam];
-            imgCPProgressBackground.color = TeamManager.FactionColors[newTeam];
+            imgCPProgressBackground.color = TeamManager.FactionColors[newTeam - 1];
         }
 
         imgCPProgressSlide.color = newDefyingTeam == 0 ? Color.white : TeamManager.FactionColors[newDefyingTeam - 1];
+        cpCaptureProgress.value = controlPointProgress = 0;
     }
 
     public void UpdateCPProgress(float progress) => controlPointProgress = progress;

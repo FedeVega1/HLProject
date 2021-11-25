@@ -46,6 +46,7 @@ public class PlayerMovement : CachedNetTransform
     {
         startHeight = CharCtrl.height;
         playerSpeed = maxWalkSpeed;
+        CharCtrl.enabled = false;
     }
 
     void Update()
@@ -123,7 +124,7 @@ public class PlayerMovement : CachedNetTransform
         velocity = new Vector3(playerMovInput.x, velocity.y, playerMovInput.y);
         velocity = MyTransform.TransformDirection(velocity);
 
-        CharCtrl.Move(velocity * playerSpeed * Time.deltaTime);
+        if (CharCtrl.enabled) CharCtrl.Move(velocity * playerSpeed * Time.deltaTime);
     }
 
     void Jump()
@@ -132,7 +133,7 @@ public class PlayerMovement : CachedNetTransform
             velocity.y += Mathf.Sqrt(jumpHeight * -2 * Physics.gravity.y);
 
         velocity.y += Physics.gravity.y * Time.deltaTime;
-        CharCtrl.Move(velocity * Time.deltaTime);
+        if (CharCtrl.enabled) CharCtrl.Move(velocity * Time.deltaTime);
     }
 
     void Crouch()
@@ -168,8 +169,9 @@ public class PlayerMovement : CachedNetTransform
 
     public void ForceMoveCharacter(Vector3 pos, Quaternion rotation)
     {
-        CharCtrl.Move(pos);
+        MyTransform.position = pos + Vector3.up;
         MyTransform.rotation = rotation;
+        CharCtrl.enabled = true;
     }
 
     [TargetRpc]

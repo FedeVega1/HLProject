@@ -14,9 +14,17 @@ public class GameModeManager : NetworkBehaviour
         public int GetQuanity() => spawnPoints.Length;
     }
 
+    [System.Serializable]
+    class ControlPointNode
+    {
+        public ControlPoint controlPoint;
+        public int order;
+    }
+
     [SerializeField] TeamManager teamManager;
     [SerializeField] TeamSpawnPoints[] spawnPointsByTeam;
     [SerializeField] Transform[] spectatorPoints;
+    [SerializeField] ControlPointNode[] controlPoints;
 
     public TeamManager TeamManagerInstance => teamManager;
 
@@ -34,7 +42,27 @@ public class GameModeManager : NetworkBehaviour
     {
         connectedPlayers = new List<Player>();
         currentGameModeData = Resources.Load<GameModeData>("GameModes/AttackDefend");
-        TeamManagerInstance.GetGameModeData(ref currentGameModeData.ticketsPerTeam);
+
+        int size = controlPoints.Length;
+        for (int i = 0; i < size; i++)
+        {
+            controlPoints[i].controlPoint.SetPointOrder(controlPoints[i].order);
+            controlPoints[i].controlPoint.OnControllPointCaptured += TeamManagerInstance.OnCapturedControlPoint;
+        }
+
+        //controlPoints[0].controlPoint.UnlockCP();
+        //controlPoints[size - 1].controlPoint.UnlockCP();
+
+        TeamManagerInstance.GetGameModeData(ref currentGameModeData.ticketsPerTeam, size);
+    }
+
+    public override void OnStopServer()
+    {
+        int size = controlPoints.Length;
+        for (int i = 0; i < size; i++)
+        {
+            controlPoints[i].controlPoint.OnControllPointCaptured -= TeamManagerInstance.OnCapturedControlPoint;
+        }
     }
 
     [Server]
@@ -78,11 +106,31 @@ public class GameModeManager : NetworkBehaviour
     }
 
     [Server]
-    public bool CanCaptureControlPoint(ref List<Player> playersInCP, out int mayorTeam, int currentTeamHolder)
+    public bool CanCaptureControlPoint(ref List<Player> playersInCP, out int mayorTeam, int currentTeamHolder, int pointOrder)
     {
+        mayorTeam = 0;
         int[] playersPerTeam = TeamManagerInstance.SeparatePlayersPerTeam(ref playersInCP);
 
-        mayorTeam = 0;
+        switch (currentTeamHolder)
+        {
+            case 0:
+                print($"Point in dispiute: {pointOrder}");
+                print($"Team 1 point to capture: {TeamManagerInstance.GetTeamControlledPoints(0)}");
+                print($"Team 2 point to capture: {TeamManagerInstance.GetTeamControlledPoints(1)}");
+
+                if (playersPerTeam[0] >= currentGameModeData.minNumbPlayersToCaputre && TeamManagerInstance.GetTeamControlledPoints(0) < pointOrder) return false;
+                else if (playersPerTeam[1] >= currentGameModeData.minNumbPlayersToCaputre  && TeamManagerInstance.GetTeamControlledPoints(1) > pointOrder) return false;
+                break;
+
+            case 1:
+                if (TeamManagerInstance.GetTeamControlledPoints(1) > pointOrder) return false;
+                break;
+
+            case 2:
+                if (TeamManagerInstance.GetTeamControlledPoints(0) < pointOrder) return false;
+                break;
+        }
+
         int bestPlayerQuantity = -9999;
 
         if (playersPerTeam[0] == playersPerTeam[1] && playersInCP.Count >= currentGameModeData.minNumbPlayersToCaputre) return true;
@@ -114,5 +162,12 @@ public class GameModeManager : NetworkBehaviour
 
         if (sameNumberPlayers > 0) newPlayerName += $"#{sameNumberPlayers:000}";
         return newPlayerName;
+    }
+
+    [Server]
+    public void DoActionPerPlayer(System.Action<Player> actionToDo)
+    {
+        int size = connectedPlayers.Count;
+        for (int i = 0; i < size; i++) actionToDo?.Invoke(connectedPlayers[i]);
     }
 }

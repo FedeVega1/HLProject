@@ -177,7 +177,7 @@ MonoBehaviour:
   maxWalkSpeed: 500
   maxCrouchSpeed: 150
   crouchAmmount: 0.7
-  maxRunSpeed: 650
+  maxRunSpeed: 800
   jumpHeight: 1
   horizontalSens: 100
   playerVCam: {fileID: 2527544677063496800}

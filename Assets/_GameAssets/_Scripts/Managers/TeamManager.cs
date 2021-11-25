@@ -14,6 +14,7 @@ public class TeamManager : NetworkBehaviour
     };
 
     int[] ticketsPerTeam;
+    int[] controlledPoints;
     List<Player>[] playersByTeam;
     List<Player> spectators;
 
@@ -25,9 +26,10 @@ public class TeamManager : NetworkBehaviour
     }
 
     [Server]
-    public void GetGameModeData(ref int[] ticketsPerTeam)
+    public void GetGameModeData(ref int[] ticketsPerTeam, int totalCP)
     {
         this.ticketsPerTeam = ticketsPerTeam;
+        controlledPoints = new int[MAXTEAMS] { 0, totalCP - 1 };
     }
 
     [Server]
@@ -96,5 +98,30 @@ public class TeamManager : NetworkBehaviour
         }
 
         return playersPerTeam;
+    }
+
+    public void OnCapturedControlPoint(int team, int oldTeam)
+    {
+        switch (team)
+        {
+            case 1:
+                controlledPoints[0]++;
+                if (oldTeam != 0) controlledPoints[1]++;
+                break;
+
+            case 2:
+                controlledPoints[1]--;
+                if (oldTeam != 0) controlledPoints[0]--;
+                break;
+
+            default:
+                Debug.LogError("The spectator team has captured a control point... This should be worrying");
+                break;
+        }
+    }
+
+    public int GetTeamControlledPoints(int teamIndex)
+    {
+        return controlledPoints[Mathf.Clamp(teamIndex, 0, controlledPoints.Length)];
     }
 }

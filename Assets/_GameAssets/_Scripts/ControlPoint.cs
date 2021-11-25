@@ -15,10 +15,13 @@ public class ControlPoint : NetworkBehaviour
     List<Player> playersInCP;
 
     public bool IsBlocked { get; private set; }
+    public int PointOrder { get; private set; }
 
     bool canCapture, onDraw, canDeplete;
     int currentTeam, defyingTeam, newTeamOnDeplete;
     float captureProgress;
+
+    public System.Action<int, int> OnControllPointCaptured;
 
     void Start()
     {
@@ -114,7 +117,7 @@ public class ControlPoint : NetworkBehaviour
 
     void CheckPlayerCount()
     {
-        canCapture = GameModeManager.INS.CanCaptureControlPoint(ref playersInCP, out int defyingTeam, currentTeam);
+        canCapture = GameModeManager.INS.CanCaptureControlPoint(ref playersInCP, out int defyingTeam, currentTeam, PointOrder);
         if (defyingTeam != 0)
         {
             if (captureProgress > 0 && this.defyingTeam != defyingTeam)
@@ -151,9 +154,8 @@ public class ControlPoint : NetworkBehaviour
 
     void NotifyPointCapture()
     {
-        int size = playersInCP.Count;
-        for (int i = 0; i < size; i++)
-            playersInCP[i].RpcControlPointCaptured(defyingTeam, currentTeam, name);
+        GameModeManager.INS.DoActionPerPlayer((player) => { player.RpcControlPointCaptured(defyingTeam, currentTeam, name); });
+        OnControllPointCaptured?.Invoke(defyingTeam, currentTeam);
     }
 
     void OnProgressDepleted()
@@ -166,6 +168,12 @@ public class ControlPoint : NetworkBehaviour
         int size = playersInCP.Count;
         for (int i = 0; i < size; i++)
             playersInCP[i].RpcOnControlPoint(playersInCP[i].connectionToClient, currentTeam, captureProgress, defyingTeam);
+    }
+
+    public void SetPointOrder(int newOrder)
+    {
+        PointOrder = newOrder;
+        //BlockCP();
     }
 
     public void BlockCP()
