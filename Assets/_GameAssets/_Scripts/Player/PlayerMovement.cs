@@ -10,7 +10,7 @@ public class PlayerMovement : CachedNetTransform
     [SerializeField] float maxWalkSpeed, maxCrouchSpeed, crouchAmmount, maxRunSpeed, jumpHeight, horizontalSens;
     [SerializeField] CinemachineVirtualCamera playerVCam;
 
-    [SyncVar(hook = nameof(OnFreezePlayerSet))] public bool FreezePlayer;
+    [SyncVar(hook = nameof(OnFreezePlayerSet))] public bool freezePlayer;
 
     CharacterController _CharCtrl;
     CharacterController CharCtrl
@@ -40,6 +40,7 @@ public class PlayerMovement : CachedNetTransform
     void OnFreezePlayerSet(bool oldValue, bool newValue)
     {
         if (isLocalPlayer) PovComponent.m_VerticalAxis.m_MaxSpeed = newValue ? 0 : 300;
+        CharCtrl.enabled = !newValue;
     }
 
     void Start()
@@ -51,11 +52,12 @@ public class PlayerMovement : CachedNetTransform
 
     void Update()
     {
-        if (FreezePlayer) return;
+        if (freezePlayer) return;
         if (isLocalPlayer) CheckForInput();
 
+        if (!isServer) return;
+
         Move();
-        Jump();
         Rotate();
         Lean();
     }
@@ -109,6 +111,10 @@ public class PlayerMovement : CachedNetTransform
     [Command]
     void CmdSendPlayerInputs(Vector2 movAxis, float rotAxis, byte _inputFlags)
     {
+        movAxis.x = Mathf.Clamp(movAxis.x, -1, 1);
+        movAxis.y = Mathf.Clamp(movAxis.y, -1, 1);
+        rotAxis = Mathf.Clamp(rotAxis, -1, 1);
+
         playerMovInput = movAxis;
         cameraRotInput = rotAxis;
         inputFlags = new BitFlag8(_inputFlags);
@@ -117,6 +123,7 @@ public class PlayerMovement : CachedNetTransform
     void Move()
     {
         Crouch();
+        Jump();
 
         if (CharCtrl.isGrounded && velocity.y < 0) velocity.y = -.5f;
         if (inputFlags == 2) playerSpeed = maxRunSpeed * Time.deltaTime;
@@ -133,7 +140,7 @@ public class PlayerMovement : CachedNetTransform
             velocity.y += Mathf.Sqrt(jumpHeight * -2 * Physics.gravity.y);
 
         velocity.y += Physics.gravity.y * Time.deltaTime;
-        if (CharCtrl.enabled) CharCtrl.Move(velocity * Time.deltaTime);
+        //if (CharCtrl.enabled) CharCtrl.Move(velocity * Time.deltaTime);
     }
 
     void Crouch()
@@ -174,10 +181,10 @@ public class PlayerMovement : CachedNetTransform
         CharCtrl.enabled = true;
     }
 
-    [TargetRpc]
-    public void RpcToggleFreezePlayer(NetworkConnection target, bool toggle)
-    {
-        if (target.connectionId != connectionToServer.connectionId) return;
-        FreezePlayer = toggle;
-    }
+    //[TargetRpc]
+    //public void RpcToggleFreezePlayer(NetworkConnection target, bool toggle)
+    //{
+    //    if (target.connectionId != connectionToServer.connectionId) return;
+    //    freezePlayer = toggle;
+    //}
 }

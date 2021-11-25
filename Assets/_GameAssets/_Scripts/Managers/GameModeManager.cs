@@ -8,29 +8,41 @@ public class GameModeManager : NetworkBehaviour
     public static GameModeManager INS;
 
     [System.Serializable]
-    class TeamSpawnPoints
-    {
-        public Transform[] spawnPoints;
-        public int GetQuanity() => spawnPoints.Length;
-    }
-
-    [System.Serializable]
     class ControlPointNode
     {
         public ControlPoint controlPoint;
         public int order;
     }
 
+    class PlayerTimer
+    {
+        readonly Player affectedPlayer;
+        readonly double timeToAction;
+        readonly System.Action<Player> actionToPerform;
+
+        public PlayerTimer(ref Player _Player, float time, System.Action<Player> action)
+        {
+            affectedPlayer = _Player;
+            timeToAction = NetworkTime.time + time;
+            actionToPerform = action;
+        }
+
+        public bool IsAffectedPlayer(ref Player playerToCheck) => playerToCheck == affectedPlayer;
+        public bool OnTime() => NetworkTime.time >= timeToAction;
+        public void PerformAction() => actionToPerform?.Invoke(affectedPlayer);
+    }
+
     [SerializeField] TeamManager teamManager;
-    [SerializeField] TeamSpawnPoints[] spawnPointsByTeam;
     [SerializeField] Transform[] spectatorPoints;
     [SerializeField] ControlPointNode[] controlPoints;
+    [SerializeField] TeamBase[] teamBases;
 
     public TeamManager TeamManagerInstance => teamManager;
 
     bool matchEnded;
     GameModeData currentGameModeData;
     List<Player> connectedPlayers;
+    List<PlayerTimer> playerTimerQueue;
 
     void Awake()
     {
@@ -38,9 +50,28 @@ public class GameModeManager : NetworkBehaviour
         else Destroy(gameObject);
     }
 
+    void Update()
+    {
+        if (!isServer) return;
+        if (playerTimerQueue.Count > 0)
+        {
+            int size = playerTimerQueue.Count;
+            for (int i = 0; i < size; i++)
+            {
+                if (playerTimerQueue[i].OnTime())
+                {
+                    playerTimerQueue[i].PerformAction();
+                    playerTimerQueue[i] = null;
+                    playerTimerQueue.RemoveAt(i);
+                }
+            }
+        }
+    }
+
     public override void OnStartServer()
     {
         connectedPlayers = new List<Player>();
+        playerTimerQueue = new List<PlayerTimer>();
         currentGameModeData = Resources.Load<GameModeData>("GameModes/AttackDefend");
 
         int size = controlPoints.Length;
@@ -101,8 +132,8 @@ public class GameModeManager : NetworkBehaviour
     public void SpawnPlayerByTeam(Player playerToSpawn)
     {
         int playerTeam = playerToSpawn.GetPlayerTeam() - 1;
-        Transform randomSpawnPoint = spawnPointsByTeam[playerTeam].spawnPoints[Random.Range(0, spawnPointsByTeam[playerTeam].GetQuanity())];
-        playerToSpawn.SpawnPlayer(randomSpawnPoint.position, randomSpawnPoint.rotation);
+        Transform randomSpawnPoint = teamBases[playerTeam].GetFreeSpawnPoint(playerToSpawn.gameObject);
+        playerToSpawn.SpawnPlayer(randomSpawnPoint.position, randomSpawnPoint.rotation, currentGameModeData.playerRespawnTime);
     }
 
     [Server]
@@ -114,9 +145,9 @@ public class GameModeManager : NetworkBehaviour
         switch (currentTeamHolder)
         {
             case 0:
-                print($"Point in dispiute: {pointOrder}");
-                print($"Team 1 point to capture: {TeamManagerInstance.GetTeamControlledPoints(0)}");
-                print($"Team 2 point to capture: {TeamManagerInstance.GetTeamControlledPoints(1)}");
+                //print($"Point in dispiute: {pointOrder}");
+                //print($"Team 1 point to capture: {TeamManagerInstance.GetTeamControlledPoints(0)}");
+                //print($"Team 2 point to capture: {TeamManagerInstance.GetTeamControlledPoints(1)}");
 
                 if (playersPerTeam[0] >= currentGameModeData.minNumbPlayersToCaputre && TeamManagerInstance.GetTeamControlledPoints(0) < pointOrder) return false;
                 else if (playersPerTeam[1] >= currentGameModeData.minNumbPlayersToCaputre  && TeamManagerInstance.GetTeamControlledPoints(1) > pointOrder) return false;
@@ -148,6 +179,7 @@ public class GameModeManager : NetworkBehaviour
         return playersPerTeam[mayorTeam - 1] >= currentGameModeData.minNumbPlayersToCaputre && mayorTeam != currentTeamHolder;
     }
 
+    [Server]
     string CheckPlayerName(string playerName)
     {
         string newPlayerName = playerName;
@@ -156,7 +188,7 @@ public class GameModeManager : NetworkBehaviour
         int size = connectedPlayers.Count;
         for (int i = 0; i < size; i++)
         {
-            if (connectedPlayers[i].GetPlayerName() == playerName)
+            if (connectedPlayers[i].GetPlayerName().RemovePlayerNumber() == playerName)
                 sameNumberPlayers++;
         }
 
@@ -169,5 +201,47 @@ public class GameModeManager : NetworkBehaviour
     {
         int size = connectedPlayers.Count;
         for (int i = 0; i < size; i++) actionToDo?.Invoke(connectedPlayers[i]);
+    }
+
+    [Server]
+    public void PlayerOnEnemyBase(Player player)
+    {
+        playerTimerQueue.Add(new PlayerTimer(ref player, currentGameModeData.timeToReturnToBattlefield, KillPlayer));
+        player.RpcPlayerOutOfBounds(player.connectionToClient, currentGameModeData.timeToReturnToBattlefield);
+    }
+
+    [Server]
+    public void PlayerLeftEnemyBase(Player player)
+    {
+        RemovePlayerFromTimerQueue(ref player);
+        player.RpcPlayerReturned(player.connectionToClient);
+    }
+
+    [Server]
+    public void KillPlayer(Player playerToKill)
+    {
+        playerToKill.TakeDamage(99999999);
+        playerToKill.SetRespawnTime(playerToKill.GetPlayerRespawnTime() + currentGameModeData.killSelfTime);
+    }
+
+    [Server]
+    void RemovePlayerFromTimerQueue(ref Player playerToRemove)
+    {
+        int size = playerTimerQueue.Count;
+        for (int i = 0; i < size; i++)
+        {
+            if (playerTimerQueue[i].IsAffectedPlayer(ref playerToRemove))
+            {
+                playerTimerQueue[i] = null;
+                playerTimerQueue.RemoveAt(i);
+                break;
+            }
+        }
+    }
+
+    [Server]
+    public void RespawnPlayer(Player playerToRespawn)
+    {
+        SpawnPlayerByTeam(playerToRespawn);
     }
 }

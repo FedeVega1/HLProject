@@ -65,10 +65,10 @@ public class TeamManager : NetworkBehaviour
     [Server]
     int SelectUnBalancedTeam()
     {
-        int unbalancedTeam = -1, quantityOfPlayers = -9999;
+        int unbalancedTeam = -1, quantityOfPlayers = 9999;
         for (int i = 0; i < MAXTEAMS; i++)
         {
-            if (playersByTeam[i].Count > quantityOfPlayers)
+            if (playersByTeam[i].Count < quantityOfPlayers)
             {
                 unbalancedTeam = i + 1;
                 quantityOfPlayers = playersByTeam[i].Count;
@@ -85,6 +85,7 @@ public class TeamManager : NetworkBehaviour
         spectators.Add(playerScript);
     }
 
+    [Server]
     public int[] SeparatePlayersPerTeam(ref List<Player> players)
     {
         int[] playersPerTeam = new int[MAXTEAMS];
@@ -100,6 +101,7 @@ public class TeamManager : NetworkBehaviour
         return playersPerTeam;
     }
 
+    [Server]
     public void OnCapturedControlPoint(int team, int oldTeam)
     {
         switch (team)

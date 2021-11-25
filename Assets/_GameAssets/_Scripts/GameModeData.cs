@@ -10,6 +10,12 @@ public class GameModeData : ScriptableObject
     public bool allowRespawn;
     public int[] ticketsPerTeam;
     public int minNumbPlayersToCaputre;
+    public float timeToReturnToBattlefield = 5;
+    public float playerRespawnTime;
+
+    [Header("RespawnPenalties")]
+    public float killSelfTime;
+    public float killTeamMateTime;
 
     void OnValidate()
     {

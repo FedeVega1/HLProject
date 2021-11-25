@@ -6,24 +6,25 @@ using Mirror;
 [RequireComponent(typeof(BoxCollider))]
 public class ControlPoint : NetworkBehaviour
 {
+    [SerializeField] protected bool debugShowBounds;
+
     [Range(0, TeamManager.MAXTEAMS)]
-    [SerializeField] int startTeam;
+    [SerializeField] protected int startTeam;
 
-    [SerializeField] float captureStep = .03f, bleedSpeed = .025f, notifyInterval = .05f;
-    [SerializeField] bool uncapturablePoint;
-
-    List<Player> playersInCP;
+    [SerializeField] protected float captureStep = .03f, bleedSpeed = .025f, notifyInterval = .05f;
+    [SerializeField] protected bool uncapturablePoint;
 
     public bool IsBlocked { get; private set; }
     public int PointOrder { get; private set; }
 
-    bool canCapture, onDraw, canDeplete;
-    int currentTeam, defyingTeam, newTeamOnDeplete;
-    float captureProgress;
+    protected bool canCapture, onDraw, canDeplete;
+    protected int currentTeam, defyingTeam, newTeamOnDeplete;
+    protected float captureProgress;
+    protected List<Player> playersInCP;
 
     public System.Action<int, int> OnControllPointCaptured;
 
-    void Start()
+    protected virtual void Start()
     {
         playersInCP = new List<Player>();
         IsBlocked = uncapturablePoint;
@@ -32,7 +33,7 @@ public class ControlPoint : NetworkBehaviour
         newTeamOnDeplete = -1;
     }
 
-    void Update()
+    protected virtual void Update()
     {
         if (IsBlocked) return;
         if (captureProgress > 0 && (!canCapture || canDeplete))
@@ -49,7 +50,7 @@ public class ControlPoint : NetworkBehaviour
         }
     }
 
-    void OnTriggerEnter(Collider other)
+    protected virtual void OnTriggerEnter(Collider other)
     {
         if (IsBlocked || !isServer || !other.CompareTag("Player")) return;    
         Player playerScript = other.GetComponent<Player>();
@@ -73,13 +74,13 @@ public class ControlPoint : NetworkBehaviour
         }
     }
 
-    void OnTriggerStay(Collider other)
+    protected virtual void OnTriggerStay(Collider other)
     {
         if (IsBlocked || !canCapture || !isServer || !other.CompareTag("Player")) return;
         CaptureControlPoint();
     }
 
-    void OnTriggerExit(Collider other)
+    protected virtual void OnTriggerExit(Collider other)
     {
         if (IsBlocked || !isServer || !other.CompareTag("Player")) return;
 
@@ -97,7 +98,7 @@ public class ControlPoint : NetworkBehaviour
         CheckPlayerCount();
     }
 
-    void CaptureControlPoint()
+    protected virtual void CaptureControlPoint()
     {
         if (onDraw || defyingTeam == 0) return;
 
@@ -115,7 +116,7 @@ public class ControlPoint : NetworkBehaviour
         }
     }
 
-    void CheckPlayerCount()
+    protected virtual void CheckPlayerCount()
     {
         canCapture = GameModeManager.INS.CanCaptureControlPoint(ref playersInCP, out int defyingTeam, currentTeam, PointOrder);
         if (defyingTeam != 0)
@@ -141,7 +142,7 @@ public class ControlPoint : NetworkBehaviour
         }
     }
 
-    void NotifyProgress()
+    protected virtual void NotifyProgress()
     {
         float progress = captureProgress % notifyInterval;
         if (progress >= -.01f && progress <= .01f)
@@ -152,13 +153,13 @@ public class ControlPoint : NetworkBehaviour
         }
     }
 
-    void NotifyPointCapture()
+    protected virtual void NotifyPointCapture()
     {
         GameModeManager.INS.DoActionPerPlayer((player) => { player.RpcControlPointCaptured(defyingTeam, currentTeam, name); });
         OnControllPointCaptured?.Invoke(defyingTeam, currentTeam);
     }
 
-    void OnProgressDepleted()
+    protected virtual void OnProgressDepleted()
     {
         canDeplete = false;
         defyingTeam = newTeamOnDeplete;
@@ -192,16 +193,17 @@ public class ControlPoint : NetworkBehaviour
         enabled = true;
     }
 
-    int GetPlayersInTeam(int team)
+    protected virtual int GetPlayersInTeam(int team)
     {
         if (team != 0) 
             return GameModeManager.INS.TeamManagerInstance.SeparatePlayersPerTeam(ref playersInCP)[team - 1];
         return 1;
     }
 
-    void OnDrawGizmosSelected()
+    protected virtual void OnDrawGizmos()
     {
-        Gizmos.color = startTeam == 0 ? Color.grey : TeamManager.FactionColors[startTeam];
+        if (!debugShowBounds) return;
+        Gizmos.color = startTeam == 0 ? Color.grey : TeamManager.FactionColors[startTeam - 1];
         Gizmos.DrawWireCube(transform.position, transform.localScale);    
     }
 }

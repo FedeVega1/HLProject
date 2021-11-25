@@ -29,6 +29,7 @@ public class Character : CachedNetTransform
         isDead = false;
     }
 
+    [Server]
     public virtual void TakeDamage(float ammount)
     {
         if (!isServer || isDead || isInvencible) return;
@@ -40,18 +41,21 @@ public class Character : CachedNetTransform
         if (currentHealth <= 0) CharacterDies();
     }
 
+    [Server]
     public virtual void TakeHealth(float ammount)
     {
         if (!isServer || isDead) return;
         currentHealth += ammount;
     }
 
+    [Server]
     public virtual void TakeArmor(float ammount)
     {
         if (!isServer || isDead) return;
         currentArmor += ammount;
     }
 
+    [Server]
     protected virtual void CharacterDies()
     {
         if (!isServer || isInvencible) return;

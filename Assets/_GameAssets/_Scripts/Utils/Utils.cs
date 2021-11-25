@@ -54,3 +54,22 @@ public abstract class CachedRectTransform : MonoBehaviour
         }
     }
 }
+
+public static class Utilities
+{
+    public static string RemovePlayerNumber(this string playerName)
+    {
+        if (!playerName.Contains('#')) return playerName;
+
+        string newPlayerName = "";
+        int size = playerName.Length;
+
+        for (int i = 0; i < size; i++)
+        {
+            if (playerName[i] == '#') break;
+            newPlayerName += playerName[i];
+        }
+
+        return newPlayerName;
+    }
+}

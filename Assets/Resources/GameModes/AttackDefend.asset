@@ -15,3 +15,7 @@ MonoBehaviour:
   allowRespawn: 1
   ticketsPerTeam: 2c0100002c010000
   minNumbPlayersToCaputre: 1
+  timeToReturnToBattlefield: 5
+  playerRespawnTime: 5
+  killSelfTime: 2
+  killTeamMateTime: 2

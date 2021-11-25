@@ -4,24 +4,42 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using Mirror;
 
 public class PlayerCanvas : MonoBehaviour
 {
-    [SerializeField] CanvasGroup teamSelectionCanvasGroup, capturedCPNoticeCanvasGroup;
     [SerializeField] Sprite[] factionSprites;
-    [SerializeField] Image imgPointFaction, imgCPProgressBackground, imgCPProgressSlide, imgCPNotice;
-    [SerializeField] Slider cpCaptureProgress;
-    [SerializeField] TMP_Text lblNotice;
 
-    [SerializeField] TMP_Text[] lblTeams;
+    [SerializeField] UIControlPointCapture cpCapture;
+    [SerializeField] UIControlPointNotice cpNotice;
+    [SerializeField] UITeamSelection teamSelection;
 
-    bool onCapturePoint;
-    float controlPointProgress;
+    [SerializeField] Image obscurer;
+    [SerializeField] RectTransform lblPlayerOutBounds;
+    [SerializeField] TMP_Text lblRespawnTime;
+
+    bool playerisDead;
+    int outOfBoundsTween;
+    double timeToRespawn;
+    Coroutine OutOfBoundsRoutine;
     Player playerScript;
 
     void Update()
     {
-        if (onCapturePoint) cpCaptureProgress.value = Mathf.Lerp(cpCaptureProgress.value, controlPointProgress, Time.deltaTime);
+        if (playerisDead)
+        {
+            double time = timeToRespawn - NetworkTime.time;
+
+            if (time <= 0)
+            {
+                time = 0;
+                playerisDead = false;
+                lblRespawnTime.text = "You can Respawn now";
+                return;
+            }
+
+            lblRespawnTime.text = $"You can Respawn in {System.Math.Round(time, 0)}";
+        }
     }
 
     public void Init(Player _player)
@@ -35,61 +53,80 @@ public class PlayerCanvas : MonoBehaviour
             eventSystem.AddComponent<StandaloneInputModule>();
         }
 
-        for (int i = 0; i < TeamManager.MAXTEAMS; i++) lblTeams[i].text = TeamManager.FactionNames[i];
+        teamSelection.Init();
+        cpCapture.Init(ref factionSprites);
+        cpNotice.Init(ref factionSprites);
     }
 
-    public void NewCapturedControlPoint(int cpTeam, string pointName)
+    public void PlayerOutOfBounds(float timeToDie)
     {
-        LeanTween.cancel(capturedCPNoticeCanvasGroup.gameObject);
-        LeanTween.alphaCanvas(capturedCPNoticeCanvasGroup, 1, .5f).setEaseInSine();
-        LeanTween.alphaCanvas(capturedCPNoticeCanvasGroup, 0, .5f).setDelay(2.5f).setEaseOutSine();
+        Color obsColor = new Color32(0x0, 0x0, 0x0, 0x28);
+        obscurer.color = obsColor;
+        lblPlayerOutBounds.localScale = Vector3.one;
 
-        imgCPNotice.sprite = factionSprites[cpTeam];
-        lblNotice.text = pointName + " captured";
-    }
+        OutOfBoundsRoutine = StartCoroutine(OutOfBoundsAnimation());
 
-    public void OnPointCaptured(int newTeam, int newDefyingTeam)
-    {
-        if (newTeam == 0)
+        outOfBoundsTween = LeanTween.value(.16f, 1, timeToDie).setOnUpdate((value) =>
         {
-            imgPointFaction.sprite = null;
-            imgCPProgressBackground.color = Color.white;
-        }
-        else
+            obsColor.a = value;
+            obscurer.color = obsColor;
+        }).uniqueId;
+    }
+
+    public void PlayerInBounds()
+    {
+        LeanTween.cancel(outOfBoundsTween);
+        if (OutOfBoundsRoutine != null)
         {
-            imgPointFaction.sprite = factionSprites[newTeam];
-            imgCPProgressBackground.color = TeamManager.FactionColors[newTeam - 1];
+            StopCoroutine(OutOfBoundsRoutine);
+            OutOfBoundsRoutine = null;
         }
 
-        imgCPProgressSlide.color = newDefyingTeam == 0 ? Color.white : TeamManager.FactionColors[newDefyingTeam - 1];
-        cpCaptureProgress.value = controlPointProgress = 0;
+        obscurer.color = new Color(0, 0, 0, 0);
+        lblPlayerOutBounds.localScale = Vector3.zero;
     }
 
-    public void UpdateCPProgress(float progress) => controlPointProgress = progress;
-
-    public void OnControlPoint(int pointTeam, int defyingTeam, float currentProgress)
+    public void PlayerRespawn()
     {
-        OnPointCaptured(pointTeam, defyingTeam);
-
-        imgPointFaction.color = Color.white;
-        cpCaptureProgress.value = controlPointProgress = currentProgress;
-        onCapturePoint = true;
+        playerisDead = false;
+        lblRespawnTime.rectTransform.localScale = Vector3.zero;
     }
 
-    public void OnExitControlPoint()
+    public void PlayerDied(double timeToRespawn)
     {
-        imgCPProgressSlide.color = imgPointFaction.color = imgCPProgressBackground.color = new Color(1, 1, 1, 0);
-        onCapturePoint = false;
+        PlayerInBounds();
+        playerisDead = true;
+        lblRespawnTime.rectTransform.localScale = Vector3.one;
+        this.timeToRespawn = timeToRespawn;
     }
 
-    public void SelectTeam(int team)
-    {
-        playerScript.TrySelectTeam(team);
-    }
+    #region Buttons
 
-    public void ToggleTeamSelection(bool toggle)
+    public void SelectTeam(int team) => playerScript.TrySelectTeam(team);
+
+    #endregion
+
+    #region Redirections
+
+    public void OnPointCaptured(int newTeam, int newDefyingTeam) => cpCapture.OnPointCaptured(newTeam, newDefyingTeam);
+    public void UpdateCPProgress(float progress) => cpCapture.UpdateCPProgress(progress);
+    public void OnControlPoint(int pointTeam, int defyingTeam, float currentProgress) => cpCapture.OnControlPoint(pointTeam, defyingTeam, currentProgress);
+    public void OnExitControlPoint() => cpCapture.OnExitControlPoint();
+    public void NewCapturedControlPoint(int cpTeam, string pointName) => cpNotice.NewCapturedControlPoint(cpTeam, pointName);
+    public void ToggleTeamSelection(bool toggle) => teamSelection.ToggleTeamSelection(toggle);
+
+    #endregion
+
+    IEnumerator OutOfBoundsAnimation()
     {
-        teamSelectionCanvasGroup.alpha = toggle ? 1 : 0;
-        teamSelectionCanvasGroup.interactable = teamSelectionCanvasGroup.blocksRaycasts = toggle;
+        while (true)
+        {
+            yield return new WaitForSeconds(Random.Range(.8f, 1.25f));
+            for (int i = 0; i < 2; i++)
+            {
+                LeanTween.scale(lblPlayerOutBounds.gameObject, Vector3.zero, 0).setLoopPingPong(1);
+                yield return new WaitForSeconds(.1f);
+            }
+        }
     }
 }
