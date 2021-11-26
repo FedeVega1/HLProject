@@ -5,6 +5,75 @@ using Mirror;
 
 public class TeamManager : NetworkBehaviour
 {
+    [System.Serializable]
+    class Team
+    {
+        public readonly int teamIndex;
+        public readonly List<Player> playersInTeam;
+
+        public bool CapturedFirstPoint { get; private set; }
+
+        public int nextPointToCapture, controlledPoints;
+
+        bool canBleed;
+        float bleedSpeed, bleedProgress;
+        int tickets;
+
+        public System.Action<int> UpdateTickets;
+        public System.Action OnLostAllTickets;
+
+        public Team(int index)
+        {
+            teamIndex = index;
+            playersInTeam = new List<Player>();
+        }
+
+        public void SetTickets(int startingTickets)
+        {
+            tickets = startingTickets;
+            UpdateTickets?.Invoke(tickets);
+        }
+
+        public void Update()
+        {
+            if (!canBleed) return;
+            bleedProgress += bleedSpeed * Time.deltaTime;
+            if (bleedProgress >= 1)
+            {
+                RemoveTicket(1);
+                bleedProgress = 0;
+            }
+        }
+
+        public void RemoveTicket(int quanity)
+        {
+            tickets -= quanity;
+            if (tickets <= 0)
+            {
+                tickets = 0;
+                OnLostAllTickets?.Invoke();
+            }
+
+            UpdateTickets?.Invoke(tickets);
+        }
+
+        public void StartBleeding(float bleedSpeed)
+        {
+            canBleed = true;
+            this.bleedSpeed = bleedSpeed;
+        }
+
+        public void StopBleeding()
+        {
+            canBleed = false;
+            bleedProgress = 0;
+        }
+
+        public bool HasMorePoints(int points) => controlledPoints > points;
+
+        public void TeamCapturedFirstPoint() => CapturedFirstPoint = true;
+    }
+
     public const int MAXTEAMS = 2;
     public static readonly string[] FactionNames = new string[MAXTEAMS] { "Combine", "Rebels" };
     public static readonly Color32[] FactionColors = new Color32[MAXTEAMS]
@@ -13,23 +82,45 @@ public class TeamManager : NetworkBehaviour
         new Color32(0xCD, 0x71, 0x33, 0xFF)
     };
 
-    int[] ticketsPerTeam;
-    int[] controlledPoints;
-    List<Player>[] playersByTeam;
+    int totalCP;
+    Team[] teamData;
+    GameModeData currentGameModeData;
     List<Player> spectators;
+
+    public System.Action<int, int> OnTicketChange;
 
     public override void OnStartServer()
     {
         spectators = new List<Player>();
-        playersByTeam = new List<Player>[MAXTEAMS];
-        for (int i = 0; i < MAXTEAMS; i++) playersByTeam[i] = new List<Player>();
+        //playersByTeam = new List<Player>[MAXTEAMS];
+
+        teamData = new Team[MAXTEAMS];
+        for (int i = 0; i < MAXTEAMS; i++)
+        {
+            teamData[i] = new Team(i + 1);
+            teamData[i].SetTickets(currentGameModeData.ticketsPerTeam[i]);
+            teamData[i].OnLostAllTickets += GameModeManager.INS.EndMatch;
+        }
+
+        teamData[0].nextPointToCapture = 0;
+        teamData[1].nextPointToCapture = totalCP - 1;
+
+        teamData[0].UpdateTickets += (tickets) => { OnTicketChange?.Invoke(1, tickets); };
+        teamData[1].UpdateTickets += (tickets) => { OnTicketChange?.Invoke(2, tickets); };
+        //for (int i = 0; i < MAXTEAMS; i++) playersByTeam[i] = new List<Player>();
+    }
+
+    void Update()
+    {
+        if (!isServer) return;
+        for (int i = 0; i < MAXTEAMS; i++) teamData[i].Update();
     }
 
     [Server]
-    public void GetGameModeData(ref int[] ticketsPerTeam, int totalCP)
+    public void GetGameModeData(ref GameModeData data, int totalCP)
     {
-        this.ticketsPerTeam = ticketsPerTeam;
-        controlledPoints = new int[MAXTEAMS] { 0, totalCP - 1 };
+        currentGameModeData = data;
+        this.totalCP = totalCP;
     }
 
     [Server]
@@ -58,7 +149,7 @@ public class TeamManager : NetworkBehaviour
         }
 
         playerScript.SetPlayerTeam(selectedTeam);
-        playersByTeam[selectedTeam - 1].Add(playerScript);
+        teamData[selectedTeam - 1].playersInTeam.Add(playerScript);
         GameModeManager.INS.SpawnPlayerByTeam(playerScript);
     }
 
@@ -68,10 +159,10 @@ public class TeamManager : NetworkBehaviour
         int unbalancedTeam = -1, quantityOfPlayers = 9999;
         for (int i = 0; i < MAXTEAMS; i++)
         {
-            if (playersByTeam[i].Count < quantityOfPlayers)
+            if (teamData[i].playersInTeam.Count < quantityOfPlayers)
             {
                 unbalancedTeam = i + 1;
-                quantityOfPlayers = playersByTeam[i].Count;
+                quantityOfPlayers = teamData[i].playersInTeam.Count;
             }
         }
 
@@ -107,23 +198,65 @@ public class TeamManager : NetworkBehaviour
         switch (team)
         {
             case 1:
-                controlledPoints[0]++;
-                if (oldTeam != 0) controlledPoints[1]++;
+                teamData[0].nextPointToCapture++;
+                teamData[0].controlledPoints++;
+
+                if (oldTeam != 0)
+                {
+                    teamData[1].nextPointToCapture++;
+                    teamData[1].controlledPoints--;
+                }
+
+                if (!teamData[0].CapturedFirstPoint) teamData[0].TeamCapturedFirstPoint();
                 break;
 
             case 2:
-                controlledPoints[1]--;
-                if (oldTeam != 0) controlledPoints[0]--;
+                teamData[1].nextPointToCapture--;
+                teamData[1].controlledPoints++;
+
+                if (oldTeam != 0)
+                {
+                    teamData[0].nextPointToCapture--;
+                    teamData[0].controlledPoints--;
+                }
+
+                if (!teamData[1].CapturedFirstPoint) teamData[1].TeamCapturedFirstPoint();
                 break;
 
             default:
                 Debug.LogError("The spectator team has captured a control point... This should be worrying");
                 break;
         }
+
+        if (teamData[0].CapturedFirstPoint && teamData[1].CapturedFirstPoint)
+        {
+            if (teamData[0].HasMorePoints(teamData[1].controlledPoints))
+            {
+                teamData[1].StartBleeding(currentGameModeData.cpHandicap);
+                teamData[0].StopBleeding();
+            }
+            else if (teamData[1].HasMorePoints(teamData[0].controlledPoints))
+            {
+                teamData[0].StartBleeding(currentGameModeData.cpHandicap);
+                teamData[1].StopBleeding();
+            }
+            else
+            {
+                for (int i = 0; i < MAXTEAMS; i++) 
+                 teamData[i].StopBleeding();
+            }
+        }
     }
 
+    [Server]
     public int GetTeamControlledPoints(int teamIndex)
     {
-        return controlledPoints[Mathf.Clamp(teamIndex, 0, controlledPoints.Length)];
+        return teamData[Mathf.Clamp(teamIndex, 0, MAXTEAMS)].nextPointToCapture;
+    }
+
+    [Server]
+    public void RemoveTicket(int team, int quanity)
+    {
+        teamData[team - 1].RemoveTicket(quanity);
     }
 }

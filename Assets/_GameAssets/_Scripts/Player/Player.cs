@@ -37,6 +37,7 @@ public class Player : Character
     {
         playerCanvas = Instantiate(playerCanvasPrefab).GetComponent<PlayerCanvas>();
         playerCanvas.Init(this);
+        GameModeManager.INS.TeamManagerInstance.OnTicketChange += UpdateMatchTickets;
     }
 
     void Start() { if (!isLocalPlayer) Destroy(playerCamera); }
@@ -48,6 +49,17 @@ public class Player : Character
         if (Input.GetKeyDown(KeyCode.Escape) && Input.GetKeyDown(KeyCode.LeftShift)) GameManager.INS.StopServer();
         if (isDead && (Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0))) CmdRequestPlayerRespawn();
         if (Input.GetKeyDown(KeyCode.Delete)) GameModeManager.INS.KillPlayer(this);
+
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            movementScript.FreezeInputs = true;
+            playerCanvas.ToggleTeamSelection(true);
+        }
+    }
+
+    void OnDisable()
+    {
+        GameModeManager.INS.TeamManagerInstance.OnTicketChange -= UpdateMatchTickets;
     }
 
     #region Get/Set
@@ -70,6 +82,12 @@ public class Player : Character
     {
         if (!isLocalPlayer) return;
         CmdRequestPlayerChangeTeam(team);
+    }
+
+    [Client]
+    public void UpdateMatchTickets(int team, int tickets)
+    {
+        print($"{team} team tickets: {tickets}");
     }
 
     #endregion
@@ -109,7 +127,11 @@ public class Player : Character
     #region ServerCommands
 
     [Command]
-    void CmdRequestPlayerChangeTeam(int team) => GameModeManager.INS.TeamManagerInstance.PlayerSelectedTeam(this, team);
+    void CmdRequestPlayerChangeTeam(int team)
+    {
+        movementScript.freezePlayer = true;
+        GameModeManager.INS.TeamManagerInstance.PlayerSelectedTeam(this, team);
+    }
 
     [Command]
     void CmdRequestPlayerRespawn()
@@ -170,6 +192,7 @@ public class Player : Character
     void RpcShowDeadHUD(NetworkConnection target, double respawnTime)
     {
         if (target.connectionId != connectionToServer.connectionId) return;
+        movementScript.FreezeInputs = true;
         playerCanvas.PlayerDied(respawnTime);
     }
 
@@ -194,7 +217,12 @@ public class Player : Character
     [ClientRpc]
     public void RpcPlayerSpawns()
     {
-        if (isLocalPlayer) playerCanvas.PlayerRespawn();
+        if (isLocalPlayer)
+        {
+            playerCanvas.PlayerRespawn();
+            movementScript.FreezeInputs = false;
+        }
+
         playerMesh.enabled = true;
     }
 

@@ -84,7 +84,7 @@ public class GameModeManager : NetworkBehaviour
         //controlPoints[0].controlPoint.UnlockCP();
         //controlPoints[size - 1].controlPoint.UnlockCP();
 
-        TeamManagerInstance.GetGameModeData(ref currentGameModeData.ticketsPerTeam, size);
+        TeamManagerInstance.GetGameModeData(ref currentGameModeData, size);
     }
 
     public override void OnStopServer()
@@ -243,5 +243,11 @@ public class GameModeManager : NetworkBehaviour
     public void RespawnPlayer(Player playerToRespawn)
     {
         SpawnPlayerByTeam(playerToRespawn);
+    }
+
+    [Server]
+    public void EndMatch()
+    {
+
     }
 }

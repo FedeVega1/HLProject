@@ -17,6 +17,11 @@ public class GameModeData : ScriptableObject
     public float killSelfTime;
     public float killTeamMateTime;
 
+    [Header("TicketBleeding")]
+    public float cpHandicap;
+    public float lostTeamBase;
+    public float totalAnnihilation;
+
     void OnValidate()
     {
         if (ticketsPerTeam == null || ticketsPerTeam.Length < MAXTEAMS || ticketsPerTeam.Length > MAXTEAMS)

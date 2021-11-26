@@ -12,6 +12,18 @@ public class PlayerMovement : CachedNetTransform
 
     [SyncVar(hook = nameof(OnFreezePlayerSet))] public bool freezePlayer;
 
+    bool _FreezeInputs;
+    public bool FreezeInputs
+    {
+        get => _FreezeInputs;
+
+        set
+        {
+            _FreezeInputs = value;
+            PovComponent.m_VerticalAxis.m_MaxSpeed = value ? 0 : 300;
+        }
+    }
+
     CharacterController _CharCtrl;
     CharacterController CharCtrl
     {
@@ -64,6 +76,7 @@ public class PlayerMovement : CachedNetTransform
 
     void CheckForInput()
     {
+        if (FreezeInputs) return;
         bool newInput = false;
         playerMovInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         cameraRotInput = Input.GetAxis("Mouse X");
@@ -180,11 +193,4 @@ public class PlayerMovement : CachedNetTransform
         MyTransform.rotation = rotation;
         CharCtrl.enabled = true;
     }
-
-    //[TargetRpc]
-    //public void RpcToggleFreezePlayer(NetworkConnection target, bool toggle)
-    //{
-    //    if (target.connectionId != connectionToServer.connectionId) return;
-    //    freezePlayer = toggle;
-    //}
 }

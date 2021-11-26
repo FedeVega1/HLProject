@@ -88,16 +88,23 @@ public class PlayerCanvas : MonoBehaviour
 
     public void PlayerRespawn()
     {
+        ResetHUD();
         playerisDead = false;
-        lblRespawnTime.rectTransform.localScale = Vector3.zero;
     }
 
     public void PlayerDied(double timeToRespawn)
     {
-        PlayerInBounds();
+        ResetHUD();
         playerisDead = true;
         lblRespawnTime.rectTransform.localScale = Vector3.one;
         this.timeToRespawn = timeToRespawn;
+    }
+
+    void ResetHUD()
+    {
+        PlayerInBounds();
+        lblRespawnTime.rectTransform.localScale = Vector3.zero;
+        cpCapture.OnExitControlPoint();
     }
 
     #region Buttons
