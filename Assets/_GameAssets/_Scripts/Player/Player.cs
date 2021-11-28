@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public struct PlayerInfo : NetworkMessage
-{
-    public string playerName;
-}
+//public struct PlayerInfo : NetworkMessage
+//{
+//    public string playerName;
+//}
 
 public class Player : Character
 {
@@ -40,7 +40,11 @@ public class Player : Character
         GameModeManager.INS.TeamManagerInstance.OnTicketChange += UpdateMatchTickets;
     }
 
-    void Start() { if (!isLocalPlayer) Destroy(playerCamera); }
+    void Start() 
+    { 
+        if (!isLocalPlayer) Destroy(playerCamera);
+        playerMesh.enabled = false;
+    }
 
     void Update()
     {
@@ -49,6 +53,7 @@ public class Player : Character
         if (Input.GetKeyDown(KeyCode.Escape) && Input.GetKeyDown(KeyCode.LeftShift)) GameManager.INS.StopServer();
         if (isDead && (Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0))) CmdRequestPlayerRespawn();
         if (Input.GetKeyDown(KeyCode.Delete)) GameModeManager.INS.KillPlayer(this);
+        if (Input.GetKeyDown(KeyCode.F1)) GameModeManager.INS.EndMatch();
 
         if (Input.GetKeyDown(KeyCode.M))
         {
@@ -87,7 +92,8 @@ public class Player : Character
     [Client]
     public void UpdateMatchTickets(int team, int tickets)
     {
-        print($"{team} team tickets: {tickets}");
+        if (isLocalPlayer) playerCanvas.SetTeamTickets(team - 1, tickets);
+        print($"{TeamManager.FactionNames[team - 1]} tickets: {tickets}");
     }
 
     #endregion
@@ -122,6 +128,25 @@ public class Player : Character
         base.CharacterDies();
     }
 
+    [Server]
+    public void Init()
+    {
+        GameModeManager.INS.OnMatchEnded += MatchEnded;
+    }
+
+    [Server]
+    void MatchEnded(int loosingTeam)
+    {
+        movementScript.freezePlayer = true;
+        movementScript.ToggleCharacterController(false);
+
+        Transform spectPoint = GameModeManager.INS.GetSpectatePointByIndex(0);
+        movementScript.MyTransform.position = spectPoint.position;
+        movementScript.MyTransform.rotation = spectPoint.rotation;
+
+        RpcMatchEndPlayerSetup(loosingTeam);
+    }
+
     #endregion
 
     #region ServerCommands
@@ -145,10 +170,13 @@ public class Player : Character
     #region TargetRpc
 
     [TargetRpc]
-    public void RpcShowGreetings(NetworkConnection target)
+    public void RpcShowGreetings(NetworkConnection target, int team1Tickets, int team2Tickets)
     {
         if (target.connectionId != connectionToServer.connectionId) return;
+
         playerCanvas.ToggleTeamSelection(true);
+        playerCanvas.SetTeamTickets(0, team1Tickets);
+        playerCanvas.SetTeamTickets(1, team2Tickets);
     }
 
     [TargetRpc]
@@ -224,6 +252,17 @@ public class Player : Character
         }
 
         playerMesh.enabled = true;
+    }
+
+    [ClientRpc]
+    public void RpcMatchEndPlayerSetup(int loosingTeam)
+    {
+        if (isLocalPlayer)
+        {
+            playerCanvas.ShowGameOverScreen(loosingTeam);
+        }
+
+        playerMesh.enabled = false;
     }
 
     #endregion

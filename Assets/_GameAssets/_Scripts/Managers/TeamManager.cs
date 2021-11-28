@@ -12,12 +12,12 @@ public class TeamManager : NetworkBehaviour
         public readonly List<Player> playersInTeam;
 
         public bool CapturedFirstPoint { get; private set; }
+        public int Tickets { get; private set; }
 
         public int nextPointToCapture, controlledPoints;
 
         bool canBleed;
         float bleedSpeed, bleedProgress;
-        int tickets;
 
         public System.Action<int> UpdateTickets;
         public System.Action OnLostAllTickets;
@@ -30,8 +30,8 @@ public class TeamManager : NetworkBehaviour
 
         public void SetTickets(int startingTickets)
         {
-            tickets = startingTickets;
-            UpdateTickets?.Invoke(tickets);
+            Tickets = startingTickets;
+            UpdateTickets?.Invoke(Tickets);
         }
 
         public void Update()
@@ -47,14 +47,14 @@ public class TeamManager : NetworkBehaviour
 
         public void RemoveTicket(int quanity)
         {
-            tickets -= quanity;
-            if (tickets <= 0)
+            Tickets -= quanity;
+            if (Tickets <= 0)
             {
-                tickets = 0;
+                Tickets = 0;
                 OnLostAllTickets?.Invoke();
             }
 
-            UpdateTickets?.Invoke(tickets);
+            UpdateTickets?.Invoke(Tickets);
         }
 
         public void StartBleeding(float bleedSpeed)
@@ -107,6 +107,8 @@ public class TeamManager : NetworkBehaviour
 
         teamData[0].UpdateTickets += (tickets) => { OnTicketChange?.Invoke(1, tickets); };
         teamData[1].UpdateTickets += (tickets) => { OnTicketChange?.Invoke(2, tickets); };
+
+        GameModeManager.INS.OnMatchEnded += MatchEnded;
         //for (int i = 0; i < MAXTEAMS; i++) playersByTeam[i] = new List<Player>();
     }
 
@@ -259,4 +261,21 @@ public class TeamManager : NetworkBehaviour
     {
         teamData[team - 1].RemoveTicket(quanity);
     }
+
+    [Server]
+    public int GetLoosingTeam()
+    {
+        if (teamData[0].Tickets == teamData[1].Tickets) return -1;
+        return teamData[0].Tickets > 0 ? 1 : 2;
+    }
+
+    [Server]
+    public void MatchEnded(int loosingTeam)
+    {
+        enabled = false;
+        for (int i = 0; i < MAXTEAMS; i++) teamData[i].StopBleeding();
+    }
+
+    [Server]
+    public int GetTicketsFromTeam(int team) => teamData[team - 1].Tickets;
 }

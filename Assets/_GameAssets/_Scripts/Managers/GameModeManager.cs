@@ -44,6 +44,8 @@ public class GameModeManager : NetworkBehaviour
     List<Player> connectedPlayers;
     List<PlayerTimer> playerTimerQueue;
 
+    public System.Action<int> OnMatchEnded;
+
     void Awake()
     {
         if (INS == null) INS = this;
@@ -97,7 +99,20 @@ public class GameModeManager : NetworkBehaviour
     }
 
     [Server]
-    public GameObject SpawnPlayerObject(GameObject playerPrefab, PlayerInfo playerInfo)
+    public void OnSceneChanged()
+    {
+        int size = connectedPlayers.Count;
+        for (int i = 0; i < size; i++)
+        {
+            connectedPlayers[i].MyTransform.position = spectatorPoints[0].position;
+            connectedPlayers[i].MyTransform.rotation = spectatorPoints[0].rotation;
+            connectedPlayers[i].Init();
+            connectedPlayers[i].RpcShowGreetings(connectedPlayers[i].connectionToClient, TeamManagerInstance.GetTicketsFromTeam(1), TeamManagerInstance.GetTicketsFromTeam(2));
+        }
+    }
+
+    [Server]
+    public GameObject SpawnPlayerObject(GameObject playerPrefab, string playerName)
     {
         GameObject playerObject = Instantiate(playerPrefab, spectatorPoints[0].position, spectatorPoints[0].rotation);
         Player playerScript = playerObject.GetComponent<Player>();
@@ -108,7 +123,8 @@ public class GameModeManager : NetworkBehaviour
             return null;
         }
 
-        playerScript.SetPlayerName(CheckPlayerName(playerInfo.playerName));
+        playerScript.SetPlayerName(CheckPlayerName(playerName));
+        playerScript.Init();
         connectedPlayers.Add(playerScript);
 
         return playerObject;
@@ -125,12 +141,16 @@ public class GameModeManager : NetworkBehaviour
             return;
         }
 
-        if (!matchEnded) playerScript.RpcShowGreetings(playerScript.connectionToClient);
+        if (!matchEnded)
+        {
+            playerScript.RpcShowGreetings(playerScript.connectionToClient, TeamManagerInstance.GetTicketsFromTeam(1), TeamManagerInstance.GetTicketsFromTeam(2));
+        }
     }
 
     [Server]
     public void SpawnPlayerByTeam(Player playerToSpawn)
     {
+        if (matchEnded) return;
         int playerTeam = playerToSpawn.GetPlayerTeam() - 1;
         Transform randomSpawnPoint = teamBases[playerTeam].GetFreeSpawnPoint(playerToSpawn.gameObject);
         playerToSpawn.SpawnPlayer(randomSpawnPoint.position, randomSpawnPoint.rotation, currentGameModeData.playerRespawnTime);
@@ -140,6 +160,8 @@ public class GameModeManager : NetworkBehaviour
     public bool CanCaptureControlPoint(ref List<Player> playersInCP, out int mayorTeam, int currentTeamHolder, int pointOrder)
     {
         mayorTeam = 0;
+        if (matchEnded) return false;
+
         int[] playersPerTeam = TeamManagerInstance.SeparatePlayersPerTeam(ref playersInCP);
 
         switch (currentTeamHolder)
@@ -206,6 +228,7 @@ public class GameModeManager : NetworkBehaviour
     [Server]
     public void PlayerOnEnemyBase(Player player)
     {
+        if (matchEnded) return;
         playerTimerQueue.Add(new PlayerTimer(ref player, currentGameModeData.timeToReturnToBattlefield, KillPlayer));
         player.RpcPlayerOutOfBounds(player.connectionToClient, currentGameModeData.timeToReturnToBattlefield);
     }
@@ -213,6 +236,7 @@ public class GameModeManager : NetworkBehaviour
     [Server]
     public void PlayerLeftEnemyBase(Player player)
     {
+        if (matchEnded) return;
         RemovePlayerFromTimerQueue(ref player);
         player.RpcPlayerReturned(player.connectionToClient);
     }
@@ -220,6 +244,7 @@ public class GameModeManager : NetworkBehaviour
     [Server]
     public void KillPlayer(Player playerToKill)
     {
+        if (matchEnded) return;
         playerToKill.TakeDamage(99999999);
         playerToKill.SetRespawnTime(playerToKill.GetPlayerRespawnTime() + currentGameModeData.killSelfTime);
     }
@@ -227,6 +252,8 @@ public class GameModeManager : NetworkBehaviour
     [Server]
     void RemovePlayerFromTimerQueue(ref Player playerToRemove)
     {
+        if (matchEnded) return;
+
         int size = playerTimerQueue.Count;
         for (int i = 0; i < size; i++)
         {
@@ -242,12 +269,25 @@ public class GameModeManager : NetworkBehaviour
     [Server]
     public void RespawnPlayer(Player playerToRespawn)
     {
+        if (matchEnded) return;
         SpawnPlayerByTeam(playerToRespawn);
     }
 
     [Server]
     public void EndMatch()
     {
+        print("GameOver");
+        matchEnded = true;
+        enabled = false;
 
+        int size = playerTimerQueue.Count;
+        for (int i = 0; i < size; i++) playerTimerQueue[i] = null;
+        playerTimerQueue.Clear();
+
+        int loosingTeam = TeamManagerInstance.GetLoosingTeam();
+        OnMatchEnded?.Invoke(loosingTeam);
+        LeanTween.value(0, 1, 15).setOnComplete(() => { GameManager.INS.ServerChangeLevel(); });
     }
+
+    public Transform GetSpectatePointByIndex(int index) => spectatorPoints[index];
 }

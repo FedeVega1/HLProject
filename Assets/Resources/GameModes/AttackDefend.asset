@@ -19,3 +19,6 @@ MonoBehaviour:
   playerRespawnTime: 5
   killSelfTime: 2
   killTeamMateTime: 2
+  cpHandicap: 0.033
+  lostTeamBase: 0.067
+  totalAnnihilation: 1

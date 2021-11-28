@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
     public static GameManager INS;
 
     [SerializeField] NetManager netManager;
+    [SerializeField] UILoadingScreen loadingScreen;
 
     string _PlayerName = "";
     public string PlayerName 
@@ -57,25 +58,39 @@ public class GameManager : MonoBehaviour
 
     public void CreateMatch()
     {
-        netManager.StartHost();
+        ShowLoadingScreen(netManager.StartHost);
     }
 
     public void ConnectToServerByIP(string serverIP)
     {
         netManager.networkAddress = serverIP;
-        netManager.StartClient();
+        ShowLoadingScreen(netManager.StartClient);
     }
 
     public void StopServer()
     {
-        netManager.StopHost();
-        SceneManager.LoadScene(netManager.offlineScene);
+        ShowLoadingScreen(netManager.StopHost);
     }
 
     public void DisconnectFromServer()
     {
-        netManager.StopClient();
-        SceneManager.LoadScene(netManager.offlineScene);
+        ShowLoadingScreen(netManager.StopClient);
+    }
+
+    public void OnLoadedScene()
+    {
+        if (loadingScreen != null) loadingScreen.HideLoadingScreen();
+    }
+
+    void ShowLoadingScreen(System.Action OnLoadingScreenShown)
+    {
+        if (loadingScreen != null) loadingScreen.ShowLoadingScreen();
+        LeanTween.value(0, 1, .5f).setOnComplete(() => { OnLoadingScreenShown?.Invoke(); });
+    }
+
+    public void ServerChangeLevel()
+    {
+        ShowLoadingScreen(() => { netManager.ServerChangeScene(netManager.onlineScene); });
     }
 
     public string SetPlayerName(string newName) => PlayerName = newName;

@@ -13,6 +13,7 @@ public class PlayerCanvas : MonoBehaviour
     [SerializeField] UIControlPointCapture cpCapture;
     [SerializeField] UIControlPointNotice cpNotice;
     [SerializeField] UITeamSelection teamSelection;
+    [SerializeField] UIGameOverScreen gameOverScreen;
 
     [SerializeField] Image obscurer;
     [SerializeField] RectTransform lblPlayerOutBounds;
@@ -23,6 +24,8 @@ public class PlayerCanvas : MonoBehaviour
     double timeToRespawn;
     Coroutine OutOfBoundsRoutine;
     Player playerScript;
+
+    int[] teamTickets;
 
     void Update()
     {
@@ -56,6 +59,9 @@ public class PlayerCanvas : MonoBehaviour
         teamSelection.Init();
         cpCapture.Init(ref factionSprites);
         cpNotice.Init(ref factionSprites);
+        gameOverScreen.Init(ref factionSprites);
+
+        teamTickets = new int[TeamManager.MAXTEAMS];
     }
 
     public void PlayerOutOfBounds(float timeToDie)
@@ -103,9 +109,19 @@ public class PlayerCanvas : MonoBehaviour
     void ResetHUD()
     {
         PlayerInBounds();
+        teamSelection.ToggleTeamSelection(false);
         lblRespawnTime.rectTransform.localScale = Vector3.zero;
         cpCapture.OnExitControlPoint();
     }
+
+    public void ShowGameOverScreen(int loosingTeam)
+    {
+        ResetHUD();
+        obscurer.color = new Color32(0x0, 0x0, 0x0, 0x43);
+        gameOverScreen.ShowGameOverScreen(loosingTeam, teamTickets);
+    }
+
+    public void SetTeamTickets(int team, int tickets) => teamTickets[team] = tickets;
 
     #region Buttons
 

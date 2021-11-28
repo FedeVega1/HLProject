@@ -74,6 +74,7 @@ public class PlayerMovement : CachedNetTransform
         Lean();
     }
 
+    [Client]
     void CheckForInput()
     {
         if (FreezeInputs) return;
@@ -187,10 +188,14 @@ public class PlayerMovement : CachedNetTransform
         MyTransform.rotation = Quaternion.AngleAxis(rotation, Vector3.up);
     }
 
+    [Server]
     public void ForceMoveCharacter(Vector3 pos, Quaternion rotation)
     {
         MyTransform.position = pos + Vector3.up;
         MyTransform.rotation = rotation;
         CharCtrl.enabled = true;
     }
+
+    [Server]
+    public void ToggleCharacterController(bool toggle) => CharCtrl.enabled = toggle;
 }
