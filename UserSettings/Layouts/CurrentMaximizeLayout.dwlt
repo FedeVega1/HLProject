@@ -215,8 +215,8 @@ MonoBehaviour:
     y: 0
     width: 789
     height: 738
-  m_MinSize: {x: 200, y: 200}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 202, y: 221}
+  m_MaxSize: {x: 4002, y: 4021}
   m_ActualView: {fileID: 7}
   m_Panes:
   - {fileID: 7}
@@ -224,7 +224,7 @@ MonoBehaviour:
   - {fileID: 9}
   - {fileID: 10}
   m_Selected: 0
-  m_LastSelected: 3
+  m_LastSelected: 1
 --- !u!114 &7
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -483,9 +483,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 18.57825, y: -1.2987814, z: 1.2566938}
+    m_Target: {x: 89.49421, y: 88.5, z: 0}
     speed: 2
-    m_Value: {x: 18.57825, y: -1.2987814, z: 1.2566938}
+    m_Value: {x: 89.49421, y: 88.5, z: 0}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -532,13 +532,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: -0.12369326, y: -0.77939063, z: 0.16278468, w: -0.5922337}
+    m_Target: {x: 0.1274826, y: -0.010774025, z: -0.007197404, w: 0.9917632}
     speed: 2
-    m_Value: {x: -0.12369391, y: -0.77939475, z: 0.16278554, w: -0.5922369}
+    m_Value: {x: 0.12748171, y: -0.01077395, z: -0.007197354, w: 0.9917563}
   m_Size:
-    m_Target: 18.708286
+    m_Target: 65.731285
     speed: 2
-    m_Value: 18.708286
+    m_Value: 65.731285
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -556,7 +556,7 @@ MonoBehaviour:
     m_FarClip: 10000
     m_DynamicClip: 0
     m_OcclusionCulling: 0
-  m_LastSceneViewRotation: {x: -0.07663275, y: -0.9213842, z: 0.2361521, w: -0.29899603}
+  m_LastSceneViewRotation: {x: 0.1274826, y: -0.010774025, z: -0.007197404, w: 0.9917632}
   m_LastSceneViewOrtho: 0
   m_ReplacementShader: {fileID: 0}
   m_ReplacementString: 
@@ -685,64 +685,7 @@ MonoBehaviour:
     m_SaveData: []
   m_WidgetStates:
     m_Keys:
-    - Decals -> Decals Affecting Transparent Objects -> Display Atlas
-    - Decals -> Decals Affecting Transparent Objects -> Mip Level
-    - Display Stats -> Update every second with average
-    - Display Stats -> CPU timings (Command Buffers)
-    - Display Stats -> GPU timings
-    - Display Stats -> Inline CPU timings
-    - Display Stats -> Count Rays (MRays/Frame)
-    - Display Stats -> Debug XR Layout
-    - Material -> Common Material Properties
-    - Material -> Material
-    - Material -> Engine
-    - Material -> Attributes
-    - Material -> Properties
-    - Material -> GBuffer
-    - Material -> Material Validator
-    - Material -> Override Global Material Texture Mip Bias
-    - Lighting -> Shadows -> Shadow Debug Mode
-    - Lighting -> Shadows -> Global Shadow Scale Factor
-    - Lighting -> Shadows -> Clear Shadow Atlas
-    - Lighting -> Shadows -> Shadow Range Minimum Value
-    - Lighting -> Shadows -> Shadow Range Maximum Value
-    - Lighting -> Lighting -> Show Lights By Type
-    - Lighting -> Lighting -> Show Lights By Type -> Directional Lights
-    - Lighting -> Lighting -> Show Lights By Type -> Punctual Lights
-    - Lighting -> Lighting -> Show Lights By Type -> Area Lights
-    - Lighting -> Lighting -> Show Lights By Type -> Reflection Probes
-    - Lighting -> Lighting -> Exposure
-    - Lighting -> Lighting -> Exposure -> DebugMode
-    - Lighting -> Lighting -> Exposure -> Debug Exposure Compensation
-    - Lighting -> Lighting -> Lighting Debug Mode
-    - Lighting -> Lighting -> Light Hierarchy Debug Mode
-    - Lighting -> Lighting -> Light Layers Visualization
-    - Lighting -> Material Overrides -> Override Smoothness
-    - Lighting -> Material Overrides -> Override Albedo
-    - Lighting -> Material Overrides -> Override Normal
-    - Lighting -> Material Overrides -> Override Specular Color
-    - Lighting -> Material Overrides -> Override Ambient Occlusion
-    - Lighting -> Material Overrides -> Override Emissive Color
-    - Lighting -> Fullscreen Debug Mode
-    - Lighting -> Tile/Cluster Debug
-    - Lighting -> Display Sky Reflection
-    - Lighting -> Display Light Volumes
-    - Lighting -> Display Cookie Atlas
-    - Lighting -> Display Planar Reflection Atlas
-    - Lighting -> Display Local Volumetric Fog Atlas
-    - Lighting -> Debug Overlay Screen Ratio
-    - Volume -> Component
-    - Rendering -> Fullscreen Debug Mode
-    - Rendering -> Mip Maps
-    - Rendering -> Color Picker -> Debug Mode
-    - Rendering -> Color Picker -> Font Color
-    - Rendering -> False Color Mode
-    - Rendering -> Freeze Camera For Culling
-    - Rendering -> HDRP Render Graph -> Clear Render Targets At Creation
-    - Rendering -> HDRP Render Graph -> Disable Pass Culling
-    - Rendering -> HDRP Render Graph -> Immediate Mode
-    - Rendering -> HDRP Render Graph -> Enable Logging
-    - Main Camera -> Rendering
+    - Scene Camera -> Rendering
     - Lit Shader Mode
     - Depth Prepass within Deferred
     - Clear GBuffers
@@ -781,7 +724,7 @@ MonoBehaviour:
     - After Post-process
     - Depth Test
     - Virtual Texturing
-    - Main Camera -> Lighting
+    - Scene Camera -> Lighting
     - Shadow Maps
     - Contact Shadows
     - Probe Volume
@@ -806,73 +749,24 @@ MonoBehaviour:
     - Subsurface Scattering
     - Volumetric Clouds
     - Full Resolution Clouds For Sky
-    - Main Camera -> Async Compute
+    - Scene Camera -> Async Compute
     - Asynchronous Execution
     - Light List
     - SS Reflection
     - SS Ambient Occlusion
     - Volume Voxelizations
-    - Main Camera -> Light Loop
+    - Scene Camera -> Light Loop
     - FPTL For Forward Opaque
     - Big Tile Prepass
     - Deferred Tile
     - Compute Light Evaluation
     - Compute Light Variants
     - Compute Material Variants
+    - Main Camera -> Rendering
+    - Main Camera -> Lighting
+    - Main Camera -> Async Compute
+    - Main Camera -> Light Loop
     m_Values:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
     - {fileID: 0}
     - {fileID: 0}
     - {fileID: 0}
@@ -980,7 +874,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 200}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 1893
+  controlID: 1216
 --- !u!114 &12
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -1040,7 +934,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 26b9feff1200ffffd8faffff
+      m_ExpandedIDs: dcfaffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1056,7 +950,7 @@ MonoBehaviour:
         m_IsRenaming: 0
         m_OriginalEventType: 11
         m_IsRenamingFilename: 0
-        m_ClientGUIView: {fileID: 6}
+        m_ClientGUIView: {fileID: 12}
       m_SearchString: 
     m_ExpandedScenes: []
     m_CurrenRootInstanceID: 0
@@ -1131,7 +1025,7 @@ MonoBehaviour:
     m_SkipHidden: 1
     m_SearchArea: 1
     m_Folders:
-    - Assets/Resources/GameModes
+    - Assets/Resources/TeamClasses
     m_Globs: []
     m_OriginalText: 
   m_ViewMode: 0
@@ -1145,7 +1039,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: cc440000
     m_LastClickedID: 17612
-    m_ExpandedIDs: ffffffff00000000266a0000286a00002a6a00002c6a00002e6a0000306a0000326a0000346a0000366a0000386a00003a6a00003c6a00003e6a0000406a0000426a0000446a0000466a0000486a0000
+    m_ExpandedIDs: ffffffff00000000ea6a0000ec6a0000ee6a0000f06a0000f26a0000f46a0000f66a0000f86a0000fa6a0000fc6a0000fe6a0000006b0000026b0000046b0000066b0000086b00000a6b00000c6b00000e6b0000106b0000126b0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1170,10 +1064,10 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_AssetTreeState:
-    scrollPos: {x: 0, y: 388}
+    scrollPos: {x: 0, y: 708}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: ffffffff00000000266a0000286a00002a6a00002c6a00002e6a0000306a0000326a0000346a0000366a0000386a00003a6a00003c6a00003e6a0000406a0000426a0000446a0000466a0000486a0000
+    m_ExpandedIDs: ffffffff00000000ea6a0000ec6a0000ee6a0000f06a0000f26a0000f46a0000f66a0000f86a0000fa6a0000fc6a0000fe6a0000006b0000026b0000046b0000066b0000086b00000a6b00000c6b00000e6b0000106b0000126b0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1314,7 +1208,7 @@ MonoBehaviour:
     m_SaveData: []
   m_LockTracker:
     m_IsLocked: 0
-  m_LastSelectedObjectID: -24860
+  m_LastSelectedObjectID: 27652
 --- !u!114 &19
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -1334,8 +1228,8 @@ MonoBehaviour:
     y: 0
     width: 561
     height: 947
-  m_MinSize: {x: 275, y: 50}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 276, y: 71}
+  m_MaxSize: {x: 4001, y: 4021}
   m_ActualView: {fileID: 20}
   m_Panes:
   - {fileID: 20}
@@ -1357,7 +1251,7 @@ MonoBehaviour:
   m_MinSize: {x: 275, y: 50}
   m_MaxSize: {x: 4000, y: 4000}
   m_TitleContent:
-    m_Text: Debug
+    m_Text: Inspector
     m_Image: {fileID: -2667387946076563598, guid: 0000000000000000d000000000000000, type: 0}
     m_Tooltip: 
   m_Pos:
@@ -1373,13 +1267,13 @@ MonoBehaviour:
   m_ObjectsLockedBeforeSerialization: []
   m_InstanceIDsLockedBeforeSerialization: 
   m_PreviewResizer:
-    m_CachedPref: -223
+    m_CachedPref: 193
     m_ControlHash: -371814159
     m_PrefName: Preview_InspectorPreview
   m_LastInspectedObjectInstanceID: -1
   m_LastVerticalScrollValue: 0
   m_GlobalObjectId: 
-  m_InspectorMode: 1
+  m_InspectorMode: 0
   m_LockTracker:
     m_IsLocked: 0
   m_PreviewWindow: {fileID: 0}

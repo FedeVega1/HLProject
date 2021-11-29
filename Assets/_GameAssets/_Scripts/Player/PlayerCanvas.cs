@@ -14,6 +14,7 @@ public class PlayerCanvas : MonoBehaviour
     [SerializeField] UIControlPointNotice cpNotice;
     [SerializeField] UITeamSelection teamSelection;
     [SerializeField] UIGameOverScreen gameOverScreen;
+    [SerializeField] UITeamClassSelection teamClassSelection;
 
     [SerializeField] Image obscurer;
     [SerializeField] RectTransform lblPlayerOutBounds;
@@ -60,6 +61,7 @@ public class PlayerCanvas : MonoBehaviour
         cpCapture.Init(ref factionSprites);
         cpNotice.Init(ref factionSprites);
         gameOverScreen.Init(ref factionSprites);
+        teamClassSelection.ToggleSpawnButton(false);
 
         teamTickets = new int[TeamManager.MAXTEAMS];
     }
@@ -109,7 +111,11 @@ public class PlayerCanvas : MonoBehaviour
     void ResetHUD()
     {
         PlayerInBounds();
+
         teamSelection.ToggleTeamSelection(false);
+        teamClassSelection.ToggleClassSelection(false);
+        teamClassSelection.ToggleSpawnButton(false);
+
         lblRespawnTime.rectTransform.localScale = Vector3.zero;
         cpCapture.OnExitControlPoint();
     }
@@ -126,6 +132,8 @@ public class PlayerCanvas : MonoBehaviour
     #region Buttons
 
     public void SelectTeam(int team) => playerScript.TrySelectTeam(team);
+    public void SelectClass(int classIndex) => playerScript.TrySelectClass(classIndex);
+    public void Respawn() => playerScript.TryPlayerSpawn();
 
     #endregion
 
@@ -137,6 +145,10 @@ public class PlayerCanvas : MonoBehaviour
     public void OnExitControlPoint() => cpCapture.OnExitControlPoint();
     public void NewCapturedControlPoint(int cpTeam, string pointName) => cpNotice.NewCapturedControlPoint(cpTeam, pointName);
     public void ToggleTeamSelection(bool toggle) => teamSelection.ToggleTeamSelection(toggle);
+    public void ToggleClassSelection(bool toggle) => teamClassSelection.ToggleClassSelection(toggle);
+    public void OnTeamSelection(int team) => teamClassSelection.Init(this, GameModeManager.INS.GetClassData(), team);
+    public void ToggleSpawnButton(bool toggle) => teamClassSelection.ToggleSpawnButton(toggle);
+    public void OnClassSelection(int index) => teamClassSelection.ClassSelected(index);
 
     #endregion
 

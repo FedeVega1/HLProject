@@ -131,6 +131,7 @@ public class TeamManager : NetworkBehaviour
         if (playerScript == null)
         {
             Debug.LogError($"TeamSelection Player component is null");
+            playerScript.RpcTeamSelectionError(connectionToClient, 0x00);
             return;
         }
 
@@ -151,8 +152,9 @@ public class TeamManager : NetworkBehaviour
         }
 
         playerScript.SetPlayerTeam(selectedTeam);
+        playerScript.RpcTeamSelectionSuccess(connectionToClient);
         teamData[selectedTeam - 1].playersInTeam.Add(playerScript);
-        GameModeManager.INS.SpawnPlayerByTeam(playerScript);
+        //GameModeManager.INS.SpawnPlayerByTeam(playerScript);
     }
 
     [Server]

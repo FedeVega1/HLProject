@@ -73,3 +73,21 @@ public static class Utilities
         return newPlayerName;
     }
 }
+
+public class PlayerTimer
+{
+    readonly Player affectedPlayer;
+    readonly double timeToAction;
+    readonly System.Action<Player> actionToPerform;
+
+    public PlayerTimer(ref Player _Player, float time, System.Action<Player> action)
+    {
+        affectedPlayer = _Player;
+        timeToAction = NetworkTime.time + time;
+        actionToPerform = action;
+    }
+
+    public bool IsAffectedPlayer(ref Player playerToCheck) => playerToCheck == affectedPlayer;
+    public bool OnTime() => NetworkTime.time >= timeToAction;
+    public void PerformAction() => actionToPerform?.Invoke(affectedPlayer);
+}

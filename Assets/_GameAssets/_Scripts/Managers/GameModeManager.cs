@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 using Mirror;
 
 public class GameModeManager : NetworkBehaviour
@@ -14,24 +15,6 @@ public class GameModeManager : NetworkBehaviour
         public int order;
     }
 
-    class PlayerTimer
-    {
-        readonly Player affectedPlayer;
-        readonly double timeToAction;
-        readonly System.Action<Player> actionToPerform;
-
-        public PlayerTimer(ref Player _Player, float time, System.Action<Player> action)
-        {
-            affectedPlayer = _Player;
-            timeToAction = NetworkTime.time + time;
-            actionToPerform = action;
-        }
-
-        public bool IsAffectedPlayer(ref Player playerToCheck) => playerToCheck == affectedPlayer;
-        public bool OnTime() => NetworkTime.time >= timeToAction;
-        public void PerformAction() => actionToPerform?.Invoke(affectedPlayer);
-    }
-
     [SerializeField] TeamManager teamManager;
     [SerializeField] Transform[] spectatorPoints;
     [SerializeField] ControlPointNode[] controlPoints;
@@ -41,6 +24,7 @@ public class GameModeManager : NetworkBehaviour
 
     bool matchEnded;
     GameModeData currentGameModeData;
+    TeamClassData[] classData;
     List<Player> connectedPlayers;
     List<PlayerTimer> playerTimerQueue;
 
@@ -50,6 +34,11 @@ public class GameModeManager : NetworkBehaviour
     {
         if (INS == null) INS = this;
         else Destroy(gameObject);
+    }
+
+    void Start()
+    {
+        classData = Resources.LoadAll<TeamClassData>("TeamClasses");
     }
 
     void Update()
@@ -74,7 +63,8 @@ public class GameModeManager : NetworkBehaviour
     {
         connectedPlayers = new List<Player>();
         playerTimerQueue = new List<PlayerTimer>();
-        currentGameModeData = Resources.Load<GameModeData>("GameModes/AttackDefend");
+
+        currentGameModeData = Resources.Load<GameModeData>(Path.Combine("GameModes", "AttackDefend"));
 
         int size = controlPoints.Length;
         for (int i = 0; i < size; i++)
@@ -87,6 +77,7 @@ public class GameModeManager : NetworkBehaviour
         //controlPoints[size - 1].controlPoint.UnlockCP();
 
         TeamManagerInstance.GetGameModeData(ref currentGameModeData, size);
+
     }
 
     public override void OnStopServer()
@@ -95,19 +86,6 @@ public class GameModeManager : NetworkBehaviour
         for (int i = 0; i < size; i++)
         {
             controlPoints[i].controlPoint.OnControllPointCaptured -= TeamManagerInstance.OnCapturedControlPoint;
-        }
-    }
-
-    [Server]
-    public void OnSceneChanged()
-    {
-        int size = connectedPlayers.Count;
-        for (int i = 0; i < size; i++)
-        {
-            connectedPlayers[i].MyTransform.position = spectatorPoints[0].position;
-            connectedPlayers[i].MyTransform.rotation = spectatorPoints[0].rotation;
-            connectedPlayers[i].Init();
-            connectedPlayers[i].RpcShowGreetings(connectedPlayers[i].connectionToClient, TeamManagerInstance.GetTicketsFromTeam(1), TeamManagerInstance.GetTicketsFromTeam(2));
         }
     }
 
@@ -289,5 +267,31 @@ public class GameModeManager : NetworkBehaviour
         LeanTween.value(0, 1, 15).setOnComplete(() => { GameManager.INS.ServerChangeLevel(); });
     }
 
+    [Server]
+    public void PlayerChangeClass(Player playerScript, int classIndex)
+    {
+        if (classIndex < 0 || classIndex >= classData.Length)
+        {
+            Debug.LogError("Class index out of bounds!");
+            playerScript.RpcClassSelectionError(connectionToClient, 0x00);
+            return;
+        }
+
+        if (classData[classIndex].teamSpecific != 0)
+        {
+            if (classData[classIndex].teamSpecific != playerScript.GetPlayerTeam())
+            {
+                Debug.LogError($"{playerScript.GetPlayerName()} tried to use {classData[classIndex].className} from {TeamManager.FactionNames[classData[classIndex].teamSpecific]}");
+                playerScript.RpcClassSelectionError(connectionToClient, 0x01);
+                return;
+            }
+        }
+
+        playerScript.SetPlayerClass(classData[classIndex]);
+        playerScript.RpcClassSelectionSuccess(connectionToClient, classIndex);
+    }
+
     public Transform GetSpectatePointByIndex(int index) => spectatorPoints[index];
+
+    public TeamClassData[] GetClassData() => classData;
 }

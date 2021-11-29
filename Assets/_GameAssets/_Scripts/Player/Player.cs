@@ -3,11 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-//public struct PlayerInfo : NetworkMessage
-//{
-//    public string playerName;
-//}
-
 public class Player : Character
 {
     [SerializeField] GameObject playerCamera, playerCanvasPrefab;
@@ -18,9 +13,11 @@ public class Player : Character
     [SyncVar] string playerName;
     [SyncVar] double timeToRespawn;
 
-    bool onControlPoint;
+    bool classSelectionMenuOpen, teamSelectionMenuOpen;
+    bool onControlPoint, firstSpawn;
     float maxRespawnTime;
     PlayerCanvas playerCanvas;
+    TeamClassData classData;
 
     #region Hooks
 
@@ -31,6 +28,7 @@ public class Player : Character
     public override void OnStartServer()
     {
         movementScript.freezePlayer = true;
+        firstSpawn = true;
     }
 
     public override void OnStartLocalPlayer()
@@ -51,14 +49,40 @@ public class Player : Character
         if (!isLocalPlayer) return;
         if (Input.GetKeyDown(KeyCode.Escape)) GameManager.INS.DisconnectFromServer();
         if (Input.GetKeyDown(KeyCode.Escape) && Input.GetKeyDown(KeyCode.LeftShift)) GameManager.INS.StopServer();
-        if (isDead && (Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0))) CmdRequestPlayerRespawn();
         if (Input.GetKeyDown(KeyCode.Delete)) GameModeManager.INS.KillPlayer(this);
         if (Input.GetKeyDown(KeyCode.F1)) GameModeManager.INS.EndMatch();
 
-        if (Input.GetKeyDown(KeyCode.M))
+        if (!firstSpawn && Input.GetKeyDown(KeyCode.Return))
         {
-            movementScript.FreezeInputs = true;
-            playerCanvas.ToggleTeamSelection(true);
+            if (classSelectionMenuOpen)
+            {
+                movementScript.FreezeInputs = false;
+                playerCanvas.ToggleClassSelection(false);
+                classSelectionMenuOpen = false;
+            }
+            else
+            {
+                movementScript.FreezeInputs = true;
+                playerCanvas.ToggleClassSelection(true);
+                classSelectionMenuOpen = true;
+            }
+        }
+
+        if (!firstSpawn && Input.GetKeyDown(KeyCode.M))
+        {
+            if (teamSelectionMenuOpen)
+            {
+                movementScript.FreezeInputs = false;
+                playerCanvas.ToggleTeamSelection(false);
+                teamSelectionMenuOpen = false;
+            }
+            else
+            {
+                movementScript.FreezeInputs = true;
+                playerCanvas.ToggleClassSelection(false);
+                playerCanvas.ToggleTeamSelection(true);
+                teamSelectionMenuOpen = true;
+            }
         }
     }
 
@@ -94,6 +118,20 @@ public class Player : Character
     {
         if (isLocalPlayer) playerCanvas.SetTeamTickets(team - 1, tickets);
         print($"{TeamManager.FactionNames[team - 1]} tickets: {tickets}");
+    }
+
+    [Client]
+    public void TrySelectClass(int classIndex)
+    {
+        if (!isLocalPlayer) return;
+        CmdRequestPlayerChangeClass(classIndex);
+    }
+
+    [Client]
+    public void TryPlayerSpawn()
+    {
+        if (!isLocalPlayer) return;
+        CmdRequestPlayerRespawn();
     }
 
     #endregion
@@ -147,6 +185,12 @@ public class Player : Character
         RpcMatchEndPlayerSetup(loosingTeam);
     }
 
+    [Server]
+    public void SetPlayerClass(TeamClassData classData)
+    {
+        this.classData = classData;
+    }
+
     #endregion
 
     #region ServerCommands
@@ -159,10 +203,17 @@ public class Player : Character
     }
 
     [Command]
+    void CmdRequestPlayerChangeClass(int teamClass)
+    {
+        GameModeManager.INS.PlayerChangeClass(this, teamClass);
+    }
+
+    [Command]
     void CmdRequestPlayerRespawn()
     {
-        if (NetworkTime.time < timeToRespawn) return;
+        if ((!isDead && !firstSpawn) || NetworkTime.time < timeToRespawn) return;
         GameModeManager.INS.RespawnPlayer(this);
+        firstSpawn = false;
     }
 
     #endregion
@@ -177,6 +228,41 @@ public class Player : Character
         playerCanvas.ToggleTeamSelection(true);
         playerCanvas.SetTeamTickets(0, team1Tickets);
         playerCanvas.SetTeamTickets(1, team2Tickets);
+    }
+
+    [TargetRpc]
+    public void RpcTeamSelectionError(NetworkConnection target, int error)
+    {
+        if (target.connectionId != connectionToServer.connectionId) return;
+        Debug.LogError($"TeamSelection error code: {error}");
+    }
+
+    [TargetRpc]
+    public void RpcTeamSelectionSuccess(NetworkConnection target)
+    {
+        if (target.connectionId != connectionToServer.connectionId) return;
+
+        if (!isDead && !firstSpawn) GameModeManager.INS.KillPlayer(this);
+
+        playerCanvas.ToggleTeamSelection(false);
+        playerCanvas.OnTeamSelection(playerTeam);
+        playerCanvas.ToggleClassSelection(true);
+    }
+
+    [TargetRpc]
+    public void RpcClassSelectionError(NetworkConnection target, int error)
+    {
+        if (target.connectionId != connectionToServer.connectionId) return;
+        Debug.LogError($"ClassSelection error code: {error}");
+        playerCanvas.ToggleSpawnButton(false);
+    }
+
+    [TargetRpc]
+    public void RpcClassSelectionSuccess(NetworkConnection target, int classIndex)
+    { 
+        if (target.connectionId != connectionToServer.connectionId) return;
+        playerCanvas.ToggleSpawnButton(true);
+        playerCanvas.OnClassSelection(classIndex);
     }
 
     [TargetRpc]
