@@ -20,7 +20,16 @@ public class PlayerMovement : CachedNetTransform
         set
         {
             _FreezeInputs = value;
-            PovComponent.m_VerticalAxis.m_MaxSpeed = value ? 0 : 300;
+
+            if (value)
+            {
+                PovComponent.m_VerticalAxis.m_MaxSpeed = 0;
+                CmdSendPlayerInputs(Vector2.zero, 0, 0x00);
+            }
+            else
+            {
+                PovComponent.m_VerticalAxis.m_MaxSpeed = 300;
+            }
         }
     }
 

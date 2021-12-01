@@ -155,11 +155,14 @@ MonoBehaviour:
   syncInterval: 0.1
   maxHealth: 100
   maxArmor: 0
+  maxBleedTime: 0
+  bleedThreshold: 0
   isInvencible: 0
   playerCamera: {fileID: 8486365275955650098}
   playerCanvasPrefab: {fileID: 1464683063064833345, guid: 9325dfb170a97dd48931fcf4c43e9c0a, type: 3}
   playerMesh: {fileID: 3748691895452756505}
   movementScript: {fileID: 8303033203183977524}
+  woundedMaxTime: 10
 --- !u!114 &8303033203183977524
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -174,6 +177,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  maxInputCheckTime: 0.5
   maxWalkSpeed: 500
   maxCrouchSpeed: 150
   crouchAmmount: 0.7
@@ -181,7 +185,7 @@ MonoBehaviour:
   jumpHeight: 1
   horizontalSens: 100
   playerVCam: {fileID: 2527544677063496800}
-  FreezePlayer: 0
+  freezePlayer: 0
 --- !u!114 &-7027478099048125744
 MonoBehaviour:
   m_ObjectHideFlags: 0

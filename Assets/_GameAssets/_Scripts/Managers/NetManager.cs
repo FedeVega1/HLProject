@@ -3,18 +3,29 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
+public struct AddCustomPlayerMessage : NetworkMessage
+{
+
+}
+
 public class NetManager : NetworkManager
 {
     public override void OnStartServer()
     {
         base.OnStartServer();
-        //NetworkServer.RegisterHandler<PlayerInfo>(OnPlayerConnection);
+        NetworkServer.RegisterHandler<AddCustomPlayerMessage>(OnCustomPlayer);
     }
 
     public override void OnClientConnect(NetworkConnection conn)
     {
-        base.OnClientConnect(conn);
-        conn.Send(new AddPlayerMessage());
+        //base.OnClientConnect(conn);
+        if (clientLoadedScene) return;
+
+        if (!NetworkClient.ready) NetworkClient.Ready();
+        if (conn.identity == null || !conn.isReady)
+        {
+            conn.Send(new AddCustomPlayerMessage());
+        }
         //if (GameModeManager.INS == null) Debug.LogError("Couldn't find a GameModeManager in scene");
 
         //PlayerInfo message = new PlayerInfo
@@ -29,7 +40,12 @@ public class NetManager : NetworkManager
     {
         base.OnClientSceneChanged(conn);
         GameManager.INS.OnLoadedScene();
-        conn.Send(new AddPlayerMessage());
+
+        
+        if (conn.identity == null || !conn.isReady)
+        {
+            conn.Send(new AddCustomPlayerMessage());
+        }
 
         //PlayerInfo message = new PlayerInfo
         //{
@@ -51,6 +67,8 @@ public class NetManager : NetworkManager
         //GameModeManager.INS.OnSceneChanged();
         GameManager.INS.OnLoadedScene();
     }
+
+    void OnCustomPlayer(NetworkConnection conn, AddCustomPlayerMessage msg) { OnServerAddPlayer(conn); }
 
     public override void OnServerAddPlayer(NetworkConnection conn)
     {

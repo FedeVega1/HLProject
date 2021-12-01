@@ -152,7 +152,7 @@ public class TeamManager : NetworkBehaviour
         }
 
         playerScript.SetPlayerTeam(selectedTeam);
-        playerScript.RpcTeamSelectionSuccess(connectionToClient);
+        playerScript.RpcTeamSelectionSuccess(connectionToClient, selectedTeam);
         teamData[selectedTeam - 1].playersInTeam.Add(playerScript);
         //GameModeManager.INS.SpawnPlayerByTeam(playerScript);
     }

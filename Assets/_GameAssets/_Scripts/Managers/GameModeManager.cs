@@ -22,6 +22,8 @@ public class GameModeManager : NetworkBehaviour
 
     public TeamManager TeamManagerInstance => teamManager;
 
+    public float timeToChangeLevel = 15;
+
     bool matchEnded;
     GameModeData currentGameModeData;
     TeamClassData[] classData;
@@ -224,7 +226,8 @@ public class GameModeManager : NetworkBehaviour
     {
         if (matchEnded) return;
         playerToKill.TakeDamage(99999999);
-        playerToKill.SetRespawnTime(playerToKill.GetPlayerRespawnTime() + currentGameModeData.killSelfTime);
+        playerToKill.MaxRespawnTime += currentGameModeData.killSelfTime;
+        playerToKill.BonusWoundTime = 0;
     }
 
     [Server]
@@ -264,7 +267,7 @@ public class GameModeManager : NetworkBehaviour
 
         int loosingTeam = TeamManagerInstance.GetLoosingTeam();
         OnMatchEnded?.Invoke(loosingTeam);
-        LeanTween.value(0, 1, 15).setOnComplete(() => { GameManager.INS.ServerChangeLevel(); });
+        LeanTween.value(0, 1, timeToChangeLevel).setOnComplete(() => { GameManager.INS.ServerChangeLevel(); });
     }
 
     [Server]

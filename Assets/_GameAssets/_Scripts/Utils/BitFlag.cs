@@ -1,6 +1,9 @@
 using System.Text;
 using UnityEngine;
 
+#pragma warning disable CS0660
+#pragma warning disable CS0661
+
 interface IBitFlag
 {
     public void SetBit(int bit);
@@ -63,6 +66,9 @@ public struct BitFlag8 : IBitFlag
         bit = Mathf.Clamp(bit, 0, 7);
         return (flagsBytes & (byte)(1 << bit)) != 0;
     }
+
+    public void SetAllBits() { for (int i = 0; i < 8; i++) SetBit(i); }
+    public void ResetAllBits() { for (int i = 0; i < 8; i++) ResetBit(i); }
 
     public bool[] GetBitArray()
     {

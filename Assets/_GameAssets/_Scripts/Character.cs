@@ -3,14 +3,29 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
+public enum DamageType { Base, Bleed }
+
 public class Character : CachedNetTransform
 {
-    [SerializeField] protected float maxHealth, maxArmor;
+    [Header("Character")]
 
+    [SerializeField] protected float maxHealth, maxArmor;
+    [SerializeField] protected float maxBleedTime;
+    [SerializeField] protected float bleedThreshold;
     [SerializeField] [SyncVar] protected bool isInvencible;
+
+    [SyncVar] protected bool isDead;
     [SyncVar(hook = nameof(OnHealthChange))] protected float currentHealth;
     [SyncVar(hook = nameof(OnArmorChange))] protected float currentArmor;
-    [SyncVar] protected bool isDead;
+    [SyncVar(hook = nameof(OnBleedingSet))] protected bool isBleeding;
+
+    public bool IsDead => isDead;
+
+    double bleedTime;
+
+    #region Hooks
+
+    protected void OnBleedingSet(bool oldValue, bool newValue) {}
 
     protected void OnHealthChange(float oldValue, float newValue)
     {
@@ -29,12 +44,39 @@ public class Character : CachedNetTransform
         isDead = false;
     }
 
+    #endregion
+
+    protected virtual void Update()
+    {
+        if (!isServer || !isBleeding || NetworkTime.time < bleedTime) return;
+
+        TakeDamage(1, DamageType.Bleed);
+        bleedTime = NetworkTime.time + maxBleedTime;
+    }
+
     [Server]
-    public virtual void TakeDamage(float ammount)
+    public virtual void TakeDamage(float ammount, DamageType damageType = DamageType.Base)
     {
         if (!isServer || isDead || isInvencible) return;
 
         float damageToArmor = ammount * .6f;
+
+        switch (damageType)
+        {
+            case DamageType.Base:
+            case DamageType.Bleed:
+                damageToArmor = 0;
+                break;
+
+            default:
+                if (ammount >= bleedThreshold)
+                {
+                    isBleeding = true;
+                    bleedTime = NetworkTime.time + maxBleedTime;
+                }
+                break;
+        }
+
         currentArmor -= damageToArmor;
         currentHealth -= Mathf.Clamp(ammount - damageToArmor, 0, 9999999);
 

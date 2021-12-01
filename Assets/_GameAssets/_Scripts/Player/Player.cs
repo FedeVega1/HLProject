@@ -5,17 +5,24 @@ using Mirror;
 
 public class Player : Character
 {
+    [Header("Player")]
+
     [SerializeField] GameObject playerCamera, playerCanvasPrefab;
     [SerializeField] MeshRenderer playerMesh;
     [SerializeField] PlayerMovement movementScript;
+    [SerializeField] float woundedMaxTime;
 
     [SyncVar(hook = nameof(OnTeamChange))] int playerTeam;
+    [SyncVar] bool isWounded, firstSpawn;
     [SyncVar] string playerName;
     [SyncVar] double timeToRespawn;
 
+    public float MaxRespawnTime { get; set; }
+    public float BonusWoundTime { get; set; }
+
     bool classSelectionMenuOpen, teamSelectionMenuOpen;
-    bool onControlPoint, firstSpawn;
-    float maxRespawnTime;
+    bool onControlPoint;
+    double woundedTime;
     PlayerCanvas playerCanvas;
     TeamClassData classData;
 
@@ -35,55 +42,22 @@ public class Player : Character
     {
         playerCanvas = Instantiate(playerCanvasPrefab).GetComponent<PlayerCanvas>();
         playerCanvas.Init(this);
+        movementScript.FreezeInputs = true;
         GameModeManager.INS.TeamManagerInstance.OnTicketChange += UpdateMatchTickets;
     }
 
     void Start() 
     { 
         if (!isLocalPlayer) Destroy(playerCamera);
-        playerMesh.enabled = false;
+        if (!IsDead || firstSpawn) playerMesh.enabled = false;
     }
 
-    void Update()
+    protected override void Update()
     {
-        if (!isLocalPlayer) return;
-        if (Input.GetKeyDown(KeyCode.Escape)) GameManager.INS.DisconnectFromServer();
-        if (Input.GetKeyDown(KeyCode.Escape) && Input.GetKeyDown(KeyCode.LeftShift)) GameManager.INS.StopServer();
-        if (Input.GetKeyDown(KeyCode.Delete)) GameModeManager.INS.KillPlayer(this);
-        if (Input.GetKeyDown(KeyCode.F1)) GameModeManager.INS.EndMatch();
+        base.Update();
 
-        if (!firstSpawn && Input.GetKeyDown(KeyCode.Return))
-        {
-            if (classSelectionMenuOpen)
-            {
-                movementScript.FreezeInputs = false;
-                playerCanvas.ToggleClassSelection(false);
-                classSelectionMenuOpen = false;
-            }
-            else
-            {
-                movementScript.FreezeInputs = true;
-                playerCanvas.ToggleClassSelection(true);
-                classSelectionMenuOpen = true;
-            }
-        }
-
-        if (!firstSpawn && Input.GetKeyDown(KeyCode.M))
-        {
-            if (teamSelectionMenuOpen)
-            {
-                movementScript.FreezeInputs = false;
-                playerCanvas.ToggleTeamSelection(false);
-                teamSelectionMenuOpen = false;
-            }
-            else
-            {
-                movementScript.FreezeInputs = true;
-                playerCanvas.ToggleClassSelection(false);
-                playerCanvas.ToggleTeamSelection(true);
-                teamSelectionMenuOpen = true;
-            }
-        }
+        if (isLocalPlayer) CheckInputs();
+        if (isServer) PlayerWoundedUpdate();
     }
 
     void OnDisable()
@@ -99,12 +73,56 @@ public class Player : Character
     public int GetPlayerTeam() => playerTeam;
     public void SetPlayerTeam(int newPlayerTeam) => playerTeam = newPlayerTeam;
 
-    public float GetPlayerRespawnTime() => maxRespawnTime;
-    public void SetRespawnTime(float newRespawnTime) => maxRespawnTime = newRespawnTime;
-
     #endregion
 
     #region ClientOnly
+
+    [Client]
+    void CheckInputs()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape)) GameManager.INS.DisconnectFromServer();
+        if (Input.GetKeyDown(KeyCode.Escape) && Input.GetKeyDown(KeyCode.LeftShift)) GameManager.INS.StopServer();
+        if (Input.GetKeyDown(KeyCode.Delete)) GameModeManager.INS.KillPlayer(this);
+        if (Input.GetKeyDown(KeyCode.F1)) GameModeManager.INS.EndMatch();
+
+        if (!isDead && !firstSpawn && Input.GetKeyDown(KeyCode.Return))
+        {
+            if (classSelectionMenuOpen)
+            {
+                movementScript.FreezeInputs = false;
+                playerCanvas.ToggleClassSelection(false);
+                classSelectionMenuOpen = false;
+            }
+            else
+            {
+                movementScript.FreezeInputs = true;
+                playerCanvas.ToggleTeamSelection(false);
+                playerCanvas.ToggleClassSelection(true);
+                classSelectionMenuOpen = true;
+            }
+
+            return;
+        }
+
+        if (!isDead && !firstSpawn && Input.GetKeyDown(KeyCode.M))
+        {
+            if (teamSelectionMenuOpen)
+            {
+                movementScript.FreezeInputs = false;
+                playerCanvas.ToggleTeamSelection(false);
+                teamSelectionMenuOpen = false;
+            }
+            else
+            {
+                movementScript.FreezeInputs = true;
+                playerCanvas.ToggleClassSelection(false);
+                playerCanvas.ToggleTeamSelection(true);
+                teamSelectionMenuOpen = true;
+            }
+
+            return;
+        }
+    }
 
     [Client]
     public void TrySelectTeam(int team)
@@ -134,22 +152,41 @@ public class Player : Character
         CmdRequestPlayerRespawn();
     }
 
+    [Client]
+    public void TryWoundedGiveUp()
+    {
+        if (!isLocalPlayer) return;
+        CmdRequestWoundedGiveUp();
+    }
+
     #endregion
 
     #region ServerOnly
 
     [Server]
-    public void SetAsSpectator()
+    public void PlayerWoundedUpdate() 
     {
+        if (isDead || isInvencible || !isWounded || NetworkTime.time < woundedTime) return;
+        isWounded = false;
+        isDead = true;
 
+        Transform specPoint = GameModeManager.INS.GetSpectatePointByIndex(0);
+        MyTransform.position = specPoint.position;
+        MyTransform.rotation = specPoint.rotation;
+
+        RpcWoundedCanGiveUp(connectionToClient);
+        RpcCharacterDied();
     }
+
+    [Server]
+    public void SetAsSpectator() { }
 
     [Server]
     public void SpawnPlayer(Vector3 spawnPosition, Quaternion spawnRotation, float spawnTime)
     {
         //print($"NewPos: {MyTransform.position}");
         isDead = false;
-        maxRespawnTime = spawnTime;
+        MaxRespawnTime = spawnTime;
         movementScript.ForceMoveCharacter(spawnPosition, spawnRotation);
         movementScript.freezePlayer = false;
         //movementScript.RpcToggleFreezePlayer(connectionToClient, false);
@@ -159,11 +196,17 @@ public class Player : Character
     [Server]
     protected override void CharacterDies()
     {
-        timeToRespawn = NetworkTime.time + maxRespawnTime;
-        RpcShowDeadHUD(connectionToClient, timeToRespawn);
-        //movementScript.RpcToggleFreezePlayer(connectionToClient, true);
+        if (isDead || isInvencible) return;
+
+        timeToRespawn = NetworkTime.time + MaxRespawnTime;
+
+        isWounded = true;
+        woundedTime = NetworkTime.time + (woundedMaxTime - BonusWoundTime);
+
+        RpcShowWoundedHUD(connectionToClient, woundedTime, timeToRespawn);
         movementScript.freezePlayer = true;
-        base.CharacterDies();
+        //movementScript.RpcToggleFreezePlayer(connectionToClient, true);
+        //base.CharacterDies();
     }
 
     [Server]
@@ -182,7 +225,7 @@ public class Player : Character
         movementScript.MyTransform.position = spectPoint.position;
         movementScript.MyTransform.rotation = spectPoint.rotation;
 
-        RpcMatchEndPlayerSetup(loosingTeam);
+        RpcMatchEndPlayerSetup(loosingTeam, GameModeManager.INS.timeToChangeLevel);
     }
 
     [Server]
@@ -199,6 +242,7 @@ public class Player : Character
     void CmdRequestPlayerChangeTeam(int team)
     {
         movementScript.freezePlayer = true;
+        if (!isDead && !firstSpawn) GameModeManager.INS.KillPlayer(this);
         GameModeManager.INS.TeamManagerInstance.PlayerSelectedTeam(this, team);
     }
 
@@ -216,9 +260,27 @@ public class Player : Character
         firstSpawn = false;
     }
 
+    [Command]
+    void CmdRequestWoundedGiveUp()
+    {
+        if (isDead || !isWounded) return;
+        woundedTime = 0;
+        //isWounded = false;
+        //RpcCharacterDied();
+        //RpcWoundedCanGiveUp(connectionToClient);
+    }
+
     #endregion
 
     #region TargetRpc
+
+    [TargetRpc]
+    void RpcWoundedCanGiveUp(NetworkConnection target)
+    {
+        if (target.connectionId != connectionToServer.connectionId) return;
+        playerCanvas.PlayerNotWounded();
+        playerCanvas.ToggleClassSelection(true);
+    }
 
     [TargetRpc]
     public void RpcShowGreetings(NetworkConnection target, int team1Tickets, int team2Tickets)
@@ -238,14 +300,11 @@ public class Player : Character
     }
 
     [TargetRpc]
-    public void RpcTeamSelectionSuccess(NetworkConnection target)
+    public void RpcTeamSelectionSuccess(NetworkConnection target, int team)
     {
         if (target.connectionId != connectionToServer.connectionId) return;
-
-        if (!isDead && !firstSpawn) GameModeManager.INS.KillPlayer(this);
-
         playerCanvas.ToggleTeamSelection(false);
-        playerCanvas.OnTeamSelection(playerTeam);
+        playerCanvas.OnTeamSelection(team);
         playerCanvas.ToggleClassSelection(true);
     }
 
@@ -254,14 +313,14 @@ public class Player : Character
     {
         if (target.connectionId != connectionToServer.connectionId) return;
         Debug.LogError($"ClassSelection error code: {error}");
-        playerCanvas.ToggleSpawnButton(false);
+        playerCanvas.ToggleSpawnButton(true);
     }
 
     [TargetRpc]
     public void RpcClassSelectionSuccess(NetworkConnection target, int classIndex)
     { 
         if (target.connectionId != connectionToServer.connectionId) return;
-        playerCanvas.ToggleSpawnButton(true);
+        if (isDead || firstSpawn) playerCanvas.ToggleSpawnButton(true);
         playerCanvas.OnClassSelection(classIndex);
     }
 
@@ -303,11 +362,12 @@ public class Player : Character
     }
 
     [TargetRpc]
-    void RpcShowDeadHUD(NetworkConnection target, double respawnTime)
+    void RpcShowWoundedHUD(NetworkConnection target, double _woundedTime, double _respawnTime)
     {
         if (target.connectionId != connectionToServer.connectionId) return;
         movementScript.FreezeInputs = true;
-        playerCanvas.PlayerDied(respawnTime);
+        playerCanvas.PlayerIsWounded(_woundedTime);
+        playerCanvas.ShowRespawnTimer(_respawnTime);
     }
 
     #endregion
@@ -317,6 +377,7 @@ public class Player : Character
     [ClientRpc]
     protected override void RpcCharacterDied()
     {
+        if (isLocalPlayer) movementScript.FreezeInputs = true;
         playerMesh.enabled = false;
     }
 
@@ -341,11 +402,11 @@ public class Player : Character
     }
 
     [ClientRpc]
-    public void RpcMatchEndPlayerSetup(int loosingTeam)
+    public void RpcMatchEndPlayerSetup(int loosingTeam, float timeToChangeLevel)
     {
         if (isLocalPlayer)
         {
-            playerCanvas.ShowGameOverScreen(loosingTeam);
+            playerCanvas.ShowGameOverScreen(loosingTeam, timeToChangeLevel);
         }
 
         playerMesh.enabled = false;

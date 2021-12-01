@@ -15,36 +15,10 @@ public class PlayerCanvas : MonoBehaviour
     [SerializeField] UITeamSelection teamSelection;
     [SerializeField] UIGameOverScreen gameOverScreen;
     [SerializeField] UITeamClassSelection teamClassSelection;
+    [SerializeField] UIWoundedScreen woundedScreen;
 
-    [SerializeField] Image obscurer;
-    [SerializeField] RectTransform lblPlayerOutBounds;
-    [SerializeField] TMP_Text lblRespawnTime;
-
-    bool playerisDead;
-    int outOfBoundsTween;
-    double timeToRespawn;
-    Coroutine OutOfBoundsRoutine;
     Player playerScript;
-
     int[] teamTickets;
-
-    void Update()
-    {
-        if (playerisDead)
-        {
-            double time = timeToRespawn - NetworkTime.time;
-
-            if (time <= 0)
-            {
-                time = 0;
-                playerisDead = false;
-                lblRespawnTime.text = "You can Respawn now";
-                return;
-            }
-
-            lblRespawnTime.text = $"You can Respawn in {System.Math.Round(time, 0)}";
-        }
-    }
 
     public void Init(Player _player)
     {
@@ -66,46 +40,21 @@ public class PlayerCanvas : MonoBehaviour
         teamTickets = new int[TeamManager.MAXTEAMS];
     }
 
-    public void PlayerOutOfBounds(float timeToDie)
+    public void PlayerNotWounded()
     {
-        Color obsColor = new Color32(0x0, 0x0, 0x0, 0x28);
-        obscurer.color = obsColor;
-        lblPlayerOutBounds.localScale = Vector3.one;
-
-        OutOfBoundsRoutine = StartCoroutine(OutOfBoundsAnimation());
-
-        outOfBoundsTween = LeanTween.value(.16f, 1, timeToDie).setOnUpdate((value) =>
-        {
-            obsColor.a = value;
-            obscurer.color = obsColor;
-        }).uniqueId;
-    }
-
-    public void PlayerInBounds()
-    {
-        LeanTween.cancel(outOfBoundsTween);
-        if (OutOfBoundsRoutine != null)
-        {
-            StopCoroutine(OutOfBoundsRoutine);
-            OutOfBoundsRoutine = null;
-        }
-
-        obscurer.color = new Color(0, 0, 0, 0);
-        lblPlayerOutBounds.localScale = Vector3.zero;
+        ResetHUD();
+        woundedScreen.PlayerNotWounded();
     }
 
     public void PlayerRespawn()
     {
         ResetHUD();
-        playerisDead = false;
     }
 
-    public void PlayerDied(double timeToRespawn)
+    public void PlayerIsWounded(double woundTime)
     {
         ResetHUD();
-        playerisDead = true;
-        lblRespawnTime.rectTransform.localScale = Vector3.one;
-        this.timeToRespawn = timeToRespawn;
+        woundedScreen.PlayerIsWounded(woundTime);
     }
 
     void ResetHUD()
@@ -114,17 +63,16 @@ public class PlayerCanvas : MonoBehaviour
 
         teamSelection.ToggleTeamSelection(false);
         teamClassSelection.ToggleClassSelection(false);
-        teamClassSelection.ToggleSpawnButton(false);
 
-        lblRespawnTime.rectTransform.localScale = Vector3.zero;
+        woundedScreen.Hide();
         cpCapture.OnExitControlPoint();
     }
 
-    public void ShowGameOverScreen(int loosingTeam)
+    public void ShowGameOverScreen(int loosingTeam, double levelChangeTime)
     {
         ResetHUD();
-        obscurer.color = new Color32(0x0, 0x0, 0x0, 0x43);
-        gameOverScreen.ShowGameOverScreen(loosingTeam, teamTickets);
+        woundedScreen.SetObscurerColor(new Color32(0x0, 0x0, 0x0, 0x43));
+        gameOverScreen.ShowGameOverScreen(loosingTeam, teamTickets, levelChangeTime);
     }
 
     public void SetTeamTickets(int team, int tickets) => teamTickets[team] = tickets;
@@ -134,6 +82,7 @@ public class PlayerCanvas : MonoBehaviour
     public void SelectTeam(int team) => playerScript.TrySelectTeam(team);
     public void SelectClass(int classIndex) => playerScript.TrySelectClass(classIndex);
     public void Respawn() => playerScript.TryPlayerSpawn();
+    public void GiveUp() => playerScript.TryWoundedGiveUp();
 
     #endregion
 
@@ -146,22 +95,12 @@ public class PlayerCanvas : MonoBehaviour
     public void NewCapturedControlPoint(int cpTeam, string pointName) => cpNotice.NewCapturedControlPoint(cpTeam, pointName);
     public void ToggleTeamSelection(bool toggle) => teamSelection.ToggleTeamSelection(toggle);
     public void ToggleClassSelection(bool toggle) => teamClassSelection.ToggleClassSelection(toggle);
-    public void OnTeamSelection(int team) => teamClassSelection.Init(this, GameModeManager.INS.GetClassData(), team);
+    public void OnTeamSelection(int team) => teamClassSelection.Init(this, GameModeManager.INS.GetClassData(), team, ref playerScript);
     public void ToggleSpawnButton(bool toggle) => teamClassSelection.ToggleSpawnButton(toggle);
     public void OnClassSelection(int index) => teamClassSelection.ClassSelected(index);
+    public void PlayerOutOfBounds(float timeToDie) => woundedScreen.PlayerOutOfBounds(timeToDie);
+    public void PlayerInBounds() => woundedScreen.PlayerInBounds();
+    public void ShowRespawnTimer(double time) => teamClassSelection.ShowRespawnTimer(time);
 
     #endregion
-
-    IEnumerator OutOfBoundsAnimation()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(Random.Range(.8f, 1.25f));
-            for (int i = 0; i < 2; i++)
-            {
-                LeanTween.scale(lblPlayerOutBounds.gameObject, Vector3.zero, 0).setLoopPingPong(1);
-                yield return new WaitForSeconds(.1f);
-            }
-        }
-    }
 }

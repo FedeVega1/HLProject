@@ -21,6 +21,6 @@ public class UIClassSelectionButton : MonoBehaviour
 
     public void ToggleSelection(bool toggle)
     {
-        btnClassSelection.image.color = toggle ? btnClassSelection.colors.selectedColor : btnClassSelection.colors.normalColor;
+        btnClassSelection.image.color = toggle ? btnClassSelection.colors.pressedColor : btnClassSelection.colors.normalColor;
     }
 }

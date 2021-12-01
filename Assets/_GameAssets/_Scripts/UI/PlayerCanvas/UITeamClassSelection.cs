@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+using Mirror;
 
 public class UITeamClassSelection : MonoBehaviour
 {
@@ -21,12 +23,41 @@ public class UITeamClassSelection : MonoBehaviour
     [SerializeField] GameObject classButtonsPrefab;
     [SerializeField] Transform buttonsHolder;
     [SerializeField] Button spawnButton;
+    [SerializeField] TMP_Text lblRespawnTime;
 
     UIClassSelectionButton currentSelectedClass;
     List<UIClassSelectionButton> spawnedButtons;
 
-    public void Init(PlayerCanvas canvasScript, TeamClassData[] classData, int playerTeam)
+    bool onRespawn;
+    double respawnTime;
+    Player playerScript;
+
+    void Update()
     {
+        if (!onRespawn)
+        {
+            if (playerScript != null && playerScript.IsDead && !spawnButton.interactable)
+                ToggleSpawnButton(true);
+            return;
+        }
+
+            double time = respawnTime - NetworkTime.time;
+        if (time <= 0)
+        {
+            respawnTime = 0;
+            onRespawn = false;
+            lblRespawnTime.text = $"You can respawn now";
+            ToggleSpawnButton(true);
+            return;
+        }
+
+        lblRespawnTime.text = $"You can respawn in: {System.Math.Round(time, 0)}";
+    }
+
+    public void Init(PlayerCanvas canvasScript, TeamClassData[] classData, int playerTeam, ref Player player)
+    {
+        playerScript = player;
+
         int size;
         if (spawnedButtons != null)
         {
@@ -60,6 +91,8 @@ public class UITeamClassSelection : MonoBehaviour
             if (classButton != null) spawnedButtons.Add(classButton);
             else Destroy(classButton.gameObject);
         }
+
+        lblRespawnTime.text = $"Select a class";
     }
 
     public void ToggleSpawnButton(bool toggle)
@@ -81,12 +114,30 @@ public class UITeamClassSelection : MonoBehaviour
                 break;
             }
         }
+
+        if (!onRespawn && respawnTime <= 0) lblRespawnTime.text = $"You can respawn now";
     }
 
     public void ToggleClassSelection(bool toggle)
     {
         classSelectionCanvasGroup.alpha = toggle ? 1 : 0;
         classSelectionCanvasGroup.interactable = classSelectionCanvasGroup.blocksRaycasts = toggle;
-        currentSelectedClass.ToggleSelection(toggle);
+        if (currentSelectedClass != null) currentSelectedClass.ToggleSelection(toggle);
+        if (!onRespawn && playerScript.IsDead) ToggleSpawnButton(true);
+    }
+
+    public void TryRespawn()
+    {
+        respawnTime = 0;
+        lblRespawnTime.text = "";
+        spawnButton.interactable = false;
+        onRespawn = false;
+    }
+
+    public void ShowRespawnTimer(double time)
+    {
+        respawnTime = time;
+        onRespawn = true;
+        spawnButton.interactable = false;
     }
 }
