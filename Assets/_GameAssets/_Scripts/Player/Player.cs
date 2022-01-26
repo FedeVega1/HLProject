@@ -24,6 +24,7 @@ public class Player : Character
     bool onControlPoint;
     double woundedTime;
     PlayerCanvas playerCanvas;
+    PlayerInventory inventory;
     TeamClassData classData;
 
     #region Hooks
@@ -46,10 +47,12 @@ public class Player : Character
         GameModeManager.INS.TeamManagerInstance.OnTicketChange += UpdateMatchTickets;
     }
 
-    void Start() 
-    { 
+    void Start()
+    {
         if (!isLocalPlayer) Destroy(playerCamera);
         if (!IsDead || firstSpawn) playerMesh.enabled = false;
+
+        inventory = GetComponent<PlayerInventory>();
     }
 
     protected override void Update()
@@ -164,7 +167,7 @@ public class Player : Character
     #region ServerOnly
 
     [Server]
-    public void PlayerWoundedUpdate() 
+    public void PlayerWoundedUpdate()
     {
         if (isDead || isInvencible || !isWounded || NetworkTime.time < woundedTime) return;
         isWounded = false;
@@ -190,6 +193,7 @@ public class Player : Character
         movementScript.ForceMoveCharacter(spawnPosition, spawnRotation);
         movementScript.freezePlayer = false;
         //movementScript.RpcToggleFreezePlayer(connectionToClient, false);
+        inventory.SetupWeaponInventory(classData.classWeapons, 0);
         RpcPlayerSpawns();
     }
 
@@ -233,6 +237,9 @@ public class Player : Character
     {
         this.classData = classData;
     }
+
+    [Server]
+    public float GetPlayerCameraXAxis() => movementScript.CameraXAxis;
 
     #endregion
 
@@ -396,6 +403,7 @@ public class Player : Character
         {
             playerCanvas.PlayerRespawn();
             movementScript.FreezeInputs = false;
+            //inventory.SetupWeaponInventory(classData.classWeapons, 0);
         }
 
         playerMesh.enabled = true;

@@ -3,17 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
+[RequireComponent(typeof(Player))]
 public class PlayerInventory : NetworkBehaviour
 {
-    [SerializeField] Transform weaponPivot;
+    [SerializeField] Transform wWeaponPivot;
+    [SerializeField] GameObject WeaponPrefab;
 
-    List<Weapon> weaponsOnInventory;
     int currentWeaponIndex;
-    float weaponRateOfFire;
+    Player playerScript;
+    Transform vWeaponPivot;
+    List<Weapon> weaponsOnInventory;
+
+    void Awake()
+    {
+        playerScript = GetComponent<Player>();
+    }
 
     void Start()
     {
         weaponsOnInventory = new List<Weapon>();
+        vWeaponPivot = GameModeManager.INS.GetClientCamera().GetChild(0);
     }
 
     void Update()
@@ -23,67 +32,54 @@ public class PlayerInventory : NetworkBehaviour
 
     void CheckInputs()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-
-        }
+        if (weaponsOnInventory == null || currentWeaponIndex >= weaponsOnInventory.Count || weaponsOnInventory[currentWeaponIndex] == null) return;
 
         if (Input.GetMouseButton(0))
         {
-
+            weaponsOnInventory[currentWeaponIndex].Fire();
         }
 
-        if (Input.GetMouseButtonUp(0))
-        {
-
-        }
+        if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonUp(0)) weaponsOnInventory[currentWeaponIndex].Scope();
     }
 
+    [Server]
     public void SetupWeaponInventory(WeaponData[] weaponsToLoad, int defaultWeaponIndex)
     {
         int size = weaponsToLoad.Length;
         for (int i = 0; i < size; i++)
         {
-            Weapon weaponScript = null;
-            if (isClient)
-            {
-                GameObject weaponObject = Instantiate(weaponsToLoad[i].clientPrefab, weaponPivot.position, weaponPivot.rotation, weaponPivot);
-                if (isLocalPlayer) weaponScript = weaponObject.AddComponent<Weapon>();
-            }
-            else
-            {
-                GameObject weaponObject = new GameObject(weaponsToLoad[i].weaponName);
-                weaponScript = weaponObject.AddComponent<Weapon>();
-            }
+            GameObject weaponObject = Instantiate(WeaponPrefab, wWeaponPivot);
+            NetWeapon spawnedWeapon = weaponObject.GetComponent<NetWeapon>();
 
-            if (weaponScript == null)
-            {
-                Debug.LogError($"Instantiated {weaponsToLoad[i].weaponName} weapon without a Weapon script");
-                return;
-            }
-
-            weaponsOnInventory.Add(weaponScript);
+            NetworkServer.Spawn(weaponObject, gameObject);
+            spawnedWeapon.Init(weaponsToLoad[i], playerScript);
         }
-    }
 
-    //[Server]
-    //void Register
-
-    [Command]
-    void CmdFireWeapon()
-    {
-
-    }
-
-    [Command]
-    void CmdReleaseFireWeapon()
-    {
-
+        RpcSetupWeaponInventory(connectionToClient, size, defaultWeaponIndex);
     }
 
     [TargetRpc]
-    void RpcRegisterWeapon(NetworkConnection conn, uint netID)
+    void RpcSetupWeaponInventory(NetworkConnection target, int weaponsToSpawn, int defaultWeaponIndex)
     {
-       // weaponsOnInventory.Add(NetworkServerGet);
+        weaponsOnInventory.Clear();
+
+        for (int i = 0; i < weaponsToSpawn; i++)
+        {
+            NetWeapon netWeapon = wWeaponPivot.GetChild(i).GetComponent<NetWeapon>();
+            if (netWeapon != null)
+            {
+                GameObject weaponObject = new GameObject("Weapon");
+                Weapon spawnedWeapon = weaponObject.AddComponent<Weapon>();
+
+                spawnedWeapon.MyTransform.SetParent(vWeaponPivot);
+                spawnedWeapon.MyTransform.localPosition = Vector3.zero;
+                spawnedWeapon.MyTransform.localRotation = Quaternion.identity;
+
+                spawnedWeapon.Init(netWeapon.GetWeaponData(), netWeapon);
+                weaponsOnInventory.Add(spawnedWeapon);
+            }
+        }
+
+        currentWeaponIndex = defaultWeaponIndex;
     }
 }

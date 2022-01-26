@@ -24,7 +24,7 @@ public class PlayerMovement : CachedNetTransform
             if (value)
             {
                 PovComponent.m_VerticalAxis.m_MaxSpeed = 0;
-                CmdSendPlayerInputs(Vector2.zero, 0, 0x00);
+                CmdSendPlayerInputs(Vector2.zero, Vector2.zero, 0x00);
             }
             else
             {
@@ -43,11 +43,6 @@ public class PlayerMovement : CachedNetTransform
         }
     }
 
-    BitFlag8 inputFlags;
-    float startHeight, playerSpeed, cameraRotInput, lastCameraRotInput;
-    Vector2 playerMovInput, lastPlayerMovInput;
-    Vector3 velocity;
-
     CinemachinePOV _PovComponent;
     CinemachinePOV PovComponent
     {
@@ -57,6 +52,13 @@ public class PlayerMovement : CachedNetTransform
             return _PovComponent;
         }
     }
+
+    public float CameraXAxis => xAxisRotaion;
+
+    BitFlag8 inputFlags;
+    float startHeight, playerSpeed, cameraRotInput, lastCameraRotInput, xAxisRotaion;
+    Vector2 playerMovInput, lastPlayerMovInput;
+    Vector3 velocity;
 
     void OnFreezePlayerSet(bool oldValue, bool newValue)
     {
@@ -126,20 +128,21 @@ public class PlayerMovement : CachedNetTransform
             newInput = true;
         }
 
-        if (newInput) CmdSendPlayerInputs(playerMovInput, cameraRotInput, inputFlags.GetByte());
+        if (newInput) CmdSendPlayerInputs(playerMovInput, new Vector2(cameraRotInput, PovComponent.m_VerticalAxis.Value), inputFlags.GetByte());
         lastCameraRotInput = cameraRotInput;
         lastPlayerMovInput = playerMovInput;
     }
 
     [Command]
-    void CmdSendPlayerInputs(Vector2 movAxis, float rotAxis, byte _inputFlags)
+    void CmdSendPlayerInputs(Vector2 movAxis, Vector2 rotAxis, byte _inputFlags)
     {
         movAxis.x = Mathf.Clamp(movAxis.x, -1, 1);
         movAxis.y = Mathf.Clamp(movAxis.y, -1, 1);
-        rotAxis = Mathf.Clamp(rotAxis, -1, 1);
+        rotAxis.x = Mathf.Clamp(rotAxis.x, -1, 1);
 
         playerMovInput = movAxis;
-        cameraRotInput = rotAxis;
+        cameraRotInput = rotAxis.x;
+        xAxisRotaion = Mathf.Clamp(rotAxis.y, PovComponent.m_VerticalAxis.m_MinValue, PovComponent.m_VerticalAxis.m_MaxValue);
         inputFlags = new BitFlag8(_inputFlags);
     }
 

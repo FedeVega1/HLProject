@@ -32,7 +32,11 @@ public class PlayerSpawnPoint : CachedTransform
     void OnDrawGizmos()
     {
         if (!debugDrawPlayerMesh) return;
-        Gizmos.color = playerTeam == 0 ? Color.white : TeamManager.FactionColors[playerTeam - 1];
+
+        Color color = playerTeam == 0 ? Color.white : TeamManager.FactionColors[playerTeam - 1];
+        color.a = .35f;
+
+        Gizmos.color = color;
         Gizmos.DrawMesh(debugPlayerMesh, transform.position + Vector3.up, transform.rotation);        
     }
 }

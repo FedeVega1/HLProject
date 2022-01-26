@@ -19,6 +19,7 @@ public class GameModeManager : NetworkBehaviour
     [SerializeField] Transform[] spectatorPoints;
     [SerializeField] ControlPointNode[] controlPoints;
     [SerializeField] TeamBase[] teamBases;
+    [SerializeField] Transform clientCamera;
 
     public TeamManager TeamManagerInstance => teamManager;
 
@@ -297,4 +298,5 @@ public class GameModeManager : NetworkBehaviour
     public Transform GetSpectatePointByIndex(int index) => spectatorPoints[index];
 
     public TeamClassData[] GetClassData() => classData;
+    public Transform GetClientCamera() => clientCamera;
 }

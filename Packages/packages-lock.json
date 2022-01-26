@@ -1,12 +1,5 @@
 {
   "dependencies": {
-    "com.hwaet.projectcloner": {
-      "version": "https://github.com/hwaet/UnityProjectCloner.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "03574fbe08f90d9482056b06f99c4072aa6b3920"
-    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,
@@ -23,7 +16,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.cinemachine": {
-      "version": "2.8.3",
+      "version": "2.8.4",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -67,7 +60,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.12",
+      "version": "2.0.14",
       "depth": 0,
       "source": "registry",
       "dependencies": {

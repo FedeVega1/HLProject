@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbc436bff5906864d8060ea6fbb33a4f, type: 3}
+  m_Name: TestPistol
+  m_EditorClassIdentifier: 
+  weaponName: TEST PISTOL
+  clientPrefab: {fileID: 7693782198007015193, guid: bbabd81eb8d1b054aa05f15716238902, type: 3}
+  bulletData: {fileID: 11400000, guid: cc396ea161d868d478424de1629e4a84, type: 2}
+  maxBulletSpread: 1
+  rateOfFire: 0.5
