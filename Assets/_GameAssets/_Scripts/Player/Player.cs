@@ -47,10 +47,16 @@ public class Player : Character
         GameModeManager.INS.TeamManagerInstance.OnTicketChange += UpdateMatchTickets;
     }
 
+    //public override void OnStartClient()
+    //{
+    //    if (isLocalPlayer || IsDead || firstSpawn) return;
+    //    playerMesh.enabled = true;
+    //}
+
     void Start()
     {
         if (!isLocalPlayer) Destroy(playerCamera);
-        if (!IsDead || firstSpawn) playerMesh.enabled = false;
+        if (!IsDead && firstSpawn) playerMesh.enabled = false;
 
         inventory = GetComponent<PlayerInventory>();
     }

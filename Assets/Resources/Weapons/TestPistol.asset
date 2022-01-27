@@ -16,4 +16,4 @@ MonoBehaviour:
   clientPrefab: {fileID: 7693782198007015193, guid: bbabd81eb8d1b054aa05f15716238902, type: 3}
   bulletData: {fileID: 11400000, guid: cc396ea161d868d478424de1629e4a84, type: 2}
   maxBulletSpread: 1
-  rateOfFire: 0.5
+  rateOfFire: 1.5

@@ -5,38 +5,49 @@ using Mirror;
 
 public class NetWeapon : CachedNetTransform
 {
+    [SyncVar] bool serverInitialized;
+
     double fireTime;
     RaycastHit rayHit;
 
-    [SyncVar] WeaponData weaponData;
+    WeaponData weaponData;
+
     Player owningPlayer;
     IWeapon clientWeapon;
     LayerMask weaponLayerMask;
     BulletData bulletData;
     Transform firePivot;
 
-    void Start()
+    public override void OnStartClient()
     {
-        weaponLayerMask = LayerMask.GetMask("PlayerHitBoxes", "SceneObjects");
+        if (hasAuthority) return;
+        CmdRequestWeaponData();
     }
+
+    void Start() => weaponLayerMask = LayerMask.GetMask("PlayerHitBoxes", "SceneObjects");
 
     public void Init(WeaponData data, Player owner)
     {
         weaponData = data;
+        RpcSyncWeaponData(weaponData.GetInstanceID());
+
         bulletData = data.bulletData;
         owningPlayer = owner;
 
-        IWeapon cWeapon = Instantiate(weaponData.clientPrefab, MyTransform).GetComponent<IWeapon>();
+        GameObject weaponObj = Instantiate(weaponData.clientPrefab, MyTransform);
+        IWeapon cWeapon = weaponObj.GetComponent<IWeapon>();
         if (cWeapon != null)
         {
             cWeapon.ToggleAllViewModels(false);
             firePivot = cWeapon.GetVirtualPivot();
+            firePivot.SetParent(weaponObj.transform);
         }
         else
         {
             firePivot = MyTransform;
         }
 
+        serverInitialized = true;
         RpcInitClientWeapon();
     }
 
@@ -60,14 +71,15 @@ public class NetWeapon : CachedNetTransform
             //float range = Mathf.Pow(bulletData.initialSpeed, 2) * Mathf.Sin(2 * angle) / Physics.gravity.y;
             print($"Server Fire! Range[] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
             Debug.DrawLine(weaponRay.origin, rayHit.point, Color.green, 5);
+            RpcFireWeapon(rayHit.point);
         }
         else
         {
+            RpcFireWeapon(weaponRay.origin + (weaponRay.direction * bulletData.maxTravelDistance));
             Debug.DrawRay(weaponRay.origin, weaponRay.direction, Color.red, 2);
         }
-       
-        fireTime = NetworkTime.time * weaponData.rateOfFire;
-        RpcFireWeapon(rayHit.point);
+
+        fireTime = NetworkTime.time + weaponData.rateOfFire;
     }
 
     [Server]
@@ -88,10 +100,19 @@ public class NetWeapon : CachedNetTransform
         AltFire();
     }
 
-    [ClientRpc(includeOwner = false)]
-    public void RpcInitClientWeapon()
+    [Command(requiresAuthority = false)]
+    public void CmdRequestWeaponData()
     {
-        //if (hasAuthority) return;
+        RpcSyncWeaponData(weaponData.GetInstanceID());
+    }
+
+
+    [ClientRpc(includeOwner = false)]
+    public void RpcInitClientWeapon() => InitClientWeapon();
+
+    void InitClientWeapon()
+    {
+        if (!serverInitialized || hasAuthority) return;
 
         clientWeapon = Instantiate(weaponData.clientPrefab, MyTransform).GetComponent<IWeapon>();
         if (clientWeapon != null)
@@ -111,6 +132,15 @@ public class NetWeapon : CachedNetTransform
     public void RpcFireWeapon(Vector3 destination)
     {
         clientWeapon.Fire(destination);
+    }
+
+    [ClientRpc]
+    void RpcSyncWeaponData(int weaponID)
+    {
+        if (weaponData == null) weaponData = (WeaponData)Resources.InstanceIDToObject(weaponID);
+        if (bulletData == null) bulletData = weaponData.bulletData;
+
+        if (serverInitialized && clientWeapon == null) InitClientWeapon();
     }
 
     public WeaponData GetWeaponData() => weaponData;

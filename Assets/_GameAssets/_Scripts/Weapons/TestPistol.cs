@@ -33,6 +33,7 @@ public class TestPistol : CachedTransform, IWeapon
 
         bullet.Init(bulletData.initialSpeed);
         bullet.TravelTo(destination);
+        bullet.MyTransform.parent = null;
     }
 
     public void AltFire(Vector3 destination)

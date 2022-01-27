@@ -9,19 +9,30 @@ public class PlayerInventory : NetworkBehaviour
     [SerializeField] Transform wWeaponPivot;
     [SerializeField] GameObject WeaponPrefab;
 
+    [SyncVar] bool isServerInitialized;
+
     int currentWeaponIndex;
     Player playerScript;
     Transform vWeaponPivot;
-    List<Weapon> weaponsOnInventory;
+
+    List<Weapon> weaponsInvetoryOnClient;
+    List<NetWeapon> weaponsInventoryOnServer;
 
     void Awake()
     {
         playerScript = GetComponent<Player>();
     }
 
+    public override void OnStartClient()
+    {
+        if (hasAuthority || !isServerInitialized) return;
+        CmdRequestWeaponInventory();
+    }
+
     void Start()
     {
-        weaponsOnInventory = new List<Weapon>();
+        weaponsInventoryOnServer = new List<NetWeapon>();
+        weaponsInvetoryOnClient = new List<Weapon>();
         vWeaponPivot = GameModeManager.INS.GetClientCamera().GetChild(0);
     }
 
@@ -32,19 +43,21 @@ public class PlayerInventory : NetworkBehaviour
 
     void CheckInputs()
     {
-        if (weaponsOnInventory == null || currentWeaponIndex >= weaponsOnInventory.Count || weaponsOnInventory[currentWeaponIndex] == null) return;
+        if (weaponsInvetoryOnClient == null || currentWeaponIndex >= weaponsInvetoryOnClient.Count || weaponsInvetoryOnClient[currentWeaponIndex] == null) return;
 
         if (Input.GetMouseButton(0))
         {
-            weaponsOnInventory[currentWeaponIndex].Fire();
+            weaponsInvetoryOnClient[currentWeaponIndex].Fire();
         }
 
-        if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonUp(0)) weaponsOnInventory[currentWeaponIndex].Scope();
+        if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonUp(0)) weaponsInvetoryOnClient[currentWeaponIndex].Scope();
     }
 
     [Server]
     public void SetupWeaponInventory(WeaponData[] weaponsToLoad, int defaultWeaponIndex)
     {
+        weaponsInventoryOnServer.Clear();
+
         int size = weaponsToLoad.Length;
         for (int i = 0; i < size; i++)
         {
@@ -52,16 +65,46 @@ public class PlayerInventory : NetworkBehaviour
             NetWeapon spawnedWeapon = weaponObject.GetComponent<NetWeapon>();
 
             NetworkServer.Spawn(weaponObject, gameObject);
+            RpcSetWeaponParent(spawnedWeapon.netId);
             spawnedWeapon.Init(weaponsToLoad[i], playerScript);
+            weaponsInventoryOnServer.Add(spawnedWeapon);
         }
 
+        isServerInitialized = true;
         RpcSetupWeaponInventory(connectionToClient, size, defaultWeaponIndex);
+    }
+
+    [ClientRpc]
+    void RpcSetWeaponParent(uint weaponID)
+    {
+        if (!NetworkClient.spawned.ContainsKey(weaponID))
+        {
+            Debug.LogError($"Weapon with Network ID: {weaponID} not found");
+            return;
+        }
+
+        NetworkIdentity weaponIdentity = NetworkClient.spawned[weaponID];
+        if (weaponIdentity.transform.parent == vWeaponPivot) return;
+
+        NetWeapon spawnedWeapon = weaponIdentity.GetComponent<NetWeapon>();
+        if (spawnedWeapon != null)
+        {
+            spawnedWeapon.MyTransform.SetParent(wWeaponPivot);
+            spawnedWeapon.MyTransform.localPosition = Vector3.zero;
+            spawnedWeapon.MyTransform.localRotation = Quaternion.identity;
+        }
+        else
+        {
+            Debug.LogError($"Found weapon with Network ID {weaponID}, but it does not have a NetWeapon Component!");
+        }
     }
 
     [TargetRpc]
     void RpcSetupWeaponInventory(NetworkConnection target, int weaponsToSpawn, int defaultWeaponIndex)
     {
-        weaponsOnInventory.Clear();
+        weaponsInvetoryOnClient.Clear();
+
+        if (wWeaponPivot.childCount == 0) return;
 
         for (int i = 0; i < weaponsToSpawn; i++)
         {
@@ -76,10 +119,20 @@ public class PlayerInventory : NetworkBehaviour
                 spawnedWeapon.MyTransform.localRotation = Quaternion.identity;
 
                 spawnedWeapon.Init(netWeapon.GetWeaponData(), netWeapon);
-                weaponsOnInventory.Add(spawnedWeapon);
+                weaponsInvetoryOnClient.Add(spawnedWeapon);
             }
         }
 
         currentWeaponIndex = defaultWeaponIndex;
+    }
+
+    [Command(requiresAuthority = false)]
+    void CmdRequestWeaponInventory()
+    {
+        int size = weaponsInventoryOnServer.Count;
+        for (int i = 0; i < size; i++)
+        {
+            RpcSetWeaponParent(weaponsInventoryOnServer[i].netId);
+        }
     }
 }

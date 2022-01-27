@@ -62,7 +62,6 @@ public class Weapon : CachedTransform
         if (NetworkTime.time < fireTime) return;
 
         Ray weaponRay = new Ray(firePivot.position, firePivot.forward);
-
         if (Physics.Raycast(weaponRay, out rayHit, bulletData.maxTravelDistance, weaponLayerMask))
         {
             //float height = MyTransform.position.y;
@@ -74,15 +73,16 @@ public class Weapon : CachedTransform
             //float range = Mathf.Pow(bulletData.initialSpeed, 2) * Mathf.Sin(2 * angle) / Physics.gravity.y;
             print($"Player Fire! Range[] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
             Debug.DrawLine(weaponRay.origin, rayHit.point, Color.cyan, 2);
+            clientWeapon.Fire(rayHit.point);
         }
         else
         {
+            clientWeapon.Fire(weaponRay.origin + (weaponRay.direction * bulletData.maxTravelDistance));
             Debug.DrawRay(weaponRay.origin, weaponRay.direction, Color.red, 2);
         }
 
-        fireTime = NetworkTime.time * weaponData.rateOfFire;
+        fireTime = NetworkTime.time + weaponData.rateOfFire;
         netWeapon.CmdRequestFire();
-        clientWeapon.Fire(rayHit.point);
     }
 
     public void AltFire()

@@ -142,7 +142,7 @@ public class PlayerMovement : CachedNetTransform
 
         playerMovInput = movAxis;
         cameraRotInput = rotAxis.x;
-        xAxisRotaion = Mathf.Clamp(rotAxis.y, PovComponent.m_VerticalAxis.m_MinValue, PovComponent.m_VerticalAxis.m_MaxValue);
+        xAxisRotaion = Mathf.Clamp(rotAxis.y, -70, 70);
         inputFlags = new BitFlag8(_inputFlags);
     }
 
