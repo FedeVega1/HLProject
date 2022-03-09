@@ -59,6 +59,7 @@ public class Player : Character
         if (!IsDead && firstSpawn) playerMesh.enabled = false;
 
         inventory = GetComponent<PlayerInventory>();
+        inventory.DisablePlayerInputs = true;
     }
 
     protected override void Update()
@@ -84,13 +85,13 @@ public class Player : Character
 
     #endregion
 
-    #region ClientOnly
+    #region Client
 
     [Client]
     void CheckInputs()
     {
-        if (Input.GetKeyDown(KeyCode.Escape)) GameManager.INS.DisconnectFromServer();
         if (Input.GetKeyDown(KeyCode.Escape) && Input.GetKeyDown(KeyCode.LeftShift)) GameManager.INS.StopServer();
+        if (Input.GetKeyDown(KeyCode.Escape)) GameManager.INS.DisconnectFromServer();
         if (Input.GetKeyDown(KeyCode.Delete)) GameModeManager.INS.KillPlayer(this);
         if (Input.GetKeyDown(KeyCode.F1)) GameModeManager.INS.EndMatch();
 
@@ -99,12 +100,14 @@ public class Player : Character
             if (classSelectionMenuOpen)
             {
                 movementScript.FreezeInputs = false;
+                inventory.DisablePlayerInputs = false;
                 playerCanvas.ToggleClassSelection(false);
                 classSelectionMenuOpen = false;
             }
             else
             {
                 movementScript.FreezeInputs = true;
+            inventory.DisablePlayerInputs = true;
                 playerCanvas.ToggleTeamSelection(false);
                 playerCanvas.ToggleClassSelection(true);
                 classSelectionMenuOpen = true;
@@ -118,12 +121,14 @@ public class Player : Character
             if (teamSelectionMenuOpen)
             {
                 movementScript.FreezeInputs = false;
+                inventory.DisablePlayerInputs = false;
                 playerCanvas.ToggleTeamSelection(false);
                 teamSelectionMenuOpen = false;
             }
             else
             {
                 movementScript.FreezeInputs = true;
+                inventory.DisablePlayerInputs = true;
                 playerCanvas.ToggleClassSelection(false);
                 playerCanvas.ToggleTeamSelection(true);
                 teamSelectionMenuOpen = true;
@@ -170,7 +175,7 @@ public class Player : Character
 
     #endregion
 
-    #region ServerOnly
+    #region Server
 
     [Server]
     public void PlayerWoundedUpdate()
@@ -199,22 +204,23 @@ public class Player : Character
         movementScript.ForceMoveCharacter(spawnPosition, spawnRotation);
         movementScript.freezePlayer = false;
         //movementScript.RpcToggleFreezePlayer(connectionToClient, false);
+        print($"Server: Setup weapon inventory for {playerName} player - ClassName: {classData.className}");
         inventory.SetupWeaponInventory(classData.classWeapons, 0);
         RpcPlayerSpawns();
     }
 
     [Server]
-    protected override void CharacterDies()
+    protected override void CharacterDies(bool criticalHit)
     {
         if (isDead || isInvencible) return;
 
         timeToRespawn = NetworkTime.time + MaxRespawnTime;
+        woundedTime = criticalHit ? 0 : NetworkTime.time + (woundedMaxTime - BonusWoundTime);
 
         isWounded = true;
-        woundedTime = NetworkTime.time + (woundedMaxTime - BonusWoundTime);
-
         RpcShowWoundedHUD(connectionToClient, woundedTime, timeToRespawn);
         movementScript.freezePlayer = true;
+        OnPlayerDead?.Invoke();
         //movementScript.RpcToggleFreezePlayer(connectionToClient, true);
         //base.CharacterDies();
     }
@@ -242,6 +248,7 @@ public class Player : Character
     public void SetPlayerClass(TeamClassData classData)
     {
         this.classData = classData;
+        print($"Server: CurrentClass {classData.className}");
     }
 
     [Server]
@@ -256,6 +263,7 @@ public class Player : Character
     {
         movementScript.freezePlayer = true;
         if (!isDead && !firstSpawn) GameModeManager.INS.KillPlayer(this);
+        classData = null;
         GameModeManager.INS.TeamManagerInstance.PlayerSelectedTeam(this, team);
     }
 
@@ -268,7 +276,7 @@ public class Player : Character
     [Command]
     void CmdRequestPlayerRespawn()
     {
-        if ((!isDead && !firstSpawn) || NetworkTime.time < timeToRespawn) return;
+        if ((!isDead && !firstSpawn) || NetworkTime.time < timeToRespawn || classData == null) return;
         GameModeManager.INS.RespawnPlayer(this);
         firstSpawn = false;
     }
@@ -335,6 +343,7 @@ public class Player : Character
         if (target.connectionId != connectionToServer.connectionId) return;
         if (isDead || firstSpawn) playerCanvas.ToggleSpawnButton(true);
         playerCanvas.OnClassSelection(classIndex);
+        print($"Client: CurrentClass {classIndex}");
     }
 
     [TargetRpc]
@@ -379,6 +388,7 @@ public class Player : Character
     {
         if (target.connectionId != connectionToServer.connectionId) return;
         movementScript.FreezeInputs = true;
+        inventory.DisablePlayerInputs = true;
         playerCanvas.PlayerIsWounded(_woundedTime);
         playerCanvas.ShowRespawnTimer(_respawnTime);
     }
@@ -390,7 +400,11 @@ public class Player : Character
     [ClientRpc]
     protected override void RpcCharacterDied()
     {
-        if (isLocalPlayer) movementScript.FreezeInputs = true;
+        if (isLocalPlayer)
+        {
+            movementScript.FreezeInputs = true;
+            inventory.DisablePlayerInputs = true;
+        }
         playerMesh.enabled = false;
     }
 
@@ -409,6 +423,7 @@ public class Player : Character
         {
             playerCanvas.PlayerRespawn();
             movementScript.FreezeInputs = false;
+            inventory.DisablePlayerInputs = false;
             //inventory.SetupWeaponInventory(classData.classWeapons, 0);
         }
 

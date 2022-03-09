@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public enum DamageType { Base, Bleed }
+public enum DamageType { Base, Bleed, Bullet }
 
 public class Character : CachedNetTransform
 {
@@ -22,6 +22,8 @@ public class Character : CachedNetTransform
     public bool IsDead => isDead;
 
     double bleedTime;
+
+    public System.Action OnPlayerDead;
 
     #region Hooks
 
@@ -80,7 +82,7 @@ public class Character : CachedNetTransform
         currentArmor -= damageToArmor;
         currentHealth -= Mathf.Clamp(ammount - damageToArmor, 0, 9999999);
 
-        if (currentHealth <= 0) CharacterDies();
+        if (currentHealth <= 0) CharacterDies(damageType == DamageType.Base);
     }
 
     [Server]
@@ -98,10 +100,11 @@ public class Character : CachedNetTransform
     }
 
     [Server]
-    protected virtual void CharacterDies()
+    protected virtual void CharacterDies(bool criticalHit)
     {
         if (!isServer || isInvencible) return;
         isDead = true;
+        OnPlayerDead?.Invoke();
         RpcCharacterDied();
     }
 

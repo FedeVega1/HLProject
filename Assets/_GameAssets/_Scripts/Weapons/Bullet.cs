@@ -5,14 +5,15 @@ public class Bullet : CachedTransform
 {
     [SerializeField] DecalProjector bulletDecal;
 
-    bool canTravel;
+    bool canTravel, canShowDecal;
     float speed;
     Vector3 hitNormal;
     Vector3 destination;
 
-    public void Init(float initialSpeed)
+    public void Init(float initialSpeed, bool showDecal)
     {
         speed = initialSpeed;
+        canShowDecal = showDecal;
     }
 
     void Update()
@@ -38,10 +39,14 @@ public class Bullet : CachedTransform
 
     void OnHit()
     {
-        bulletDecal.gameObject.SetActive(true);
-        bulletDecal.transform.position = destination;
-        bulletDecal.transform.rotation = Quaternion.LookRotation(Vector3.Normalize(destination - MyTransform.position), Vector3.up);
-        bulletDecal.transform.SetParent(null);
+        if (canShowDecal)
+        {
+            bulletDecal.gameObject.SetActive(true);
+            bulletDecal.transform.position = destination;
+            bulletDecal.transform.rotation = Quaternion.LookRotation(Vector3.Normalize(destination - MyTransform.position), Vector3.up);
+            bulletDecal.transform.SetParent(null);
+        }
+
         Destroy(gameObject);
     }
 }

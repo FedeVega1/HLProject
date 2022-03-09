@@ -8,16 +8,18 @@ public enum WeaponType { Melee, Secondary, Primary, Tools, BandAids }
 
 public interface IWeapon
 {
-    public void Init(bool isServer, BulletData data);
+    public void Init(bool isServer, BulletData data, GameObject propPrefab);
 
-    public void Fire(Vector3 destination);
-    public void AltFire(Vector3 destination);
+    public void Fire(Vector3 destination, bool didHit);
+    public void AltFire(Vector3 destination, bool didHit);
     public void Scope();
 
     public void HolsterWeapon();
     public void DrawWeapon();
 
     public void ToggleAllViewModels(bool toggle);
+
+    public void DropProp();
 
     public Transform GetVirtualPivot();
     public Transform GetWorldPivot();
@@ -51,14 +53,14 @@ public class Weapon : CachedTransform
         clientWeapon = Instantiate(weaponData.clientPrefab, MyTransform).GetComponent<IWeapon>();
         if (clientWeapon != null)
         {
-            clientWeapon.Init(false, bulletData);
+            clientWeapon.Init(false, bulletData, weaponData.propPrefab);
             firePivot = clientWeapon.GetVirtualPivot();
         }
         else
         {
             GameObject nullWGO = new GameObject($"{weaponData.weaponName} (NULL)");
             clientWeapon = nullWGO.AddComponent<NullWeapon>();
-            clientWeapon.Init(false, bulletData);
+            clientWeapon.Init(false, bulletData, weaponData.propPrefab);
             Debug.LogError($"Client weapon prefab does not have a IWeapon type component.\nSwitching to default weapon");
         }
     }
@@ -79,11 +81,11 @@ public class Weapon : CachedTransform
             //float range = Mathf.Pow(bulletData.initialSpeed, 2) * Mathf.Sin(2 * angle) / Physics.gravity.y;
             print($"Player Fire! Range[] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
             Debug.DrawLine(weaponRay.origin, rayHit.point, Color.cyan, 2);
-            clientWeapon.Fire(rayHit.point);
+            clientWeapon.Fire(rayHit.point, true);
         }
         else
         {
-            clientWeapon.Fire(weaponRay.origin + (weaponRay.direction * bulletData.maxTravelDistance));
+            clientWeapon.Fire(weaponRay.origin + (weaponRay.direction * bulletData.maxTravelDistance), false);
             Debug.DrawRay(weaponRay.origin, weaponRay.direction, Color.red, 2);
         }
 
@@ -93,7 +95,7 @@ public class Weapon : CachedTransform
 
     public void AltFire()
     {
-        clientWeapon.AltFire(Vector3.zero);
+        clientWeapon.AltFire(Vector3.zero, false);
     }
 
     public void Scope()
@@ -108,4 +110,6 @@ public class Weapon : CachedTransform
         if (toggle) clientWeapon.DrawWeapon();
         else clientWeapon.HolsterWeapon();
     }
+
+    public void DropWeapon() => clientWeapon.DropProp();
 }

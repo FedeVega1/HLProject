@@ -10,10 +10,12 @@ public class TestSMG : CachedTransform, IWeapon
 
     bool isServer, isDrawn;
     BulletData bulletData;
+    GameObject weaponPropPrefab;
 
-    public void Init(bool isServer, BulletData data)
+    public void Init(bool isServer, BulletData data, GameObject propPrefab)
     {
         bulletData = data;
+        weaponPropPrefab = propPrefab;
         ToggleAllViewModels(false);
 
         viewModels[isServer ? 0 : 1].SetActive(true);
@@ -27,18 +29,18 @@ public class TestSMG : CachedTransform, IWeapon
         for (byte i = 0; i < size; i++) viewModels[i].SetActive(toggle);
     }
 
-    public void Fire(Vector3 destination)
+    public void Fire(Vector3 destination, bool didHit)
     {
         if (!isDrawn) return;
         GameObject bulletObject = Instantiate(bulletData.bulletPrefab, isServer ? worldBulletPivot : virtualBulletPivot);
         Bullet bullet = bulletObject.GetComponent<Bullet>();
 
-        bullet.Init(bulletData.initialSpeed);
+        bullet.Init(bulletData.initialSpeed, didHit);
         bullet.TravelTo(destination);
         bullet.MyTransform.parent = null;
     }
 
-    public void AltFire(Vector3 destination)
+    public void AltFire(Vector3 destination, bool didHit)
     {
         if (!isDrawn) return;
 
@@ -60,6 +62,12 @@ public class TestSMG : CachedTransform, IWeapon
     {
         gameObject.SetActive(false);
         isDrawn = false;
+    }
+
+    public void DropProp()
+    {
+        Instantiate(weaponPropPrefab, MyTransform.position, MyTransform.rotation);
+        Destroy(gameObject);
     }
 
     public Transform GetVirtualPivot() => virtualBulletPivot;

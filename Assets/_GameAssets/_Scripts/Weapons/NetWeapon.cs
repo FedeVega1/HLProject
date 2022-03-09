@@ -9,6 +9,8 @@ public class NetWeapon : CachedNetTransform
 
     [SyncVar] bool serverInitialized;
 
+    public bool IsDroppingWeapons { get; private set; }
+
     bool clientWeaponInit;
     double fireTime;
     RaycastHit rayHit;
@@ -54,6 +56,8 @@ public class NetWeapon : CachedNetTransform
         RpcInitClientWeapon();
     }
 
+    #region Server
+
     [Server]
     void Fire()
     {
@@ -72,13 +76,23 @@ public class NetWeapon : CachedNetTransform
             //float root = Mathf.Sqrt(Mathf.Pow(speed * sin, 2) + 2 * Physics.gravity.y * height);
             //float range = speed * cos * (speed * sin + root) / Physics.gravity.y;
             //float range = Mathf.Pow(bulletData.initialSpeed, 2) * Mathf.Sin(2 * angle) / Physics.gravity.y;
+            Character chrScript = rayHit.transform.GetComponent<Character>();
+            if (chrScript != null)
+            {
+                ApplyDistanceToDamage(chrScript, rayHit.distance);
+                Debug.DrawLine(weaponRay.origin, rayHit.point, Color.green, 5);
+            }
+            else
+            {
+                Debug.DrawLine(weaponRay.origin, rayHit.point, Color.yellow, 5);
+            }
+
             print($"Server Fire! Range[] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
-            Debug.DrawLine(weaponRay.origin, rayHit.point, Color.green, 5);
-            RpcFireWeapon(rayHit.point);
+            RpcFireWeapon(rayHit.point, true);
         }
         else
         {
-            RpcFireWeapon(weaponRay.origin + (weaponRay.direction * bulletData.maxTravelDistance));
+            RpcFireWeapon(weaponRay.origin + (weaponRay.direction * bulletData.maxTravelDistance), false);
             Debug.DrawRay(weaponRay.origin, weaponRay.direction, Color.red, 2);
         }
 
@@ -91,14 +105,23 @@ public class NetWeapon : CachedNetTransform
 
     }
 
-    [ClientRpc(includeOwner = false)]
-    public void RpcToggleClientWeapon(bool toggle)
+    [Server]
+    public void DropClientWeaponAndDestroy()
     {
-        StartCoroutine(WaitForServerAndClientInitialization(true, true, () => {
-            if (toggle) clientWeapon.DrawWeapon();
-            else clientWeapon.HolsterWeapon();
-        }));
+        IsDroppingWeapons = true;
+        RpcDropWeapon();
     }
+
+    [Server]
+    IEnumerator ApplyDistanceToDamage(Character chrToHit, float distance)
+    {
+        yield return new WaitForSeconds(distance / bulletData.initialSpeed);
+        chrToHit.TakeDamage(bulletData.damage, DamageType.Bullet);
+    }
+
+    #endregion
+
+    #region Commands
 
     [Command]
     public void CmdRequestFire()
@@ -118,6 +141,25 @@ public class NetWeapon : CachedNetTransform
         RpcSyncWeaponData(weaponData.name);
     }
 
+    [Command(requiresAuthority = false)]
+    public void CmdOnPlayerDroppedWeapon()
+    {
+        if (!IsDroppingWeapons) return;
+        NetworkServer.Destroy(gameObject);
+    }
+
+    #endregion
+
+    #region RPCs
+
+    [ClientRpc(includeOwner = false)]
+    public void RpcToggleClientWeapon(bool toggle)
+    {
+        StartCoroutine(WaitForServerAndClientInitialization(true, true, () => {
+            if (toggle) clientWeapon.DrawWeapon();
+            else clientWeapon.HolsterWeapon();
+        }));
+    }
 
     [ClientRpc(includeOwner = false)]
     public void RpcInitClientWeapon()
@@ -125,6 +167,38 @@ public class NetWeapon : CachedNetTransform
         print("INIT CLIENT WEAPON");
         InitClientWeapon();
     }
+
+    [ClientRpc(includeOwner = false)]
+    public void RpcFireWeapon(Vector3 destination, bool didHit)
+    {
+        clientWeapon.Fire(destination, didHit);
+    }
+
+    [ClientRpc]
+    void RpcSyncWeaponData(string weaponAssetName)//(int weaponID)
+    {
+        if (weaponData == null) weaponData = Resources.Load<WeaponData>($"Weapons/{weaponAssetName}");
+        if (bulletData == null) bulletData = weaponData.bulletData;
+
+        if (serverInitialized && clientWeapon == null) InitClientWeapon();
+    }
+
+    [ClientRpc]
+    public void RpcDropWeapon()
+    {
+        if (hasAuthority)
+        {
+            CmdOnPlayerDroppedWeapon();
+            return;
+        }
+
+            StartCoroutine(WaitForServerAndClientInitialization(true, true, () => {
+            clientWeapon.DropProp();
+            CmdOnPlayerDroppedWeapon();
+        }));
+    }
+
+    #endregion
 
     [Client]
     void InitClientWeapon()
@@ -135,33 +209,18 @@ public class NetWeapon : CachedNetTransform
             clientWeapon = Instantiate(weaponData.clientPrefab, MyTransform).GetComponent<IWeapon>();
             if (clientWeapon != null)
             {
-                clientWeapon.Init(true, bulletData);
+                clientWeapon.Init(true, bulletData, weaponData.propPrefab);
             }
             else
             {
                 GameObject nullWGO = new GameObject($"{weaponData.weaponName} (NULL)");
                 clientWeapon = nullWGO.AddComponent<NullWeapon>();
-                clientWeapon.Init(true, bulletData);
+                clientWeapon.Init(true, bulletData, weaponData.propPrefab);
                 Debug.LogError($"Client weapon prefab does not have a IWeapon type component.\nSwitching to default weapon");
             }
 
             clientWeaponInit = true;
         }));
-    }
-
-    [ClientRpc(includeOwner = false)]
-    public void RpcFireWeapon(Vector3 destination)
-    {
-        clientWeapon.Fire(destination);
-    }
-
-    [ClientRpc]
-    void RpcSyncWeaponData(string weaponAssetName)//(int weaponID)
-    {
-        if (weaponData == null) weaponData = Resources.Load<WeaponData>($"Weapons/{weaponAssetName}");
-        if (bulletData == null) bulletData = weaponData.bulletData;
-
-        if (serverInitialized && clientWeapon == null) InitClientWeapon();
     }
 
     [Client]
