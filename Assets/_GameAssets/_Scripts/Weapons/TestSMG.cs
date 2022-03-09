@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TestPistol : CachedTransform, IWeapon
+public class TestSMG : CachedTransform, IWeapon
 {
     [SerializeField] GameObject[] viewModels;
     [SerializeField] Transform virtualBulletPivot, worldBulletPivot;

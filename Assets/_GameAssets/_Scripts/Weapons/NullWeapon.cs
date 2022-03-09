@@ -15,6 +15,10 @@ public class NullWeapon : CachedTransform, IWeapon
 
     public void Scope() { }
 
+    public void DrawWeapon() { }
+
+    public void HolsterWeapon() { }
+
     public Transform GetVirtualPivot() => MyTransform;
     public Transform GetWorldPivot() => MyTransform;
 }

@@ -6,16 +6,25 @@ using Mirror;
 [RequireComponent(typeof(Player))]
 public class PlayerInventory : NetworkBehaviour
 {
+    static KeyCode[] WeaponCycleKeys = new KeyCode[5] 
+    { 
+        KeyCode.Alpha1, KeyCode.Alpha2,
+        KeyCode.Alpha3, KeyCode.Alpha4,
+        KeyCode.Alpha5,
+    };
+
     [SerializeField] Transform wWeaponPivot;
     [SerializeField] GameObject WeaponPrefab;
 
     [SyncVar] bool isServerInitialized;
 
-    int currentWeaponIndex;
+    int currentWeaponIndex, currentCyclerIndex;
+    WeaponType currentCyclerType;
     Player playerScript;
     Transform vWeaponPivot;
 
     List<Weapon> weaponsInvetoryOnClient;
+    List<int> weaponCyclerList;
     List<NetWeapon> weaponsInventoryOnServer;
 
     void Awake()
@@ -33,7 +42,9 @@ public class PlayerInventory : NetworkBehaviour
     {
         weaponsInventoryOnServer = new List<NetWeapon>();
         weaponsInvetoryOnClient = new List<Weapon>();
+        weaponCyclerList = new List<int>();
         vWeaponPivot = GameModeManager.INS.GetClientCamera().GetChild(0);
+        currentCyclerIndex = -1;
     }
 
     void Update()
@@ -41,6 +52,7 @@ public class PlayerInventory : NetworkBehaviour
         if (isLocalPlayer) CheckInputs();
     }
 
+    [Client]
     void CheckInputs()
     {
         if (weaponsInvetoryOnClient == null || currentWeaponIndex >= weaponsInvetoryOnClient.Count || weaponsInvetoryOnClient[currentWeaponIndex] == null) return;
@@ -51,6 +63,98 @@ public class PlayerInventory : NetworkBehaviour
         }
 
         if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonUp(0)) weaponsInvetoryOnClient[currentWeaponIndex].Scope();
+
+        WeaponSelectorCycle();
+    }
+
+    [Client]
+    void WeaponSelectorCycle()
+    {
+        if (!Input.anyKeyDown) return;
+
+        if (weaponCyclerList.Count > 0 && (Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0)))
+        {
+            print($"CurrentWeaponIndex: {currentWeaponIndex} - CurrentWeaponType: {weaponsInvetoryOnClient[currentWeaponIndex].WType} - CurrentCyclerIndex: {currentCyclerIndex} - Current Cycler Type: {currentCyclerType}");
+            bool checkWeaponIndex = currentCyclerIndex < weaponCyclerList.Count && weaponCyclerList[currentCyclerIndex] != currentWeaponIndex;
+            if (weaponsInvetoryOnClient[currentWeaponIndex].WType != currentCyclerType || checkWeaponIndex)
+            {
+                CmdRequestWeaponChange(weaponCyclerList[currentCyclerIndex]);
+            }
+
+            currentCyclerType = weaponsInvetoryOnClient[currentWeaponIndex].WType;
+            currentCyclerIndex = -1;
+            weaponCyclerList.Clear();
+            return;
+        }
+
+        int weaponIndex;
+        int size = WeaponCycleKeys.Length;
+
+        for (int i = 0; i < size; i++)
+        {
+            if (Input.GetKeyDown(WeaponCycleKeys[i]))
+            {
+                print($"{currentCyclerType} - {(WeaponType) i} - {currentCyclerType == (WeaponType) i}");
+                if (currentCyclerType == (WeaponType) i)
+                {
+                    if (SearchForWeaponsType((WeaponType) i, out weaponIndex))
+                    {
+                        weaponCyclerList.Add(weaponIndex);
+                        currentCyclerIndex++;
+                        break;
+                    }
+
+                    currentCyclerIndex++;
+                    if (currentCyclerIndex >= weaponCyclerList.Count) currentCyclerIndex = 0;
+                    break;
+                }
+
+                currentCyclerIndex = 0;
+                if (weaponCyclerList.Count > 0) weaponCyclerList.Clear();
+                if (SearchForWeaponsType((WeaponType) i, out weaponIndex)) weaponCyclerList.Add(weaponIndex);
+                currentCyclerType = (WeaponType) i;
+                break;
+            }
+        }
+
+        print($"CurrentWeaponIndex: {currentWeaponIndex} - CurrentWeaponType: {weaponsInvetoryOnClient[currentWeaponIndex].WType} - CurrentCyclerIndex: {currentCyclerIndex} - Current Cycler Type: {currentCyclerType}");
+    }
+
+    [Client]
+    bool SearchForWeaponsType(WeaponType TypeToSearch, out int weaponIndex)
+    {
+        weaponIndex = -1;
+        int size = weaponsInvetoryOnClient.Count;
+        for (int i = 0; i < size; i++)
+        {
+            if (weaponsInvetoryOnClient[i].WType == TypeToSearch && !weaponCyclerList.Contains(i))
+            {
+                weaponIndex = i;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    [Command]
+    public void CmdRequestWeaponChange(int weaponIndex)
+    {
+        if (weaponIndex == currentWeaponIndex) return;
+
+        weaponsInventoryOnServer[currentWeaponIndex].RpcToggleClientWeapon(false);
+        weaponsInventoryOnServer[weaponIndex].RpcToggleClientWeapon(true);
+
+        RpcChangeWeapon(connectionToClient, weaponIndex, currentWeaponIndex);
+        currentWeaponIndex = weaponIndex;
+    }
+
+    [TargetRpc]
+    public void RpcChangeWeapon(NetworkConnection target, int weaponIndex, int oldIndex)
+    {
+        weaponsInvetoryOnClient[oldIndex].ToggleWeapon(false);
+        weaponsInvetoryOnClient[weaponIndex].ToggleWeapon(true);
+        currentWeaponIndex = weaponIndex;
     }
 
     [Server]
@@ -65,17 +169,20 @@ public class PlayerInventory : NetworkBehaviour
             NetWeapon spawnedWeapon = weaponObject.GetComponent<NetWeapon>();
 
             NetworkServer.Spawn(weaponObject, gameObject);
-            RpcSetWeaponParent(spawnedWeapon.netId);
+            RpcSetWeaponParent(spawnedWeapon.netId, false);
             spawnedWeapon.Init(weaponsToLoad[i], playerScript);
             weaponsInventoryOnServer.Add(spawnedWeapon);
         }
+
+        currentWeaponIndex = defaultWeaponIndex;
+        weaponsInventoryOnServer[currentWeaponIndex].RpcToggleClientWeapon(true);
 
         isServerInitialized = true;
         RpcSetupWeaponInventory(connectionToClient, size, defaultWeaponIndex);
     }
 
     [ClientRpc]
-    void RpcSetWeaponParent(uint weaponID)
+    void RpcSetWeaponParent(uint weaponID, bool isCurrentWeapon)
     {
         if (!NetworkClient.spawned.ContainsKey(weaponID))
         {
@@ -84,7 +191,7 @@ public class PlayerInventory : NetworkBehaviour
         }
 
         NetworkIdentity weaponIdentity = NetworkClient.spawned[weaponID];
-        if (weaponIdentity.transform.parent == vWeaponPivot) return;
+        //if (weaponIdentity.transform.parent == vWeaponPivot) return;
 
         NetWeapon spawnedWeapon = weaponIdentity.GetComponent<NetWeapon>();
         if (spawnedWeapon != null)
@@ -92,6 +199,9 @@ public class PlayerInventory : NetworkBehaviour
             spawnedWeapon.MyTransform.SetParent(wWeaponPivot);
             spawnedWeapon.MyTransform.localPosition = Vector3.zero;
             spawnedWeapon.MyTransform.localRotation = Quaternion.identity;
+
+            if (isCurrentWeapon)
+                StartCoroutine(WaitForWeaponSync(spawnedWeapon.MyTransform));
         }
         else
         {
@@ -99,31 +209,36 @@ public class PlayerInventory : NetworkBehaviour
         }
     }
 
+
     [TargetRpc]
     void RpcSetupWeaponInventory(NetworkConnection target, int weaponsToSpawn, int defaultWeaponIndex)
     {
+        print("Setup Player Weapon Inventory");
         weaponsInvetoryOnClient.Clear();
 
-        if (wWeaponPivot.childCount == 0) return;
-
-        for (int i = 0; i < weaponsToSpawn; i++)
+        StartCoroutine(WaitForPlayerWeaponSync(() =>
         {
-            NetWeapon netWeapon = wWeaponPivot.GetChild(i).GetComponent<NetWeapon>();
-            if (netWeapon != null)
+            for (int i = 0; i < weaponsToSpawn; i++)
             {
-                GameObject weaponObject = new GameObject("Weapon");
-                Weapon spawnedWeapon = weaponObject.AddComponent<Weapon>();
+                NetWeapon netWeapon = wWeaponPivot.GetChild(i).GetComponent<NetWeapon>();
+                if (netWeapon != null)
+                {
+                    GameObject weaponObject = new GameObject("Weapon");
+                    Weapon spawnedWeapon = weaponObject.AddComponent<Weapon>();
 
-                spawnedWeapon.MyTransform.SetParent(vWeaponPivot);
-                spawnedWeapon.MyTransform.localPosition = Vector3.zero;
-                spawnedWeapon.MyTransform.localRotation = Quaternion.identity;
+                    spawnedWeapon.MyTransform.SetParent(vWeaponPivot);
+                    spawnedWeapon.MyTransform.localPosition = Vector3.zero;
+                    spawnedWeapon.MyTransform.localRotation = Quaternion.identity;
 
-                spawnedWeapon.Init(netWeapon.GetWeaponData(), netWeapon);
-                weaponsInvetoryOnClient.Add(spawnedWeapon);
+                    spawnedWeapon.Init(netWeapon.GetWeaponData(), netWeapon);
+                    weaponsInvetoryOnClient.Add(spawnedWeapon);
+                }
             }
-        }
 
-        currentWeaponIndex = defaultWeaponIndex;
+            currentWeaponIndex = defaultWeaponIndex;
+            weaponsInvetoryOnClient[currentWeaponIndex].ToggleWeapon(true);
+        }));
+        //if (wWeaponPivot.childCount == 0) return;
     }
 
     [Command(requiresAuthority = false)]
@@ -131,8 +246,28 @@ public class PlayerInventory : NetworkBehaviour
     {
         int size = weaponsInventoryOnServer.Count;
         for (int i = 0; i < size; i++)
+            RpcSetWeaponParent(weaponsInventoryOnServer[i].netId, i == currentWeaponIndex);
+    }
+    
+    [Client]
+    IEnumerator WaitForWeaponSync(Transform weaponToLookAt)
+    {
+        while (weaponToLookAt.childCount <= 0) yield return new WaitForSeconds(.1f); 
+        IWeapon clientWeapon = weaponToLookAt.GetComponentInChildren<IWeapon>(true);
+        if (clientWeapon != null) clientWeapon.DrawWeapon();
+        else Debug.LogError($"Couln't find IWeapon Component or NetWeapon doesn't have a client weapon child!");
+    }
+
+    [Client]
+    IEnumerator WaitForPlayerWeaponSync(System.Action OnWeaponSync)
+    {
+        int debug = 0;
+        while (wWeaponPivot.childCount == 0)
         {
-            RpcSetWeaponParent(weaponsInventoryOnServer[i].netId);
+            print($"Player waiting for weaponSync {debug++}");
+            yield return new WaitForSeconds(.1f);
         }
+
+        OnWeaponSync?.Invoke();
     }
 }

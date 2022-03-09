@@ -9,4 +9,5 @@ public class WeaponData : ScriptableObject
     public GameObject clientPrefab;
     public BulletData bulletData;
     public float maxBulletSpread, rateOfFire;
+    public WeaponType weaponType;
 }

@@ -4,6 +4,7 @@ using UnityEngine;
 using Mirror;
 
 public enum BulletType { RayCast, Physics }
+public enum WeaponType { Melee, Secondary, Primary, Tools, BandAids }
 
 public interface IWeapon
 {
@@ -13,6 +14,9 @@ public interface IWeapon
     public void AltFire(Vector3 destination);
     public void Scope();
 
+    public void HolsterWeapon();
+    public void DrawWeapon();
+
     public void ToggleAllViewModels(bool toggle);
 
     public Transform GetVirtualPivot();
@@ -21,6 +25,8 @@ public interface IWeapon
 
 public class Weapon : CachedTransform
 {
+    public WeaponType WType => weaponData.weaponType;
+
     double fireTime;
     RaycastHit rayHit;
 
@@ -96,4 +102,10 @@ public class Weapon : CachedTransform
     }
 
     public float GetRateOfFire() => weaponData.rateOfFire;
+
+    public void ToggleWeapon(bool toggle)
+    {
+        if (toggle) clientWeapon.DrawWeapon();
+        else clientWeapon.HolsterWeapon();
+    }
 }

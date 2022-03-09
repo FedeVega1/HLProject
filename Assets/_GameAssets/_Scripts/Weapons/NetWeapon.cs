@@ -5,8 +5,11 @@ using Mirror;
 
 public class NetWeapon : CachedNetTransform
 {
+    public WeaponType WType => weaponData.weaponType;
+
     [SyncVar] bool serverInitialized;
 
+    bool clientWeaponInit;
     double fireTime;
     RaycastHit rayHit;
 
@@ -29,7 +32,7 @@ public class NetWeapon : CachedNetTransform
     public void Init(WeaponData data, Player owner)
     {
         weaponData = data;
-        RpcSyncWeaponData(weaponData.GetInstanceID());
+        RpcSyncWeaponData(weaponData.name);
 
         bulletData = data.bulletData;
         owningPlayer = owner;
@@ -88,6 +91,15 @@ public class NetWeapon : CachedNetTransform
 
     }
 
+    [ClientRpc(includeOwner = false)]
+    public void RpcToggleClientWeapon(bool toggle)
+    {
+        StartCoroutine(WaitForServerAndClientInitialization(true, true, () => {
+            if (toggle) clientWeapon.DrawWeapon();
+            else clientWeapon.HolsterWeapon();
+        }));
+    }
+
     [Command]
     public void CmdRequestFire()
     {
@@ -103,29 +115,38 @@ public class NetWeapon : CachedNetTransform
     [Command(requiresAuthority = false)]
     public void CmdRequestWeaponData()
     {
-        RpcSyncWeaponData(weaponData.GetInstanceID());
+        RpcSyncWeaponData(weaponData.name);
     }
 
 
     [ClientRpc(includeOwner = false)]
-    public void RpcInitClientWeapon() => InitClientWeapon();
+    public void RpcInitClientWeapon()
+    {
+        print("INIT CLIENT WEAPON");
+        InitClientWeapon();
+    }
 
+    [Client]
     void InitClientWeapon()
     {
-        if (!serverInitialized || hasAuthority) return;
+        if (hasAuthority) return;
+        StartCoroutine(WaitForServerAndClientInitialization(false, true, () =>
+        {
+            clientWeapon = Instantiate(weaponData.clientPrefab, MyTransform).GetComponent<IWeapon>();
+            if (clientWeapon != null)
+            {
+                clientWeapon.Init(true, bulletData);
+            }
+            else
+            {
+                GameObject nullWGO = new GameObject($"{weaponData.weaponName} (NULL)");
+                clientWeapon = nullWGO.AddComponent<NullWeapon>();
+                clientWeapon.Init(true, bulletData);
+                Debug.LogError($"Client weapon prefab does not have a IWeapon type component.\nSwitching to default weapon");
+            }
 
-        clientWeapon = Instantiate(weaponData.clientPrefab, MyTransform).GetComponent<IWeapon>();
-        if (clientWeapon != null)
-        {
-            clientWeapon.Init(true, bulletData);
-        }
-        else
-        {
-            GameObject nullWGO = new GameObject($"{weaponData.weaponName} (NULL)");
-            clientWeapon = nullWGO.AddComponent<NullWeapon>();
-            clientWeapon.Init(true, bulletData);
-            Debug.LogError($"Client weapon prefab does not have a IWeapon type component.\nSwitching to default weapon");
-        }
+            clientWeaponInit = true;
+        }));
     }
 
     [ClientRpc(includeOwner = false)]
@@ -135,12 +156,24 @@ public class NetWeapon : CachedNetTransform
     }
 
     [ClientRpc]
-    void RpcSyncWeaponData(int weaponID)
+    void RpcSyncWeaponData(string weaponAssetName)//(int weaponID)
     {
-        if (weaponData == null) weaponData = (WeaponData)Resources.InstanceIDToObject(weaponID);
+        if (weaponData == null) weaponData = Resources.Load<WeaponData>($"Weapons/{weaponAssetName}");
         if (bulletData == null) bulletData = weaponData.bulletData;
 
         if (serverInitialized && clientWeapon == null) InitClientWeapon();
+    }
+
+    [Client]
+    IEnumerator WaitForServerAndClientInitialization(bool waitForClient, bool waitForServer, System.Action OnServerAndClientInitialized)
+    {
+        int debug = 0;
+        while ((!serverInitialized && waitForServer) || (!clientWeaponInit && waitForClient))
+        {
+            print($"Waiting for client Initialization {debug++}");
+            yield return new WaitForSeconds(.1f);
+        }
+        OnServerAndClientInitialized?.Invoke();
     }
 
     public WeaponData GetWeaponData() => weaponData;
