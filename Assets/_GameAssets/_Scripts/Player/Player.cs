@@ -178,6 +178,13 @@ public class Player : Character
     #region Server
 
     [Server]
+    public override void TakeDamage(float ammount, DamageType damageType = DamageType.Base)
+    {
+        if (isWounded) return;
+        base.TakeDamage(ammount, damageType);
+    }
+
+    [Server]
     public void PlayerWoundedUpdate()
     {
         if (isDead || isInvencible || !isWounded || NetworkTime.time < woundedTime) return;

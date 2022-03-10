@@ -65,6 +65,41 @@ public class NetWeapon : CachedNetTransform
 
         MyTransform.eulerAngles = new Vector3(owningPlayer.GetPlayerCameraXAxis(), MyTransform.eulerAngles.y, MyTransform.eulerAngles.z);
 
+        switch (bulletData.type)
+        {
+            case BulletType.RayCast:
+                ShootRayCastBullet();
+                break;
+
+            case BulletType.Physics:
+                GameObject granade = Instantiate(bulletData.bulletPrefab, MyTransform.position + MyTransform.forward * 1.5f, MyTransform.rotation);
+                Bullet granadeBulletScript = granade.GetComponent<Bullet>();
+                granadeBulletScript.Init(bulletData.initialSpeed, true);
+                granadeBulletScript.PhysicsTravelTo(true, firePivot.forward, bulletData.radious, false, bulletData.timeToExplode);
+                granadeBulletScript.OnExplode += OnBulletExplode;
+                NetworkServer.Spawn(granade);
+                break;
+        }
+
+        fireTime = NetworkTime.time + weaponData.rateOfFire;
+    }
+
+    [Server]
+    void OnBulletExplode(List<HitBox> hitBoxList, Vector3 finalPos, Quaternion finalRot)
+    {
+        int size = hitBoxList.Count;
+        for (int i = 0; i < size; i++)
+        {
+            float distance = Vector3.Distance(finalPos, hitBoxList[i].MyTransform.position);
+            float damageFalloff = Mathf.Clamp(bulletData.radious - distance, 0, bulletData.radious) / bulletData.radious;
+            hitBoxList[i].GetCharacterScript().TakeDamage(bulletData.damage * damageFalloff, bulletData.damageType);
+        }
+        RpcBulletExplosion(finalPos, finalRot);
+    }
+
+    [Server]
+    void ShootRayCastBullet()
+    {
         Ray weaponRay = new Ray(firePivot.position, firePivot.forward);
         if (Physics.Raycast(weaponRay, out rayHit, bulletData.maxTravelDistance, weaponLayerMask))
         {
@@ -76,10 +111,10 @@ public class NetWeapon : CachedNetTransform
             //float root = Mathf.Sqrt(Mathf.Pow(speed * sin, 2) + 2 * Physics.gravity.y * height);
             //float range = speed * cos * (speed * sin + root) / Physics.gravity.y;
             //float range = Mathf.Pow(bulletData.initialSpeed, 2) * Mathf.Sin(2 * angle) / Physics.gravity.y;
-            Character chrScript = rayHit.transform.GetComponent<Character>();
-            if (chrScript != null)
+            HitBox hitBox = rayHit.transform.GetComponent<HitBox>();
+            if (hitBox != null)
             {
-                ApplyDistanceToDamage(chrScript, rayHit.distance);
+                ApplyDistanceToDamage(hitBox, rayHit.distance);
                 Debug.DrawLine(weaponRay.origin, rayHit.point, Color.green, 5);
             }
             else
@@ -95,8 +130,6 @@ public class NetWeapon : CachedNetTransform
             RpcFireWeapon(weaponRay.origin + (weaponRay.direction * bulletData.maxTravelDistance), false);
             Debug.DrawRay(weaponRay.origin, weaponRay.direction, Color.red, 2);
         }
-
-        fireTime = NetworkTime.time + weaponData.rateOfFire;
     }
 
     [Server]
@@ -113,10 +146,10 @@ public class NetWeapon : CachedNetTransform
     }
 
     [Server]
-    IEnumerator ApplyDistanceToDamage(Character chrToHit, float distance)
+    IEnumerator ApplyDistanceToDamage(HitBox hitBoxToHit, float distance)
     {
         yield return new WaitForSeconds(distance / bulletData.initialSpeed);
-        chrToHit.TakeDamage(bulletData.damage, DamageType.Bullet);
+        hitBoxToHit.GetCharacterScript().TakeDamage(bulletData.damage, DamageType.Bullet);
     }
 
     #endregion
@@ -151,6 +184,15 @@ public class NetWeapon : CachedNetTransform
     #endregion
 
     #region RPCs
+
+    [ClientRpc]
+    public void RpcBulletExplosion(Vector3 pos, Quaternion rot)
+    {
+        GameObject granade = Instantiate(bulletData.bulletPrefab, pos, rot);
+        Bullet granadeBulletScript = granade.GetComponent<Bullet>();
+        granadeBulletScript.Init(0, true);
+        granadeBulletScript.PhysicsTravelTo(false, Vector3.zero, bulletData.radious, false, bulletData.timeToExplode);
+    }
 
     [ClientRpc(includeOwner = false)]
     public void RpcToggleClientWeapon(bool toggle)

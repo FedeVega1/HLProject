@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cbc436bff5906864d8060ea6fbb33a4f, type: 3}
-  m_Name: TestSMG
+  m_Name: TestGranadeWeapon
   m_EditorClassIdentifier: 
-  weaponName: TEST SMG
-  clientPrefab: {fileID: 7693782198007015193, guid: 6661e261e60cc514297dc1219612b9ed, type: 3}
-  propPrefab: {fileID: 7693782198007015193, guid: d4f2d8bd5e4156d4a9eb9ecdff00f4a1, type: 3}
-  bulletData: {fileID: 11400000, guid: cc396ea161d868d478424de1629e4a84, type: 2}
-  maxBulletSpread: 1
-  rateOfFire: 0.05
-  weaponType: 2
+  weaponName: TEST GRANADE
+  clientPrefab: {fileID: 7693782198007015193, guid: 082c47b18dcaf1a4d87964596c040130, type: 3}
+  propPrefab: {fileID: 7693782198007015193, guid: 37c607967db4e6941be3931e083ef1c9, type: 3}
+  bulletData: {fileID: 11400000, guid: 97bafdf88dd66e949bf88cdbc46d3391, type: 2}
+  maxBulletSpread: 0
+  rateOfFire: 1
+  weaponType: 3

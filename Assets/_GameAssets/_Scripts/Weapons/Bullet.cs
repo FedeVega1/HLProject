@@ -1,14 +1,24 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
 
 public class Bullet : CachedTransform
 {
     [SerializeField] DecalProjector bulletDecal;
+    [SerializeField] ParticleSystem explosionPS;
 
-    bool canTravel, canShowDecal;
-    float speed;
+    bool canTravel, canShowDecal, explodeOnHit, canExplode, isServer;
+    float speed, timeToExplode, radious;
     Vector3 hitNormal;
     Vector3 destination;
+    Rigidbody rb;
+
+    public System.Action<List<HitBox>, Vector3, Quaternion> OnExplode;
+
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+    }
 
     public void Init(float initialSpeed, bool showDecal)
     {
@@ -18,6 +28,13 @@ public class Bullet : CachedTransform
 
     void Update()
     {
+        if (canExplode)
+        {
+            if (Time.time < timeToExplode) return;
+            Explode();
+            return;
+        }
+
         if (!canTravel) return;
 
         //print($"Bullet {name} Distance: {Vector3.Distance(MyTransform.position, destination)}");
@@ -47,6 +64,55 @@ public class Bullet : CachedTransform
             bulletDecal.transform.SetParent(null);
         }
 
+        Destroy(gameObject);
+    }
+
+    public void PhysicsTravelTo(bool isServer, Vector3 direction, float explosionRadious, bool explodeOnTouch, float timeToExplode = 0)
+    {
+        rb.AddForce(direction * speed);
+        rb.AddTorque(direction * (speed / 2));
+        explodeOnHit = explodeOnTouch;
+
+        this.timeToExplode = Time.time + timeToExplode;
+        this.isServer = isServer;
+
+        canExplode = true;
+        radious = explosionRadious;
+    }
+
+    void OnCollisionEnter(Collision collision) { if (canExplode && explodeOnHit) Explode(); }
+
+    void Explode()
+    {
+        if (isServer)
+        {
+            Collider[] possibleTargets = new Collider[30];
+            int quantity = Physics.OverlapSphereNonAlloc(MyTransform.position, radious, possibleTargets, LayerMask.GetMask("PlayerHitBoxes"));
+
+            List<HitBox> hitBoxList = new List<HitBox>();
+            for (int i = 0; i < quantity; i++)
+            {
+                HitBox hitBox = possibleTargets[i].GetComponent<HitBox>();
+                if (hitBox == null) continue;
+                hitBoxList.Add(hitBox);
+            }
+
+            OnExplode?.Invoke(hitBoxList, MyTransform.position, MyTransform.rotation);
+        }
+        else
+        {
+            if (canShowDecal)
+            {
+                bulletDecal.gameObject.SetActive(true);
+                bulletDecal.transform.position = MyTransform.position;
+                bulletDecal.transform.SetParent(null);
+            }
+
+            explosionPS.Play();
+            explosionPS.transform.parent = null;
+        }
+        
+        canExplode = false;
         Destroy(gameObject);
     }
 }

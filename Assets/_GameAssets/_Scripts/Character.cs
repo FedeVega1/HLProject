@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public enum DamageType { Base, Bleed, Bullet }
+public enum DamageType { Base, Bleed, Bullet, Explosion }
 
 public class Character : CachedNetTransform
 {
@@ -50,7 +50,7 @@ public class Character : CachedNetTransform
 
     protected virtual void Update()
     {
-        if (!isServer || !isBleeding || NetworkTime.time < bleedTime) return;
+        if (!isServer || isDead || !isBleeding || NetworkTime.time < bleedTime) return;
 
         TakeDamage(1, DamageType.Bleed);
         bleedTime = NetworkTime.time + maxBleedTime;
@@ -71,7 +71,7 @@ public class Character : CachedNetTransform
                 break;
 
             default:
-                if (ammount >= bleedThreshold)
+                if (currentArmor <= 0 && ammount >= bleedThreshold)
                 {
                     isBleeding = true;
                     bleedTime = NetworkTime.time + maxBleedTime;
@@ -80,8 +80,10 @@ public class Character : CachedNetTransform
         }
 
         currentArmor -= damageToArmor;
-        currentHealth -= Mathf.Clamp(ammount - damageToArmor, 0, 9999999);
+        float dmgToHealth = ammount - damageToArmor;
+        currentHealth -= Mathf.Clamp(dmgToHealth, 0, 9999999);
 
+        print($"Character {name} took {ammount} of {damageType} damage - DamageToArmor: {damageToArmor} - DamageToHealth: {dmgToHealth}");
         if (currentHealth <= 0) CharacterDies(damageType == DamageType.Base);
     }
 
@@ -102,7 +104,7 @@ public class Character : CachedNetTransform
     [Server]
     protected virtual void CharacterDies(bool criticalHit)
     {
-        if (!isServer || isInvencible) return;
+        if (!isServer || isDead || isInvencible) return;
         isDead = true;
         OnPlayerDead?.Invoke();
         RpcCharacterDied();

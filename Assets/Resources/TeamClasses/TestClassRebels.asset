@@ -18,3 +18,4 @@ MonoBehaviour:
   classWeapons:
   - {fileID: 11400000, guid: 86407aa0a0f00034b90e85dc6c1f109c, type: 2}
   - {fileID: 11400000, guid: d5486f3c38a945441973d816979a3302, type: 2}
+  - {fileID: 11400000, guid: 6a7f85c0540dcc24e80aca79ec8d64cb, type: 2}

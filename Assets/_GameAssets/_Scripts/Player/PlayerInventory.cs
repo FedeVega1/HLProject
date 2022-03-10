@@ -102,6 +102,7 @@ public class PlayerInventory : NetworkBehaviour
     void CheckInputs()
     {
         if (weaponsInvetoryOnClient == null || currentWeaponIndex >= weaponsInvetoryOnClient.Count || weaponsInvetoryOnClient[currentWeaponIndex] == null) return;
+        if (WeaponSelectorCycle()) return;
 
         if (Input.GetMouseButton(0))
         {
@@ -109,28 +110,27 @@ public class PlayerInventory : NetworkBehaviour
         }
 
         if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonUp(0)) weaponsInvetoryOnClient[currentWeaponIndex].Scope();
-
-        WeaponSelectorCycle();
     }
 
     [Client]
-    void WeaponSelectorCycle()
+    bool WeaponSelectorCycle()
     {
-        if (!Input.anyKeyDown) return;
+        if (!Input.anyKeyDown) return false;
 
         if (weaponCyclerList.Count > 0 && (Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0)))
         {
-            print($"CurrentWeaponIndex: {currentWeaponIndex} - CurrentWeaponType: {weaponsInvetoryOnClient[currentWeaponIndex].WType} - CurrentCyclerIndex: {currentCyclerIndex} - Current Cycler Type: {currentCyclerType}");
             bool checkWeaponIndex = currentCyclerIndex < weaponCyclerList.Count && weaponCyclerList[currentCyclerIndex] != currentWeaponIndex;
+            bool success = false;
             if (weaponsInvetoryOnClient[currentWeaponIndex].WType != currentCyclerType || checkWeaponIndex)
             {
                 CmdRequestWeaponChange(weaponCyclerList[currentCyclerIndex]);
+                success = true;
             }
 
             currentCyclerType = weaponsInvetoryOnClient[currentWeaponIndex].WType;
             currentCyclerIndex = -1;
             weaponCyclerList.Clear();
-            return;
+            return success;
         }
 
         int weaponIndex;
@@ -140,7 +140,6 @@ public class PlayerInventory : NetworkBehaviour
         {
             if (Input.GetKeyDown(WeaponCycleKeys[i]))
             {
-                print($"{currentCyclerType} - {(WeaponType) i} - {currentCyclerType == (WeaponType) i}");
                 if (currentCyclerType == (WeaponType) i)
                 {
                     if (SearchForWeaponsType((WeaponType) i, out weaponIndex))
@@ -163,7 +162,7 @@ public class PlayerInventory : NetworkBehaviour
             }
         }
 
-        print($"CurrentWeaponIndex: {currentWeaponIndex} - CurrentWeaponType: {weaponsInvetoryOnClient[currentWeaponIndex].WType} - CurrentCyclerIndex: {currentCyclerIndex} - Current Cycler Type: {currentCyclerType}");
+        return false;
     }
 
     [Client]
@@ -291,6 +290,8 @@ public class PlayerInventory : NetworkBehaviour
             weaponsInvetoryOnClient[i].DropWeapon();
             Destroy(weaponsInvetoryOnClient[i].gameObject);
         }
+
+        weaponsInvetoryOnClient.Clear();
     }
 
     #endregion
