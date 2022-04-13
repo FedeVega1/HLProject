@@ -52,6 +52,7 @@ public class GameManager : MonoBehaviour
         }
 
         DontDestroyOnLoad(gameObject);
+        SceneManager.sceneLoaded += (_, __) => OnLoadedScene();
     }
 
     public void QuitGame() => Application.Quit();

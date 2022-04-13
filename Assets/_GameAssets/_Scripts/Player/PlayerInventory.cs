@@ -102,14 +102,13 @@ public class PlayerInventory : NetworkBehaviour
     void CheckInputs()
     {
         if (weaponsInvetoryOnClient == null || currentWeaponIndex >= weaponsInvetoryOnClient.Count || weaponsInvetoryOnClient[currentWeaponIndex] == null) return;
+
+        print("A");
         if (WeaponSelectorCycle()) return;
 
-        if (Input.GetMouseButton(0))
-        {
-            weaponsInvetoryOnClient[currentWeaponIndex].Fire();
-        }
-
-        if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonUp(0)) weaponsInvetoryOnClient[currentWeaponIndex].Scope();
+        print($"Down: {Input.GetMouseButtonDown(0)} Up: {Input.GetMouseButtonUp(0)} - Pressed: {Input.GetMouseButton(0)}");
+        if (!Input.GetMouseButtonUp(0) && Input.GetMouseButton(0)) weaponsInvetoryOnClient[currentWeaponIndex].Fire();
+        if (Input.GetMouseButton(1)) weaponsInvetoryOnClient[currentWeaponIndex].Scope();
     }
 
     [Client]

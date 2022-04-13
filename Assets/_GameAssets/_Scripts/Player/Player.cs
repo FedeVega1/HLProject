@@ -90,8 +90,14 @@ public class Player : Character
     [Client]
     void CheckInputs()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) && Input.GetKeyDown(KeyCode.LeftShift)) GameManager.INS.StopServer();
-        if (Input.GetKeyDown(KeyCode.Escape)) GameManager.INS.DisconnectFromServer();
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Escape)) GameManager.INS.StopServer();
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (isServer && isClient) GameManager.INS.StopServer();
+            else GameManager.INS.DisconnectFromServer();
+        }
+
         if (Input.GetKeyDown(KeyCode.Delete)) GameModeManager.INS.KillPlayer(this);
         if (Input.GetKeyDown(KeyCode.F1)) GameModeManager.INS.EndMatch();
 
