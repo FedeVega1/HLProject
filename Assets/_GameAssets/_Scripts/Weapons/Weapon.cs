@@ -14,6 +14,8 @@ public interface IWeapon
     public void AltFire(Vector3 destination, bool didHit);
     public void Scope();
 
+    public void Reload();
+
     public void HolsterWeapon();
     public void DrawWeapon();
 
@@ -29,6 +31,9 @@ public class Weapon : CachedTransform
 {
     public WeaponType WType => weaponData.weaponType;
 
+    public int BulletsInMag { get; private set; }
+    public int Mags { get; private set; }
+
     double fireTime;
     RaycastHit rayHit;
 
@@ -38,6 +43,8 @@ public class Weapon : CachedTransform
     BulletData bulletData;
     Transform firePivot;
     NetWeapon netWeapon;
+
+    public System.Action OnFinishedReload;
 
     void Start()
     {
@@ -49,6 +56,9 @@ public class Weapon : CachedTransform
         weaponData = data;
         bulletData = data.bulletData;
         netWeapon = serverSideWeapon;
+
+        Mags = weaponData.mags;
+        BulletsInMag = weaponData.bulletsPerMag;
 
         clientWeapon = Instantiate(weaponData.clientPrefab, MyTransform).GetComponent<IWeapon>();
         if (clientWeapon != null)
@@ -68,6 +78,7 @@ public class Weapon : CachedTransform
     public void Fire()
     {
         if (NetworkTime.time < fireTime) return;
+        if (BulletsInMag <= 0) return;
 
         Ray weaponRay = new Ray(firePivot.position, firePivot.forward);
         if (Physics.Raycast(weaponRay, out rayHit, bulletData.maxTravelDistance, weaponLayerMask))
@@ -89,6 +100,7 @@ public class Weapon : CachedTransform
             Debug.DrawRay(weaponRay.origin, weaponRay.direction, Color.red, 2);
         }
 
+        BulletsInMag--;
         fireTime = NetworkTime.time + weaponData.rateOfFire;
         netWeapon.CmdRequestFire();
     }
@@ -103,6 +115,22 @@ public class Weapon : CachedTransform
         clientWeapon.Scope();
     }
 
+    public void Reload()
+    {
+        if (BulletsInMag >= weaponData.bulletsPerMag || Mags <= 0) return;
+        clientWeapon.Reload();
+        StartCoroutine(ReloadRoutine());
+        netWeapon.CmdRequestReload();
+    }
+
+    IEnumerator ReloadRoutine()
+    {
+        yield return new WaitForSeconds(2);
+        BulletsInMag = weaponData.bulletsPerMag;
+        Mags--;
+        OnFinishedReload?.Invoke();
+    }
+
     public float GetRateOfFire() => weaponData.rateOfFire;
 
     public void ToggleWeapon(bool toggle)
@@ -112,4 +140,6 @@ public class Weapon : CachedTransform
     }
 
     public void DropWeapon() => clientWeapon.DropProp();
+
+    public WeaponData GetWeaponData() => weaponData;
 }

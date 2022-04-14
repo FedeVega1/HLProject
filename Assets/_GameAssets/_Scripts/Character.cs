@@ -105,6 +105,7 @@ public class Character : CachedNetTransform
     protected virtual void CharacterDies(bool criticalHit)
     {
         if (!isServer || isDead || isInvencible) return;
+        isBleeding = false;
         isDead = true;
         OnPlayerDead?.Invoke();
         RpcCharacterDied();

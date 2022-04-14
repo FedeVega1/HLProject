@@ -15,8 +15,9 @@ MonoBehaviour:
   bulletPrefab: {fileID: 5175615176831954782, guid: 81b4d6b6823c1794c8ff92d5b1fd7d48, type: 3}
   type: 1
   damageType: 3
-  initialSpeed: 3
+  initialSpeed: 450
   damage: 100
   mass: 5
   maxTravelDistance: 0
   radious: 40
+  timeToExplode: 2

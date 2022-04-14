@@ -52,6 +52,8 @@ public class TestPistol : CachedTransform, IWeapon
 
     }
 
+    public void Reload() { }
+
     public void DrawWeapon()
     {
         gameObject.SetActive(true);

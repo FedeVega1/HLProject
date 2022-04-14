@@ -16,6 +16,7 @@ public class PlayerCanvas : MonoBehaviour
     [SerializeField] UIGameOverScreen gameOverScreen;
     [SerializeField] UITeamClassSelection teamClassSelection;
     [SerializeField] UIWoundedScreen woundedScreen;
+    [SerializeField] UIAmmoCounter ammoCounter;
 
     Player playerScript;
     int[] teamTickets;
@@ -63,6 +64,7 @@ public class PlayerCanvas : MonoBehaviour
 
         teamSelection.ToggleTeamSelection(false);
         teamClassSelection.ToggleClassSelection(false);
+        ToggleWeaponInfo(false);
 
         woundedScreen.Hide();
         cpCapture.OnExitControlPoint();
@@ -101,6 +103,9 @@ public class PlayerCanvas : MonoBehaviour
     public void PlayerOutOfBounds(float timeToDie) => woundedScreen.PlayerOutOfBounds(timeToDie);
     public void PlayerInBounds() => woundedScreen.PlayerInBounds();
     public void ShowRespawnTimer(double time) => teamClassSelection.ShowRespawnTimer(time);
+    public void SetCurrentWeapon(string weaponName) => ammoCounter.SetCurrentWeapon(weaponName);
+    public void SetCurrentAmmo(int bullets, int mags) => ammoCounter.SetCurrentAmmo(bullets, mags);
+    public void ToggleWeaponInfo(bool toggle) => ammoCounter.Toggle(toggle);
 
     #endregion
 }

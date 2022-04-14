@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Networking;
 using UnityEngine;
 using Mirror;
 
@@ -19,11 +20,11 @@ public class Player : Character
 
     public float MaxRespawnTime { get; set; }
     public float BonusWoundTime { get; set; }
+    public PlayerCanvas PlayerCanvas { get; private set; }
 
     bool classSelectionMenuOpen, teamSelectionMenuOpen;
     bool onControlPoint;
     double woundedTime;
-    PlayerCanvas playerCanvas;
     PlayerInventory inventory;
     TeamClassData classData;
 
@@ -41,8 +42,8 @@ public class Player : Character
 
     public override void OnStartLocalPlayer()
     {
-        playerCanvas = Instantiate(playerCanvasPrefab).GetComponent<PlayerCanvas>();
-        playerCanvas.Init(this);
+        PlayerCanvas = Instantiate(playerCanvasPrefab).GetComponent<PlayerCanvas>();
+        PlayerCanvas.Init(this);
         movementScript.FreezeInputs = true;
         GameModeManager.INS.TeamManagerInstance.OnTicketChange += UpdateMatchTickets;
     }
@@ -107,15 +108,15 @@ public class Player : Character
             {
                 movementScript.FreezeInputs = false;
                 inventory.DisablePlayerInputs = false;
-                playerCanvas.ToggleClassSelection(false);
+                PlayerCanvas.ToggleClassSelection(false);
                 classSelectionMenuOpen = false;
             }
             else
             {
                 movementScript.FreezeInputs = true;
             inventory.DisablePlayerInputs = true;
-                playerCanvas.ToggleTeamSelection(false);
-                playerCanvas.ToggleClassSelection(true);
+                PlayerCanvas.ToggleTeamSelection(false);
+                PlayerCanvas.ToggleClassSelection(true);
                 classSelectionMenuOpen = true;
             }
 
@@ -128,15 +129,15 @@ public class Player : Character
             {
                 movementScript.FreezeInputs = false;
                 inventory.DisablePlayerInputs = false;
-                playerCanvas.ToggleTeamSelection(false);
+                PlayerCanvas.ToggleTeamSelection(false);
                 teamSelectionMenuOpen = false;
             }
             else
             {
                 movementScript.FreezeInputs = true;
                 inventory.DisablePlayerInputs = true;
-                playerCanvas.ToggleClassSelection(false);
-                playerCanvas.ToggleTeamSelection(true);
+                PlayerCanvas.ToggleClassSelection(false);
+                PlayerCanvas.ToggleTeamSelection(true);
                 teamSelectionMenuOpen = true;
             }
 
@@ -154,7 +155,7 @@ public class Player : Character
     [Client]
     public void UpdateMatchTickets(int team, int tickets)
     {
-        if (isLocalPlayer) playerCanvas.SetTeamTickets(team - 1, tickets);
+        if (isLocalPlayer) PlayerCanvas.SetTeamTickets(team - 1, tickets);
         print($"{TeamManager.FactionNames[team - 1]} tickets: {tickets}");
     }
 
@@ -227,6 +228,7 @@ public class Player : Character
     {
         if (isDead || isInvencible) return;
 
+        isBleeding = false;
         timeToRespawn = NetworkTime.time + MaxRespawnTime;
         woundedTime = criticalHit ? 0 : NetworkTime.time + (woundedMaxTime - BonusWoundTime);
 
@@ -312,8 +314,8 @@ public class Player : Character
     void RpcWoundedCanGiveUp(NetworkConnection target)
     {
         if (target.connectionId != connectionToServer.connectionId) return;
-        playerCanvas.PlayerNotWounded();
-        playerCanvas.ToggleClassSelection(true);
+        PlayerCanvas.PlayerNotWounded();
+        PlayerCanvas.ToggleClassSelection(true);
     }
 
     [TargetRpc]
@@ -321,9 +323,9 @@ public class Player : Character
     {
         if (target.connectionId != connectionToServer.connectionId) return;
 
-        playerCanvas.ToggleTeamSelection(true);
-        playerCanvas.SetTeamTickets(0, team1Tickets);
-        playerCanvas.SetTeamTickets(1, team2Tickets);
+        PlayerCanvas.ToggleTeamSelection(true);
+        PlayerCanvas.SetTeamTickets(0, team1Tickets);
+        PlayerCanvas.SetTeamTickets(1, team2Tickets);
     }
 
     [TargetRpc]
@@ -337,9 +339,9 @@ public class Player : Character
     public void RpcTeamSelectionSuccess(NetworkConnection target, int team)
     {
         if (target.connectionId != connectionToServer.connectionId) return;
-        playerCanvas.ToggleTeamSelection(false);
-        playerCanvas.OnTeamSelection(team);
-        playerCanvas.ToggleClassSelection(true);
+        PlayerCanvas.ToggleTeamSelection(false);
+        PlayerCanvas.OnTeamSelection(team);
+        PlayerCanvas.ToggleClassSelection(true);
     }
 
     [TargetRpc]
@@ -347,15 +349,15 @@ public class Player : Character
     {
         if (target.connectionId != connectionToServer.connectionId) return;
         Debug.LogError($"ClassSelection error code: {error}");
-        playerCanvas.ToggleSpawnButton(true);
+        PlayerCanvas.ToggleSpawnButton(true);
     }
 
     [TargetRpc]
     public void RpcClassSelectionSuccess(NetworkConnection target, int classIndex)
     { 
         if (target.connectionId != connectionToServer.connectionId) return;
-        if (isDead || firstSpawn) playerCanvas.ToggleSpawnButton(true);
-        playerCanvas.OnClassSelection(classIndex);
+        if (isDead || firstSpawn) PlayerCanvas.ToggleSpawnButton(true);
+        PlayerCanvas.OnClassSelection(classIndex);
         print($"Client: CurrentClass {classIndex}");
     }
 
@@ -363,7 +365,7 @@ public class Player : Character
     public void RpcOnControlPoint(NetworkConnection target, int currentCPController, float cpCaptureProgress, int defyingTeam)
     {
         if (target.connectionId != connectionToServer.connectionId) return;
-        playerCanvas.OnControlPoint(currentCPController, defyingTeam, cpCaptureProgress);
+        PlayerCanvas.OnControlPoint(currentCPController, defyingTeam, cpCaptureProgress);
         onControlPoint = true;
     }
 
@@ -371,7 +373,7 @@ public class Player : Character
     public void RpcExitControlPoint(NetworkConnection target)
     {
         if (target.connectionId != connectionToServer.connectionId) return;
-        playerCanvas.OnExitControlPoint();
+        PlayerCanvas.OnExitControlPoint();
         onControlPoint = false;
     }
 
@@ -379,21 +381,21 @@ public class Player : Character
     public void RpcUpdateCPProgress(NetworkConnection target, float progress)
     {
         if (target.connectionId != connectionToServer.connectionId) return;
-        playerCanvas.UpdateCPProgress(progress);
+        PlayerCanvas.UpdateCPProgress(progress);
     }
 
     [TargetRpc]
     public void RpcPlayerOutOfBounds(NetworkConnection target, float timeToReturn)
     {
         if (target.connectionId != connectionToServer.connectionId) return;
-        playerCanvas.PlayerOutOfBounds(timeToReturn);
+        PlayerCanvas.PlayerOutOfBounds(timeToReturn);
     }
 
     [TargetRpc]
     public void RpcPlayerReturned(NetworkConnection target)
     {
         if (target.connectionId != connectionToServer.connectionId) return;
-        playerCanvas.PlayerInBounds();
+        PlayerCanvas.PlayerInBounds();
     }
 
     [TargetRpc]
@@ -402,8 +404,8 @@ public class Player : Character
         if (target.connectionId != connectionToServer.connectionId) return;
         movementScript.FreezeInputs = true;
         inventory.DisablePlayerInputs = true;
-        playerCanvas.PlayerIsWounded(_woundedTime);
-        playerCanvas.ShowRespawnTimer(_respawnTime);
+        PlayerCanvas.PlayerIsWounded(_woundedTime);
+        PlayerCanvas.ShowRespawnTimer(_respawnTime);
     }
 
     #endregion
@@ -418,15 +420,16 @@ public class Player : Character
             movementScript.FreezeInputs = true;
             inventory.DisablePlayerInputs = true;
         }
+
         playerMesh.enabled = false;
     }
 
     [ClientRpc]
     public void RpcControlPointCaptured(int cpTeam, int oldTeam, string cpName)
     {
-        if (playerCanvas == null) return;
-        if (onControlPoint) playerCanvas.OnPointCaptured(cpTeam, oldTeam != 0 ? oldTeam : 1);
-        playerCanvas.NewCapturedControlPoint(cpTeam, cpName);
+        if (PlayerCanvas == null) return;
+        if (onControlPoint) PlayerCanvas.OnPointCaptured(cpTeam, oldTeam != 0 ? oldTeam : 1);
+        PlayerCanvas.NewCapturedControlPoint(cpTeam, cpName);
     }
 
     [ClientRpc]
@@ -434,7 +437,8 @@ public class Player : Character
     {
         if (isLocalPlayer)
         {
-            playerCanvas.PlayerRespawn();
+            PlayerCanvas.PlayerRespawn();
+            PlayerCanvas.ToggleWeaponInfo(true);
             movementScript.FreezeInputs = false;
             inventory.DisablePlayerInputs = false;
             //inventory.SetupWeaponInventory(classData.classWeapons, 0);
@@ -448,7 +452,7 @@ public class Player : Character
     {
         if (isLocalPlayer)
         {
-            playerCanvas.ShowGameOverScreen(loosingTeam, timeToChangeLevel);
+            PlayerCanvas.ShowGameOverScreen(loosingTeam, timeToChangeLevel);
         }
 
         playerMesh.enabled = false;

@@ -10,6 +10,7 @@ public class NullWeapon : CachedTransform, IWeapon
     public void Fire(Vector3 destination, bool didHit) { }
     public void AltFire(Vector3 destination, bool didHit) { }
     public void Scope() { }
+    public void Reload() { }
     public void DrawWeapon() { }
     public void HolsterWeapon() { }
     public void DropProp() { }

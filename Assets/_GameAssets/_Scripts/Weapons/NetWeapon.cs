@@ -12,6 +12,7 @@ public class NetWeapon : CachedNetTransform
     public bool IsDroppingWeapons { get; private set; }
 
     bool clientWeaponInit;
+    int bulletsInMag, mags;
     double fireTime;
     RaycastHit rayHit;
 
@@ -38,6 +39,9 @@ public class NetWeapon : CachedNetTransform
 
         bulletData = data.bulletData;
         owningPlayer = owner;
+
+        mags = weaponData.mags;
+        bulletsInMag = weaponData.bulletsPerMag;
 
         GameObject weaponObj = Instantiate(weaponData.clientPrefab, MyTransform);
         IWeapon cWeapon = weaponObj.GetComponent<IWeapon>();
@@ -139,6 +143,14 @@ public class NetWeapon : CachedNetTransform
     }
 
     [Server]
+    void Reload()
+    {
+        if (bulletsInMag >= weaponData.bulletsPerMag || mags <= 0) return;
+        clientWeapon.Reload();
+        StartCoroutine(ReloadRoutine());
+    }
+
+    [Server]
     public void DropClientWeaponAndDestroy()
     {
         IsDroppingWeapons = true;
@@ -166,6 +178,12 @@ public class NetWeapon : CachedNetTransform
     public void CmdRequestAltFire()
     {
         AltFire();
+    }
+
+    [Command]
+    public void CmdRequestReload()
+    {
+        Reload();
     }
 
     [Command(requiresAuthority = false)]
@@ -242,6 +260,30 @@ public class NetWeapon : CachedNetTransform
 
     #endregion
 
+    #region Coroutines
+
+    [Server]
+    IEnumerator ReloadRoutine()
+    {
+        yield return new WaitForSeconds(2);
+        bulletsInMag = weaponData.bulletsPerMag;
+        mags--;
+    }
+
+    [Client]
+    IEnumerator WaitForServerAndClientInitialization(bool waitForClient, bool waitForServer, System.Action OnServerAndClientInitialized)
+    {
+        int debug = 0;
+        while ((!serverInitialized && waitForServer) || (!clientWeaponInit && waitForClient))
+        {
+            print($"Waiting for client Initialization {debug++}");
+            yield return new WaitForSeconds(.1f);
+        }
+        OnServerAndClientInitialized?.Invoke();
+    }
+
+    #endregion
+
     [Client]
     void InitClientWeapon()
     {
@@ -263,18 +305,6 @@ public class NetWeapon : CachedNetTransform
 
             clientWeaponInit = true;
         }));
-    }
-
-    [Client]
-    IEnumerator WaitForServerAndClientInitialization(bool waitForClient, bool waitForServer, System.Action OnServerAndClientInitialized)
-    {
-        int debug = 0;
-        while ((!serverInitialized && waitForServer) || (!clientWeaponInit && waitForClient))
-        {
-            print($"Waiting for client Initialization {debug++}");
-            yield return new WaitForSeconds(.1f);
-        }
-        OnServerAndClientInitialized?.Invoke();
     }
 
     public WeaponData GetWeaponData() => weaponData;

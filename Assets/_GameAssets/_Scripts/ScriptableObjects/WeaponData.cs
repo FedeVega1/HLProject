@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "WeaponData", menuName = "Data/Weapon")]
@@ -10,4 +8,5 @@ public class WeaponData : ScriptableObject
     public BulletData bulletData;
     public float maxBulletSpread, rateOfFire;
     public WeaponType weaponType;
+    public int bulletsPerMag, mags;
 }

@@ -107,8 +107,15 @@ public class PlayerInventory : NetworkBehaviour
         if (WeaponSelectorCycle()) return;
 
         print($"Down: {Input.GetMouseButtonDown(0)} Up: {Input.GetMouseButtonUp(0)} - Pressed: {Input.GetMouseButton(0)}");
-        if (!Input.GetMouseButtonUp(0) && Input.GetMouseButton(0)) weaponsInvetoryOnClient[currentWeaponIndex].Fire();
+		
+        if (!Input.GetMouseButtonUp(0) && Input.GetMouseButton(0))        
+		{
+            weaponsInvetoryOnClient[currentWeaponIndex].Fire();
+            UpdateWeaponAmmo();
+        }
+		
         if (Input.GetMouseButton(1)) weaponsInvetoryOnClient[currentWeaponIndex].Scope();
+        if (Input.GetKeyDown(KeyCode.R)) weaponsInvetoryOnClient[currentWeaponIndex].Reload();
     }
 
     [Client]
@@ -181,6 +188,12 @@ public class PlayerInventory : NetworkBehaviour
         return false;
     }
 
+    [Client]
+    void UpdateWeaponAmmo() => playerScript.PlayerCanvas.SetCurrentAmmo(weaponsInvetoryOnClient[currentWeaponIndex].BulletsInMag, weaponsInvetoryOnClient[currentWeaponIndex].Mags);
+
+    [Client]
+    void UpdateCurrenWeaponName() => playerScript.PlayerCanvas.SetCurrentWeapon(weaponsInvetoryOnClient[currentWeaponIndex].GetWeaponData().weaponName);
+
     #endregion
 
     #region Commands
@@ -215,6 +228,9 @@ public class PlayerInventory : NetworkBehaviour
         weaponsInvetoryOnClient[oldIndex].ToggleWeapon(false);
         weaponsInvetoryOnClient[weaponIndex].ToggleWeapon(true);
         currentWeaponIndex = weaponIndex;
+
+        UpdateCurrenWeaponName();
+        UpdateWeaponAmmo();
     }
 
     [ClientRpc]
@@ -267,6 +283,7 @@ public class PlayerInventory : NetworkBehaviour
                     spawnedWeapon.MyTransform.localRotation = Quaternion.identity;
 
                     spawnedWeapon.Init(netWeapon.GetWeaponData(), netWeapon);
+                    spawnedWeapon.OnFinishedReload += UpdateWeaponAmmo;
                     print($"Client: Spawn weapon {netWeapon.GetWeaponData().weaponName} of type {netWeapon.GetWeaponData().weaponType}");
                     weaponsInvetoryOnClient.Add(spawnedWeapon);
                 }
@@ -274,6 +291,9 @@ public class PlayerInventory : NetworkBehaviour
 
             currentWeaponIndex = defaultWeaponIndex;
             weaponsInvetoryOnClient[currentWeaponIndex].ToggleWeapon(true);
+
+            UpdateCurrenWeaponName();
+            UpdateWeaponAmmo();
 
             print($"Client: Default Weapon index {currentWeaponIndex}");
             print($"Finished client PlayerInventory Initialization");

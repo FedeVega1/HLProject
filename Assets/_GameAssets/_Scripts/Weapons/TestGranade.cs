@@ -52,6 +52,8 @@ public class TestGranade : CachedTransform, IWeapon
 
     }
 
+    public void Reload() { }
+
     public void DrawWeapon()
     {
         gameObject.SetActive(true);

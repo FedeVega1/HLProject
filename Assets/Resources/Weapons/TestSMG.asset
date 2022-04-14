@@ -19,3 +19,5 @@ MonoBehaviour:
   maxBulletSpread: 1
   rateOfFire: 0.05
   weaponType: 2
+  bulletsPerMag: 50
+  mags: 20
