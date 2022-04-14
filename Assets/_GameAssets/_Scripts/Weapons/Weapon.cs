@@ -31,10 +31,10 @@ public class Weapon : CachedTransform
 {
     public WeaponType WType => weaponData.weaponType;
 
+    double fireTime, switchingTime;
     public int BulletsInMag { get; private set; }
     public int Mags { get; private set; }
 
-    double fireTime;
     RaycastHit rayHit;
 
     IWeapon clientWeapon;

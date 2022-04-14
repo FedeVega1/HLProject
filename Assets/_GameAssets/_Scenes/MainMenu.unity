@@ -1294,7 +1294,7 @@ MonoBehaviour:
   PersistNetworkManagerToOfflineScene: 1
   runInBackground: 1
   autoStartServerBuild: 1
-  serverTickRate: 128
+  serverTickRate: 30
   offlineScene: Assets/_GameAssets/_Scenes/MainMenu.unity
   onlineScene: Assets/_GameAssets/_Scenes/TestMap.unity
   transport: {fileID: 1035443919}

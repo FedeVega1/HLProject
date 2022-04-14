@@ -16,7 +16,7 @@ public class PlayerInventory : NetworkBehaviour
     [SerializeField] Transform wWeaponPivot;
     [SerializeField] GameObject WeaponPrefab;
 
-    [SyncVar] bool isServerInitialized;
+    [SyncVar] bool isServerInitialized, isSwappingWeapons;
 
     public bool DisablePlayerInputs { get; set; }
 
@@ -103,8 +103,7 @@ public class PlayerInventory : NetworkBehaviour
     {
         if (weaponsInvetoryOnClient == null || currentWeaponIndex >= weaponsInvetoryOnClient.Count || weaponsInvetoryOnClient[currentWeaponIndex] == null) return;
 
-        print("A");
-        if (WeaponSelectorCycle()) return;
+        if (WeaponSelectorCycle() || isSwappingWeapons) return;
 
         print($"Down: {Input.GetMouseButtonDown(0)} Up: {Input.GetMouseButtonUp(0)} - Pressed: {Input.GetMouseButton(0)}");
 		
@@ -129,6 +128,7 @@ public class PlayerInventory : NetworkBehaviour
             bool success = false;
             if (weaponsInvetoryOnClient[currentWeaponIndex].WType != currentCyclerType || checkWeaponIndex)
             {
+                isSwappingWeapons = true;
                 CmdRequestWeaponChange(weaponCyclerList[currentCyclerIndex]);
                 success = true;
             }
@@ -203,11 +203,13 @@ public class PlayerInventory : NetworkBehaviour
     {
         if (weaponIndex == currentWeaponIndex) return;
 
+        isSwappingWeapons = true;
         weaponsInventoryOnServer[currentWeaponIndex].RpcToggleClientWeapon(false);
         weaponsInventoryOnServer[weaponIndex].RpcToggleClientWeapon(true);
 
         RpcChangeWeapon(connectionToClient, weaponIndex, currentWeaponIndex);
         currentWeaponIndex = weaponIndex;
+        isSwappingWeapons = false;
     }
 
     [Command(requiresAuthority = false)]
@@ -228,6 +230,7 @@ public class PlayerInventory : NetworkBehaviour
         weaponsInvetoryOnClient[oldIndex].ToggleWeapon(false);
         weaponsInvetoryOnClient[weaponIndex].ToggleWeapon(true);
         currentWeaponIndex = weaponIndex;
+        isSwappingWeapons = false;
 
         UpdateCurrenWeaponName();
         UpdateWeaponAmmo();
