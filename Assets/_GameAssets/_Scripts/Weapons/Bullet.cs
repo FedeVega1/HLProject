@@ -8,7 +8,7 @@ public class Bullet : CachedTransform
     [SerializeField] ParticleSystem explosionPS;
 
     bool canTravel, canShowDecal, explodeOnHit, canExplode, isServer;
-    float speed, timeToExplode, radious;
+    float speed, timeToExplode, radius;
     Vector3 hitNormal;
     Vector3 destination;
     Rigidbody rb;
@@ -77,7 +77,7 @@ public class Bullet : CachedTransform
         this.isServer = isServer;
 
         canExplode = true;
-        radious = explosionRadious;
+        radius = explosionRadious;
     }
 
     void OnCollisionEnter(Collision collision) { if (canExplode && explodeOnHit) Explode(); }
@@ -87,7 +87,12 @@ public class Bullet : CachedTransform
         if (isServer)
         {
             Collider[] possibleTargets = new Collider[30];
-            int quantity = Physics.OverlapSphereNonAlloc(MyTransform.position, radious, possibleTargets, LayerMask.GetMask("PlayerHitBoxes"));
+            int quantity = Physics.OverlapSphereNonAlloc(MyTransform.position, radius, possibleTargets, LayerMask.GetMask("PlayerHitBoxes"));
+
+            //GameObject areaDebug = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            //areaDebug.layer = LayerMask.NameToLayer("Debug");
+            //areaDebug.transform.position = MyTransform.position;
+            //areaDebug.transform.localScale = Vector3.one * radius * 2;
 
             List<HitBox> hitBoxList = new List<HitBox>();
             for (int i = 0; i < quantity; i++)
@@ -107,6 +112,12 @@ public class Bullet : CachedTransform
                 bulletDecal.transform.position = MyTransform.position;
                 bulletDecal.transform.SetParent(null);
             }
+
+            //GameObject areaDebug = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            //areaDebug.layer = LayerMask.NameToLayer("Debug");
+            //areaDebug.transform.position = MyTransform.position;
+            //areaDebug.transform.localScale = Vector3.one * radius * 2;
+            //Debug.Break();
 
             explosionPS.Play();
             explosionPS.transform.parent = null;

@@ -36,6 +36,7 @@ public class Player : Character
 
     public override void OnStartServer()
     {
+        base.OnStartServer();
         movementScript.freezePlayer = true;
         firstSpawn = true;
     }
@@ -213,7 +214,7 @@ public class Player : Character
     public void SpawnPlayer(Vector3 spawnPosition, Quaternion spawnRotation, float spawnTime)
     {
         //print($"NewPos: {MyTransform.position}");
-        isDead = false;
+        InitCharacter();
         MaxRespawnTime = spawnTime;
         movementScript.ForceMoveCharacter(spawnPosition, spawnRotation);
         movementScript.freezePlayer = false;

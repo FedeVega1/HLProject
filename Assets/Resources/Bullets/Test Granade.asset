@@ -19,5 +19,5 @@ MonoBehaviour:
   damage: 100
   mass: 5
   maxTravelDistance: 0
-  radious: 40
+  radius: 7
   timeToExplode: 2

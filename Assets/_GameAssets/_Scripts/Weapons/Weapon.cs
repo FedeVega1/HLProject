@@ -31,7 +31,7 @@ public class Weapon : CachedTransform
 {
     public WeaponType WType => weaponData.weaponType;
 
-    double fireTime, switchingTime;
+    double fireTime, switchingTime, reloadTime, wTime;
     public int BulletsInMag { get; private set; }
     public int Mags { get; private set; }
 
@@ -77,7 +77,7 @@ public class Weapon : CachedTransform
 
     public void Fire()
     {
-        if (NetworkTime.time < fireTime) return;
+        if (NetworkTime.time < wTime) return;
         if (BulletsInMag <= 0) return;
 
         Ray weaponRay = new Ray(firePivot.position, firePivot.forward);
@@ -101,7 +101,7 @@ public class Weapon : CachedTransform
         }
 
         BulletsInMag--;
-        fireTime = NetworkTime.time + weaponData.rateOfFire;
+        wTime = NetworkTime.time + weaponData.rateOfFire;
         netWeapon.CmdRequestFire();
     }
 
@@ -125,7 +125,7 @@ public class Weapon : CachedTransform
 
     IEnumerator ReloadRoutine()
     {
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(weaponData.weaponAnimsTiming.reload);
         BulletsInMag = weaponData.bulletsPerMag;
         Mags--;
         OnFinishedReload?.Invoke();
@@ -135,8 +135,16 @@ public class Weapon : CachedTransform
 
     public void ToggleWeapon(bool toggle)
     {
-        if (toggle) clientWeapon.DrawWeapon();
-        else clientWeapon.HolsterWeapon();
+        if (toggle)
+        {
+            clientWeapon.DrawWeapon();
+            wTime = NetworkTime.time + weaponData.weaponAnimsTiming.draw;
+        }
+        else
+        {
+            clientWeapon.HolsterWeapon();
+            wTime = NetworkTime.time + weaponData.weaponAnimsTiming.draw;
+        }
     }
 
     public void DropWeapon() => clientWeapon.DropProp();

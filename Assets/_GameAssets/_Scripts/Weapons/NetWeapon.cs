@@ -79,7 +79,7 @@ public class NetWeapon : CachedNetTransform
                 GameObject granade = Instantiate(bulletData.bulletPrefab, MyTransform.position + MyTransform.forward * 1.5f, MyTransform.rotation);
                 Bullet granadeBulletScript = granade.GetComponent<Bullet>();
                 granadeBulletScript.Init(bulletData.initialSpeed, true);
-                granadeBulletScript.PhysicsTravelTo(true, firePivot.forward, bulletData.radious, false, bulletData.timeToExplode);
+                granadeBulletScript.PhysicsTravelTo(true, firePivot.forward, bulletData.radius, false, bulletData.timeToExplode);
                 granadeBulletScript.OnExplode += OnBulletExplode;
                 NetworkServer.Spawn(granade);
                 break;
@@ -95,7 +95,7 @@ public class NetWeapon : CachedNetTransform
         for (int i = 0; i < size; i++)
         {
             float distance = Vector3.Distance(finalPos, hitBoxList[i].MyTransform.position);
-            float damageFalloff = Mathf.Clamp(bulletData.radious - distance, 0, bulletData.radious) / bulletData.radious;
+            float damageFalloff = Mathf.Clamp(bulletData.radius - distance, 0, bulletData.radius) / bulletData.radius;
             hitBoxList[i].GetCharacterScript().TakeDamage(bulletData.damage * damageFalloff, bulletData.damageType);
         }
         RpcBulletExplosion(finalPos, finalRot);
@@ -209,7 +209,7 @@ public class NetWeapon : CachedNetTransform
         GameObject granade = Instantiate(bulletData.bulletPrefab, pos, rot);
         Bullet granadeBulletScript = granade.GetComponent<Bullet>();
         granadeBulletScript.Init(0, true);
-        granadeBulletScript.PhysicsTravelTo(false, Vector3.zero, bulletData.radious, false, bulletData.timeToExplode);
+        granadeBulletScript.PhysicsTravelTo(false, Vector3.zero, bulletData.radius, false, 0);
     }
 
     [ClientRpc(includeOwner = false)]

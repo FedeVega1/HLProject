@@ -105,7 +105,7 @@ public class PlayerInventory : NetworkBehaviour
 
         if (WeaponSelectorCycle() || isSwappingWeapons) return;
 
-        print($"Down: {Input.GetMouseButtonDown(0)} Up: {Input.GetMouseButtonUp(0)} - Pressed: {Input.GetMouseButton(0)}");
+        //print($"Down: {Input.GetMouseButtonDown(0)} Up: {Input.GetMouseButtonUp(0)} - Pressed: {Input.GetMouseButton(0)}");
 		
         if (!Input.GetMouseButtonUp(0) && Input.GetMouseButton(0))        
 		{

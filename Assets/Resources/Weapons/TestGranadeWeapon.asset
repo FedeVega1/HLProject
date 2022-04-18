@@ -19,5 +19,10 @@ MonoBehaviour:
   maxBulletSpread: 0
   rateOfFire: 1
   weaponType: 3
+  weaponAnimsTiming:
+    fire: 0
+    reload: 2
+    holster: 0.5
+    draw: 0.5
   bulletsPerMag: 1
   mags: 5

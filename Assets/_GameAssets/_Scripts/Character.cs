@@ -39,14 +39,9 @@ public class Character : CachedNetTransform
         currentArmor = Mathf.Clamp(newValue, 0, maxArmor);
     }
 
-    public override void OnStartServer()
-    {
-        currentHealth = maxHealth;
-        currentArmor = maxArmor;
-        isDead = false;
-    }
-
     #endregion
+
+    public override void OnStartServer() => InitCharacter();
 
     protected virtual void Update()
     {
@@ -78,9 +73,18 @@ public class Character : CachedNetTransform
                 }
                 break;
         }
-
-        currentArmor -= damageToArmor;
-        float dmgToHealth = ammount - damageToArmor;
+        
+        float dmgToHealth;
+        if (currentArmor > 0)
+        {
+            currentArmor -= damageToArmor;
+            dmgToHealth = ammount - damageToArmor;
+        }
+        else
+        {
+            dmgToHealth = ammount + damageToArmor;
+        }
+        
         currentHealth -= Mathf.Clamp(dmgToHealth, 0, 9999999);
 
         print($"Character {name} took {ammount} of {damageType} damage - DamageToArmor: {damageToArmor} - DamageToHealth: {dmgToHealth}");
@@ -109,6 +113,13 @@ public class Character : CachedNetTransform
         isDead = true;
         OnPlayerDead?.Invoke();
         RpcCharacterDied();
+    }
+
+    protected void InitCharacter()
+    {
+        currentHealth = maxHealth;
+        currentArmor = maxArmor;
+        isDead = false;
     }
 
     [ClientRpc]
