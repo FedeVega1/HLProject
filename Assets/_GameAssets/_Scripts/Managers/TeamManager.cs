@@ -280,4 +280,17 @@ public class TeamManager : NetworkBehaviour
 
     [Server]
     public int GetTicketsFromTeam(int team) => teamData[team - 1].Tickets;
+    
+    [Server]
+    public List<Player> GetPlayersOnTeam(int teamIndex)
+    {
+        List<Player> playersOnTeam = new List<Player>();
+        teamIndex = Mathf.Clamp(teamIndex, 0, MAXTEAMS);
+
+        int size = teamData[teamIndex].playersInTeam.Count;
+        for (int j = 0; j < size; j++)
+            playersOnTeam.Add(teamData[teamIndex].playersInTeam[j]);
+        
+        return playersOnTeam;
+    }
 }

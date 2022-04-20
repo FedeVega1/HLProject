@@ -189,10 +189,10 @@ public class PlayerInventory : NetworkBehaviour
     }
 
     [Client]
-    void UpdateWeaponAmmo() => playerScript.PlayerCanvas.SetCurrentAmmo(weaponsInvetoryOnClient[currentWeaponIndex].BulletsInMag, weaponsInvetoryOnClient[currentWeaponIndex].Mags);
+    void UpdateWeaponAmmo() => playerScript.PlayerCanvasScript.SetCurrentAmmo(weaponsInvetoryOnClient[currentWeaponIndex].BulletsInMag, weaponsInvetoryOnClient[currentWeaponIndex].Mags);
 
     [Client]
-    void UpdateCurrenWeaponName() => playerScript.PlayerCanvas.SetCurrentWeapon(weaponsInvetoryOnClient[currentWeaponIndex].GetWeaponData().weaponName);
+    void UpdateCurrenWeaponName() => playerScript.PlayerCanvasScript.SetCurrentWeapon(weaponsInvetoryOnClient[currentWeaponIndex].GetWeaponData().weaponName);
 
     #endregion
 

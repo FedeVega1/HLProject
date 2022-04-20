@@ -10,10 +10,18 @@ public struct AddCustomPlayerMessage : NetworkMessage
 
 public class NetManager : NetworkManager
 {
+    public System.Action<NetworkConnection> OnClientDisconnects;
+
     public override void OnStartServer()
     {
         base.OnStartServer();
         NetworkServer.RegisterHandler<AddCustomPlayerMessage>(OnCustomPlayer);
+    }
+
+    public override void OnClientDisconnect(NetworkConnection conn)
+    {
+        base.OnClientDisconnect(conn);
+        OnClientDisconnects?.Invoke(conn);
     }
 
     public override void OnClientConnect(NetworkConnection conn)

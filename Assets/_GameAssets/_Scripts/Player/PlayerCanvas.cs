@@ -17,6 +17,7 @@ public class PlayerCanvas : MonoBehaviour
     [SerializeField] UITeamClassSelection teamClassSelection;
     [SerializeField] UIWoundedScreen woundedScreen;
     [SerializeField] UIAmmoCounter ammoCounter;
+    [SerializeField] UIScoreBoard scoreBoard;
 
     Player playerScript;
     int[] teamTickets;
@@ -106,6 +107,11 @@ public class PlayerCanvas : MonoBehaviour
     public void SetCurrentWeapon(string weaponName) => ammoCounter.SetCurrentWeapon(weaponName);
     public void SetCurrentAmmo(int bullets, int mags) => ammoCounter.SetCurrentAmmo(bullets, mags);
     public void ToggleWeaponInfo(bool toggle) => ammoCounter.Toggle(toggle);
+    public void InitScoreboard(PlayerScoreboardInfo[] info, int playerTeam) => scoreBoard.Init(info, playerTeam);
+    public void ToggleScoreboard(bool toggle) => scoreBoard.Toggle(toggle);
+    public void HideScoreboard() => scoreBoard.Toggle(false);
+    public void AddPlayerToScoreboard(PlayerScoreboardInfo playerInfo) => scoreBoard.AddNewPlayer(playerInfo);
+    public void RemovePlayerFromScoreboard(string playerName) => scoreBoard.RemovePlayer(playerName);
 
     #endregion
 }

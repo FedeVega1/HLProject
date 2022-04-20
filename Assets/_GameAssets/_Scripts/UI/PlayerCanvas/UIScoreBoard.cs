@@ -1,15 +1,36 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct PlayerScoreboardInfo
+public readonly struct PlayerScoreboardInfo
 {
-    public int playerTeam;
-    public int playerClass;
-    public string playerName;
-    public int playerScore;
-    public int playerRevives;
-    public int playerDeaths;
-    public bool isLocalPlayer;
+    public readonly int playerTeam;
+    public readonly int playerClass;
+    public readonly string playerName;
+    public readonly int playerScore;
+    public readonly int playerRevives;
+    public readonly int playerDeaths;
+    public readonly bool isLocalPlayer;
+
+    public PlayerScoreboardInfo(int team, int _playerClass, string name, int score, int revives, int deaths, bool _isLocalPlayer)
+    {
+        playerTeam = team;
+        playerClass = _playerClass;
+        playerName = name;
+        playerScore = score;
+        playerRevives = revives;
+        playerDeaths = deaths;
+        isLocalPlayer = _isLocalPlayer;
+    }
+
+    public PlayerScoreboardInfo(int team, string name, int score)
+    {
+        playerTeam = team;
+        playerName = name;
+        playerScore = score;
+
+        playerClass = playerRevives = playerDeaths = 0;
+        isLocalPlayer = false;
+    }
 }
 
 public class UIScoreBoard : MonoBehaviour
@@ -26,24 +47,38 @@ public class UIScoreBoard : MonoBehaviour
         playersInScore = new List<UIPlayerInfo>();
     }
 
-    public void Init(List<PlayerScoreboardInfo> playersInfo, int _playerTeam)
+    public void Init(PlayerScoreboardInfo[] playersInfo, int _playerTeam)
     {
         playerTeam = _playerTeam;
-        int teamIndex = playerTeam == 0 ? 1 : 0;
 
-        int size = playersInfo.Count;
+        int size = playersInfo.Length;
         for (int i = 0; i < size; i++)
         {
-            UIPlayerInfo info = Instantiate(teamPrefabs[teamIndex], teamsPivot[teamIndex]).GetComponent<UIPlayerInfo>();
+            bool updateList = false;
+            UIPlayerInfo info;
+            int teamIndex = playersInfo[i].playerTeam != playerTeam ? 1 : 0;
+
+            if (playersInScore.Count > 0 && i < playersInScore.Count)
+            {
+                info = playersInScore[i];
+                info.transform.parent = teamsPivot[teamIndex];
+            }
+            else
+            {
+                info = Instantiate(teamPrefabs[teamIndex], teamsPivot[teamIndex]).GetComponent<UIPlayerInfo>();
+                updateList = true;
+            }
+            
             if (info == null) continue;
+            
             info.UpdateInfo(playersInfo[i]);
-            playersInScore.Add(info);
+            if (updateList) playersInScore.Add(info);
         }
     }
 
     public void AddNewPlayer(PlayerScoreboardInfo playerInfo)
     {
-        int teamIndex = playerTeam == 0 ? 1 : 0;
+        int teamIndex = playerInfo.playerTeam != playerTeam ? 1 : 0;
         UIPlayerInfo info = Instantiate(teamPrefabs[teamIndex], teamsPivot[teamIndex]).GetComponent<UIPlayerInfo>();
         if (info == null) return;
         playersInScore.Add(info);
@@ -65,4 +100,6 @@ public class UIScoreBoard : MonoBehaviour
             }
         }
     }
+
+    public void Toggle(bool toggle) => canvasGroup.alpha = toggle ? 1 : 0;
 }

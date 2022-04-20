@@ -80,7 +80,7 @@ public class GameModeManager : NetworkBehaviour
         //controlPoints[size - 1].controlPoint.UnlockCP();
 
         TeamManagerInstance.GetGameModeData(ref currentGameModeData, size);
-
+        ((NetManager) NetManager.singleton).OnClientDisconnects += OnClientDiscconects;
     }
 
     public override void OnStopServer()
@@ -89,6 +89,20 @@ public class GameModeManager : NetworkBehaviour
         for (int i = 0; i < size; i++)
         {
             controlPoints[i].controlPoint.OnControllPointCaptured -= TeamManagerInstance.OnCapturedControlPoint;
+        }
+    }
+
+    [Server]
+    public void OnClientDiscconects(NetworkConnection conn)
+    {
+        int size = connectedPlayers.Count;
+        for (int i = 0; i < size; i++)
+        {
+            if (connectedPlayers[i].connectionToClient.connectionId == conn.connectionId)
+            {
+                connectedPlayers.RemoveAt(i);
+                break;
+            }
         }
     }
 
@@ -291,7 +305,7 @@ public class GameModeManager : NetworkBehaviour
             }
         }
 
-        playerScript.SetPlayerClass(classData[classIndex]);
+        playerScript.SetPlayerClass(classData[classIndex], classIndex);
         playerScript.RpcClassSelectionSuccess(connectionToClient, classIndex);
     }
 
@@ -299,4 +313,32 @@ public class GameModeManager : NetworkBehaviour
 
     public TeamClassData[] GetClassData() => classData;
     public Transform GetClientCamera() => clientCamera;
+
+    [Server]
+    public PlayerScoreboardInfo[] GetScoreboardInfo(int playerTeam)
+    {
+        PlayerScoreboardInfo[] scoreboardInfo = new PlayerScoreboardInfo[connectedPlayers.Count];
+        for (int i = 0, n = 0; i < TeamManager.MAXTEAMS; i++)
+        {
+            List<Player> players = teamManager.GetPlayersOnTeam(i);
+            int size = players.Count;
+            for (int j = 0; j < size; j++, n++)
+            {
+                PlayerScoreboardInfo info = players[j].GetPlayerScoreboardInfo(playerTeam);
+                scoreboardInfo[n] = info;
+            }
+        }
+
+        return scoreboardInfo;
+    }
+
+    public Sprite[] GetClassesSprites()
+    {
+        int size = classData.Length;
+        Sprite[] classesSprites = new Sprite[size];
+        for (int i = 0; i < size; i++)
+            classesSprites[i] = classData[i].classSprite;
+        
+        return classesSprites;
+    }
 }
