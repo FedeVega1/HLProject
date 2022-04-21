@@ -56,6 +56,8 @@ public class UIScoreBoard : MonoBehaviour
         int size = playersInfo.Length;
         for (int i = 0; i < size; i++)
         {
+            if (playersInfo[i].playerTeam == 0 || playersInfo[i].playerName == "") continue;
+
             bool updateList = false;
             UIPlayerInfo info;
             int teamIndex = playersInfo[i].playerTeam != playerTeam ? 1 : 0;

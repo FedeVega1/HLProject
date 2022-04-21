@@ -65,6 +65,7 @@ public class GameModeManager : NetworkBehaviour
             }
         }
 
+        // TODO: Fix scoreboardUpdate
         if (!enableScoreboardUpdate || NetworkTime.time < scoreBoardUpdateTimer) return;
         DoActionPerPlayer(UpdateScoreboard);
         scoreBoardUpdateTimer = NetworkTime.time + scoreBoardUpdateTime;
@@ -167,8 +168,6 @@ public class GameModeManager : NetworkBehaviour
         int playerTeam = playerToSpawn.GetPlayerTeam() - 1;
         Transform randomSpawnPoint = teamBases[playerTeam].GetFreeSpawnPoint(playerToSpawn.gameObject);
         playerToSpawn.SpawnPlayer(randomSpawnPoint.position, randomSpawnPoint.rotation, currentGameModeData.playerRespawnTime);
-
-        DoActionPerPlayer(PlayerSelectedTeamEvent);
     }
 
     [Server]
@@ -334,6 +333,19 @@ public class GameModeManager : NetworkBehaviour
     public TeamClassData[] GetClassData() => classData;
     public Transform GetClientCamera() => clientCamera;
 
+    public int GetPlayerIndex(Player playerScript)
+    {
+        if (playerScript == null) return -1;
+        int size = connectedPlayers.Count;
+        for (int i = 0; i < size; i++)
+        {
+            if (connectedPlayers[i] == playerScript)
+                return i;
+        }
+
+        return -1;
+    }
+
     [Server]
     public PlayerScoreboardInfo[] GetScoreboardInfo(int playerTeam)
     {
@@ -362,6 +374,14 @@ public class GameModeManager : NetworkBehaviour
         return classesSprites;
     }
 
+    // TODO: Fix Scoreboard when changing teams
+
+    public void OnPlayerSelectedTeam(Player player)
+    {
+        currentConnPlayerIndex = GetPlayerIndex(player);
+        DoActionPerPlayer(PlayerSelectedTeamEvent);
+    }
+
     void PlayerDisconnectedEvent(Player player)
     {
         player.RpcPlayerDisconnected(player.connectionToClient, connectedPlayers[currentDisconnPlayerIndex].GetPlayerName());
@@ -375,8 +395,8 @@ public class GameModeManager : NetworkBehaviour
 
     void PlayerSelectedTeamEvent(Player player)
     {
-        int playerTeam = player.GetPlayerTeam() - 1;
-        player.RpcPlayerSelectedTeam(player.connectionToClient, connectedPlayers[currentConnPlayerIndex].GetPlayerScoreboardInfo(playerTeam));
+        int playerTeam = player.GetPlayerTeam();
+        player.RpcPlayerSelectedTeam(player.connectionToClient, connectedPlayers[currentConnPlayerIndex].GetPlayerScoreboardInfo(playerTeam, true));
     }
 
     void UpdateScoreboard(Player player)

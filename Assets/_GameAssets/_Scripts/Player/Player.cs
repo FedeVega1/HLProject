@@ -22,7 +22,6 @@ public class Player : Character
     public float BonusWoundTime { get; set; }
     public PlayerCanvas PlayerCanvasScript { get; private set; }
 
-    bool classSelectionMenuOpen, teamSelectionMenuOpen, scoreboardMenuOpen;
     bool onControlPoint;
     int currentClassIndex, kills, deaths, revives, score;
     double woundedTime;
@@ -106,49 +105,46 @@ public class Player : Character
 
         if (Input.GetKeyDown(KeyCode.Tab))
         {
-            if (classSelectionMenuOpen || teamSelectionMenuOpen) return;
-            if (scoreboardMenuOpen)
+            if (PlayerCanvasScript.IsClassSelectionMenuOpen || PlayerCanvasScript.IsTeamSelectionMenuOpen) return;
+            if (PlayerCanvasScript.IsScoreboardMenuOpen)
             {
                 PlayerCanvasScript.ToggleScoreboard(false);
-                scoreboardMenuOpen = false;
                 return;
             }
 
             TryGetPlayerInfo();
-            scoreboardMenuOpen = true;
         }
 
-        if (!isDead && !firstSpawn && Input.GetKeyDown(KeyCode.Return))
+        if (IsDead || firstSpawn) return;
+
+        if (Input.GetKeyDown(KeyCode.Return))
         {
-            if (scoreboardMenuOpen || teamSelectionMenuOpen) return;
-            if (classSelectionMenuOpen)
+            if (PlayerCanvasScript.IsScoreboardMenuOpen) return;
+            if (PlayerCanvasScript.IsClassSelectionMenuOpen)
             {
                 movementScript.FreezeInputs = false;
                 inventory.DisablePlayerInputs = false;
                 PlayerCanvasScript.ToggleClassSelection(false);
-                classSelectionMenuOpen = false;
             }
             else
             {
                 movementScript.FreezeInputs = true;
-            inventory.DisablePlayerInputs = true;
+                inventory.DisablePlayerInputs = true;
                 PlayerCanvasScript.ToggleTeamSelection(false);
                 PlayerCanvasScript.ToggleClassSelection(true);
-                classSelectionMenuOpen = true;
             }
 
             return;
         }
 
-        if (!isDead && !firstSpawn && Input.GetKeyDown(KeyCode.M))
+        if (Input.GetKeyDown(KeyCode.M))
         {
-            if (classSelectionMenuOpen || scoreboardMenuOpen) return;
-            if (teamSelectionMenuOpen)
+            if (PlayerCanvasScript.IsScoreboardMenuOpen) return;
+            if (PlayerCanvasScript.IsTeamSelectionMenuOpen)
             {
                 movementScript.FreezeInputs = false;
                 inventory.DisablePlayerInputs = false;
                 PlayerCanvasScript.ToggleTeamSelection(false);
-                teamSelectionMenuOpen = false;
             }
             else
             {
@@ -156,7 +152,6 @@ public class Player : Character
                 inventory.DisablePlayerInputs = true;
                 PlayerCanvasScript.ToggleClassSelection(false);
                 PlayerCanvasScript.ToggleTeamSelection(true);
-                teamSelectionMenuOpen = true;
             }
 
             return;
@@ -295,9 +290,9 @@ public class Player : Character
     [Server]
     public float GetPlayerCameraXAxis() => movementScript.CameraXAxis;
 
-    public PlayerScoreboardInfo GetPlayerScoreboardInfo(int requesterTeam)
+    public PlayerScoreboardInfo GetPlayerScoreboardInfo(int requesterTeam, bool ignoreTeamFilter = false)
     {
-        if (requesterTeam == playerTeam)
+        if (ignoreTeamFilter || requesterTeam == playerTeam)
         {
             return new PlayerScoreboardInfo(playerTeam, currentClassIndex, playerName, score, revives, deaths, IsDead, isLocalPlayer);
         }
@@ -356,7 +351,7 @@ public class Player : Character
     [TargetRpc]
     public void RpcShowScoreboard(NetworkConnection target, PlayerScoreboardInfo[] scoreboardInfo)
     {
-        if (target.connectionId != connectionToServer.connectionId || !scoreboardMenuOpen) return;
+        if (target.connectionId != connectionToServer.connectionId || !PlayerCanvasScript.IsScoreboardMenuOpen) return;
         PlayerCanvasScript.InitScoreboard(scoreboardInfo, playerTeam);
     }
 
@@ -461,16 +456,18 @@ public class Player : Character
     [TargetRpc]
     public void RpcPlayerConnected(NetworkConnection target, PlayerScoreboardInfo playerInfo)
     {
-        if (target.connectionId != connectionToServer.connectionId || !scoreboardMenuOpen) return;
+        if (target.connectionId != connectionToServer.connectionId) return;
         Debug.Log($"Client: Player {playerInfo.playerName} connected");
+        //if (!PlayerCanvasScript.IsScoreboardMenuOpen) return;
         //PlayerCanvasScript.AddPlayerToScoreboard(playerInfo);
     }
 
     [TargetRpc]
     public void RpcPlayerSelectedTeam(NetworkConnection target, PlayerScoreboardInfo playerInfo)
     {
-        if (target.connectionId != connectionToServer.connectionId || !scoreboardMenuOpen) return;
+        if (target.connectionId != connectionToServer.connectionId) return;
         Debug.Log($"Client: Player {playerInfo.playerName} changes his team to {playerInfo.playerTeam}");
+        if (!PlayerCanvasScript.IsScoreboardMenuOpen) return;
         PlayerCanvasScript.AddPlayerToScoreboard(playerInfo);
     }
 

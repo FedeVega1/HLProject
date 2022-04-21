@@ -19,6 +19,10 @@ public class PlayerCanvas : MonoBehaviour
     [SerializeField] UIAmmoCounter ammoCounter;
     [SerializeField] UIScoreBoard scoreBoard;
 
+    public bool IsTeamSelectionMenuOpen { get; private set; }
+    public bool IsClassSelectionMenuOpen { get; private set; }
+    public bool IsScoreboardMenuOpen { get; private set; }
+
     Player playerScript;
     int[] teamTickets;
 
@@ -65,8 +69,11 @@ public class PlayerCanvas : MonoBehaviour
 
         teamSelection.ToggleTeamSelection(false);
         teamClassSelection.ToggleClassSelection(false);
+        scoreBoard.Toggle(false);
         ToggleWeaponInfo(false);
 
+        IsTeamSelectionMenuOpen = IsClassSelectionMenuOpen = IsScoreboardMenuOpen = false;
+        
         woundedScreen.Hide();
         cpCapture.OnExitControlPoint();
     }
@@ -89,6 +96,25 @@ public class PlayerCanvas : MonoBehaviour
 
     #endregion
 
+    public void ToggleTeamSelection(bool toggle)
+    {
+        teamSelection.ToggleTeamSelection(toggle);
+        IsTeamSelectionMenuOpen = toggle;
+    }
+
+    public void ToggleClassSelection(bool toggle)
+    {
+        teamClassSelection.ToggleClassSelection(toggle);
+        IsClassSelectionMenuOpen = toggle;
+    }
+
+    public void ToggleScoreboard(bool toggle)
+    {
+        scoreBoard.Toggle(toggle);
+        IsScoreboardMenuOpen = toggle;
+    }
+
+
     #region Redirections
 
     public void OnPointCaptured(int newTeam, int newDefyingTeam) => cpCapture.OnPointCaptured(newTeam, newDefyingTeam);
@@ -96,8 +122,6 @@ public class PlayerCanvas : MonoBehaviour
     public void OnControlPoint(int pointTeam, int defyingTeam, float currentProgress) => cpCapture.OnControlPoint(pointTeam, defyingTeam, currentProgress);
     public void OnExitControlPoint() => cpCapture.OnExitControlPoint();
     public void NewCapturedControlPoint(int cpTeam, string pointName) => cpNotice.NewCapturedControlPoint(cpTeam, pointName);
-    public void ToggleTeamSelection(bool toggle) => teamSelection.ToggleTeamSelection(toggle);
-    public void ToggleClassSelection(bool toggle) => teamClassSelection.ToggleClassSelection(toggle);
     public void OnTeamSelection(int team) => teamClassSelection.Init(this, GameModeManager.INS.GetClassData(), team, ref playerScript);
     public void ToggleSpawnButton(bool toggle) => teamClassSelection.ToggleSpawnButton(toggle);
     public void OnClassSelection(int index) => teamClassSelection.ClassSelected(index);
@@ -108,7 +132,6 @@ public class PlayerCanvas : MonoBehaviour
     public void SetCurrentAmmo(int bullets, int mags) => ammoCounter.SetCurrentAmmo(bullets, mags);
     public void ToggleWeaponInfo(bool toggle) => ammoCounter.Toggle(toggle);
     public void InitScoreboard(PlayerScoreboardInfo[] info, int playerTeam) => scoreBoard.Init(info, playerTeam);
-    public void ToggleScoreboard(bool toggle) => scoreBoard.Toggle(toggle);
     public void AddPlayerToScoreboard(PlayerScoreboardInfo playerInfo) => scoreBoard.AddNewPlayer(playerInfo);
     public void RemovePlayerFromScoreboard(string playerName) => scoreBoard.RemovePlayer(playerName);
 

@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1920
     height: 997
   m_ShowMode: 4
-  m_Title: Game
+  m_Title: Project
   m_RootView: {fileID: 72}
   m_MinSize: {x: 875, y: 350}
   m_MaxSize: {x: 10000, y: 10000}
@@ -1764,7 +1764,7 @@ MonoBehaviour:
   m_MinSize: {x: 400, y: 300}
   m_MaxSize: {x: 32384, y: 24288}
   vertical: 0
-  controlID: 17
+  controlID: 19
 --- !u!114 &76
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -1789,7 +1789,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 300}
   m_MaxSize: {x: 24288, y: 24288}
   vertical: 1
-  controlID: 18
+  controlID: 59
 --- !u!114 &77
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -1815,7 +1815,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 200}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 100
+  controlID: 60
 --- !u!114 &78
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -1894,7 +1894,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 200}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 66
+  controlID: 61
 --- !u!114 &81
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -2351,9 +2351,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 171.12454, y: 133.62857, z: 0.83721924}
+    m_Target: {x: -65.79844, y: -119.83997, z: 64.910255}
     speed: 2
-    m_Value: {x: 171.12454, y: 133.62857, z: 0.83721924}
+    m_Value: {x: -65.79844, y: -119.83997, z: 64.910255}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -2400,20 +2400,20 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: 0.36055544, y: -0.34015882, z: 0.14317499, w: 0.85661715}
+    m_Target: {x: 0.25080174, y: -0.42156273, z: 0.12254616, w: 0.86276704}
     speed: 2
-    m_Value: {x: 0.3605554, y: -0.3401588, z: 0.14317498, w: 0.85661703}
+    m_Value: {x: 0.2506175, y: -0.42285618, z: 0.12292215, w: 0.8621332}
   m_Size:
-    m_Target: 95.287506
+    m_Target: 146.48634
     speed: 2
-    m_Value: 95.287506
+    m_Value: 146.48634
   m_Ortho:
     m_Target: 0
     speed: 2
     m_Value: 0
   m_CameraSettings:
-    m_Speed: 0.5007509
-    m_SpeedNormalized: 0.25000045
+    m_Speed: 1
+    m_SpeedNormalized: 0.49974987
     m_SpeedMin: 0.001
     m_SpeedMax: 2
     m_EasingEnabled: 1
@@ -2554,9 +2554,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: faeaffff
+      m_SelectedIDs: 126d0000
       m_LastClickedID: 0
-      m_ExpandedIDs: ecfaffff
+      m_ExpandedIDs: 989bfdffcc9efdffb0a2fdffecfaffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -2621,7 +2621,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/_GameAssets/Prefabs/UI
+    - Assets/_GameAssets/_Scenes
     m_Globs: []
     m_OriginalText: 
   m_ViewMode: 0
@@ -2660,24 +2660,24 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_AssetTreeState:
-    scrollPos: {x: 0, y: 348}
+    scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: ffffffff000000009a6c00009c6c00009e6c0000a06c0000a26c0000a46c0000a66c0000a86c0000aa6c0000ac6c0000ae6c0000b06c0000b26c0000
+    m_ExpandedIDs: ffffffff000000009a6c00009c6c00009e6c0000a06c0000a26c0000a46c0000a86c0000ac6c0000ae6c0000b06c0000b26c0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: 
-      m_OriginalName: 
+      m_Name: spray_freeman
+      m_OriginalName: spray_freeman
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 0
+      m_UserData: 27116
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
-      m_OriginalEventType: 11
+      m_OriginalEventType: 0
       m_IsRenamingFilename: 1
       m_ClientGUIView: {fileID: 82}
     m_SearchString: 
@@ -2809,7 +2809,7 @@ MonoBehaviour:
   m_ObjectsLockedBeforeSerialization: []
   m_InstanceIDsLockedBeforeSerialization: 
   m_PreviewResizer:
-    m_CachedPref: -151
+    m_CachedPref: 210
     m_ControlHash: -371814159
     m_PrefName: Preview_InspectorPreview
   m_LastInspectedObjectInstanceID: -1
