@@ -106,6 +106,7 @@ public class Player : Character
 
         if (Input.GetKeyDown(KeyCode.Tab))
         {
+            if (classSelectionMenuOpen || teamSelectionMenuOpen) return;
             if (scoreboardMenuOpen)
             {
                 PlayerCanvasScript.ToggleScoreboard(false);
@@ -295,7 +296,9 @@ public class Player : Character
     public PlayerScoreboardInfo GetPlayerScoreboardInfo(int requesterTeam)
     {
         if (requesterTeam == playerTeam)
-            return new PlayerScoreboardInfo(playerTeam, currentClassIndex, playerName, score, revives, deaths, isLocalPlayer);
+        {
+            return new PlayerScoreboardInfo(playerTeam, currentClassIndex, playerName, score, revives, deaths, IsDead, isLocalPlayer);
+        }
 
         return new PlayerScoreboardInfo(playerTeam, playerName, score);
     }
@@ -349,9 +352,9 @@ public class Player : Character
     #region TargetRpc
 
     [TargetRpc]
-    void RpcShowScoreboard(NetworkConnection target, PlayerScoreboardInfo[] scoreboardInfo)
+    public void RpcShowScoreboard(NetworkConnection target, PlayerScoreboardInfo[] scoreboardInfo)
     {
-        if (target.connectionId != connectionToServer.connectionId) return;
+        if (target.connectionId != connectionToServer.connectionId || !scoreboardMenuOpen) return;
         PlayerCanvasScript.InitScoreboard(scoreboardInfo, playerTeam);
     }
 
@@ -377,7 +380,7 @@ public class Player : Character
     public void RpcTeamSelectionError(NetworkConnection target, int error)
     {
         if (target.connectionId != connectionToServer.connectionId) return;
-        Debug.LogError($"TeamSelection error code: {error}");
+        Debug.LogError($"Client: TeamSelection error code: {error}");
     }
 
     [TargetRpc]
@@ -393,7 +396,7 @@ public class Player : Character
     public void RpcClassSelectionError(NetworkConnection target, int error)
     {
         if (target.connectionId != connectionToServer.connectionId) return;
-        Debug.LogError($"ClassSelection error code: {error}");
+        Debug.LogError($"Client: ClassSelection error code: {error}");
         PlayerCanvasScript.ToggleSpawnButton(true);
     }
 
@@ -451,6 +454,30 @@ public class Player : Character
         inventory.DisablePlayerInputs = true;
         PlayerCanvasScript.PlayerIsWounded(_woundedTime);
         PlayerCanvasScript.ShowRespawnTimer(_respawnTime);
+    }
+
+    [TargetRpc]
+    public void RpcPlayerConnected(NetworkConnection target, PlayerScoreboardInfo playerInfo)
+    {
+        if (target.connectionId != connectionToServer.connectionId || !scoreboardMenuOpen) return;
+        Debug.Log($"Client: Player {playerInfo.playerName} connected");
+        //PlayerCanvasScript.AddPlayerToScoreboard(playerInfo);
+    }
+
+    [TargetRpc]
+    public void RpcPlayerSelectedTeam(NetworkConnection target, PlayerScoreboardInfo playerInfo)
+    {
+        if (target.connectionId != connectionToServer.connectionId || !scoreboardMenuOpen) return;
+        Debug.Log($"Client: Player {playerInfo.playerName} changes his team to {playerInfo.playerTeam}");
+        PlayerCanvasScript.AddPlayerToScoreboard(playerInfo);
+    }
+
+    [TargetRpc]
+    public void RpcPlayerDisconnected(NetworkConnection target, string playerName)
+    {
+        if (target.connectionId != connectionToServer.connectionId) return;
+        Debug.Log($"Client: Player {playerName} disconnected");
+        PlayerCanvasScript.RemovePlayerFromScoreboard(playerName);
     }
 
     #endregion

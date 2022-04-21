@@ -18,9 +18,9 @@ public class NetManager : NetworkManager
         NetworkServer.RegisterHandler<AddCustomPlayerMessage>(OnCustomPlayer);
     }
 
-    public override void OnClientDisconnect(NetworkConnection conn)
+    public override void OnServerDisconnect(NetworkConnection conn)
     {
-        base.OnClientDisconnect(conn);
+        base.OnServerDisconnect(conn);
         OnClientDisconnects?.Invoke(conn);
     }
 

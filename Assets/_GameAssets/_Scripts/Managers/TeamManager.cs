@@ -151,6 +151,9 @@ public class TeamManager : NetworkBehaviour
                 break;
         }
 
+        int oldPlayerTeam = playerScript.GetPlayerTeam();
+        if (oldPlayerTeam > 0) teamData[oldPlayerTeam - 1].playersInTeam.Remove(playerScript);
+
         playerScript.SetPlayerTeam(selectedTeam);
         playerScript.RpcTeamSelectionSuccess(connectionToClient, selectedTeam);
         teamData[selectedTeam - 1].playersInTeam.Add(playerScript);
@@ -292,5 +295,17 @@ public class TeamManager : NetworkBehaviour
             playersOnTeam.Add(teamData[teamIndex].playersInTeam[j]);
         
         return playersOnTeam;
+    }
+
+    public void OnClientDisconnects(Player playerDisconnected)
+    {
+        int playerTeam = playerDisconnected.GetPlayerTeam();
+        if (playerTeam == 0)
+        {
+            Debug.LogWarning("Spectators not implemented");
+            return;
+        }
+
+        teamData[playerTeam - 1].playersInTeam.Remove(playerDisconnected);
     }
 }

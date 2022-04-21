@@ -109,7 +109,6 @@ public class PlayerCanvas : MonoBehaviour
     public void ToggleWeaponInfo(bool toggle) => ammoCounter.Toggle(toggle);
     public void InitScoreboard(PlayerScoreboardInfo[] info, int playerTeam) => scoreBoard.Init(info, playerTeam);
     public void ToggleScoreboard(bool toggle) => scoreBoard.Toggle(toggle);
-    public void HideScoreboard() => scoreBoard.Toggle(false);
     public void AddPlayerToScoreboard(PlayerScoreboardInfo playerInfo) => scoreBoard.AddNewPlayer(playerInfo);
     public void RemovePlayerFromScoreboard(string playerName) => scoreBoard.RemovePlayer(playerName);
 

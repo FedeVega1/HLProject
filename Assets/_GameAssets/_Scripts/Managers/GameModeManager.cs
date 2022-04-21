@@ -20,16 +20,19 @@ public class GameModeManager : NetworkBehaviour
     [SerializeField] ControlPointNode[] controlPoints;
     [SerializeField] TeamBase[] teamBases;
     [SerializeField] Transform clientCamera;
+    [SerializeField] float scoreBoardUpdateTime = 2;
 
     public TeamManager TeamManagerInstance => teamManager;
 
     public float timeToChangeLevel = 15;
 
-    bool matchEnded;
+    bool matchEnded, enableScoreboardUpdate;
+    double scoreBoardUpdateTimer;
     GameModeData currentGameModeData;
     TeamClassData[] classData;
     List<Player> connectedPlayers;
     List<PlayerTimer> playerTimerQueue;
+    int currentDisconnPlayerIndex, currentConnPlayerIndex;
 
     public System.Action<int> OnMatchEnded;
 
@@ -47,6 +50,7 @@ public class GameModeManager : NetworkBehaviour
     void Update()
     {
         if (!isServer) return;
+
         if (playerTimerQueue.Count > 0)
         {
             int size = playerTimerQueue.Count;
@@ -60,6 +64,10 @@ public class GameModeManager : NetworkBehaviour
                 }
             }
         }
+
+        if (!enableScoreboardUpdate || NetworkTime.time < scoreBoardUpdateTimer) return;
+        DoActionPerPlayer(UpdateScoreboard);
+        scoreBoardUpdateTimer = NetworkTime.time + scoreBoardUpdateTime;
     }
 
     public override void OnStartServer()
@@ -80,7 +88,8 @@ public class GameModeManager : NetworkBehaviour
         //controlPoints[size - 1].controlPoint.UnlockCP();
 
         TeamManagerInstance.GetGameModeData(ref currentGameModeData, size);
-        ((NetManager) NetManager.singleton).OnClientDisconnects += OnClientDiscconects;
+        ((NetManager) NetManager.singleton).OnClientDisconnects += OnPlayerDisconnects;
+        //enableScoreboardUpdate = true;
     }
 
     public override void OnStopServer()
@@ -89,20 +98,6 @@ public class GameModeManager : NetworkBehaviour
         for (int i = 0; i < size; i++)
         {
             controlPoints[i].controlPoint.OnControllPointCaptured -= TeamManagerInstance.OnCapturedControlPoint;
-        }
-    }
-
-    [Server]
-    public void OnClientDiscconects(NetworkConnection conn)
-    {
-        int size = connectedPlayers.Count;
-        for (int i = 0; i < size; i++)
-        {
-            if (connectedPlayers[i].connectionToClient.connectionId == conn.connectionId)
-            {
-                connectedPlayers.RemoveAt(i);
-                break;
-            }
         }
     }
 
@@ -120,7 +115,7 @@ public class GameModeManager : NetworkBehaviour
 
         playerScript.SetPlayerName(CheckPlayerName(playerName));
         playerScript.Init();
-        connectedPlayers.Add(playerScript);
+        //connectedPlayers.Add(playerScript);
 
         return playerObject;
     }
@@ -136,10 +131,33 @@ public class GameModeManager : NetworkBehaviour
             return;
         }
 
+        connectedPlayers.Add(playerScript);
+        currentConnPlayerIndex = connectedPlayers.Count - 1;
+        DoActionPerPlayer(PlayerConnectedEvent);
+        
         if (!matchEnded)
         {
             playerScript.RpcShowGreetings(playerScript.connectionToClient, TeamManagerInstance.GetTicketsFromTeam(1), TeamManagerInstance.GetTicketsFromTeam(2));
         }
+    }
+
+    [Server]
+    public void OnPlayerDisconnects(NetworkConnection conn)
+    {
+        int size = connectedPlayers.Count;
+        for (int i = 0; i < size; i++)
+        {
+            if (connectedPlayers[i].connectionToClient.connectionId == conn.connectionId)
+            {
+                teamManager.OnClientDisconnects(connectedPlayers[i]);
+                currentDisconnPlayerIndex = i;
+                DoActionPerPlayer(PlayerDisconnectedEvent);
+                connectedPlayers.RemoveAt(i);
+                return;
+            }
+        }
+
+        Debug.LogError($"Client {conn.connectionId} disconnected but was not found in the connected players list");
     }
 
     [Server]
@@ -149,6 +167,8 @@ public class GameModeManager : NetworkBehaviour
         int playerTeam = playerToSpawn.GetPlayerTeam() - 1;
         Transform randomSpawnPoint = teamBases[playerTeam].GetFreeSpawnPoint(playerToSpawn.gameObject);
         playerToSpawn.SpawnPlayer(randomSpawnPoint.position, randomSpawnPoint.rotation, currentGameModeData.playerRespawnTime);
+
+        DoActionPerPlayer(PlayerSelectedTeamEvent);
     }
 
     [Server]
@@ -340,5 +360,28 @@ public class GameModeManager : NetworkBehaviour
             classesSprites[i] = classData[i].classSprite;
         
         return classesSprites;
+    }
+
+    void PlayerDisconnectedEvent(Player player)
+    {
+        player.RpcPlayerDisconnected(player.connectionToClient, connectedPlayers[currentDisconnPlayerIndex].GetPlayerName());
+    }
+
+    void PlayerConnectedEvent(Player player)
+    {
+        int playerTeam = player.GetPlayerTeam() - 1;
+        player.RpcPlayerConnected(player.connectionToClient, connectedPlayers[currentConnPlayerIndex].GetPlayerScoreboardInfo(playerTeam));
+    }
+
+    void PlayerSelectedTeamEvent(Player player)
+    {
+        int playerTeam = player.GetPlayerTeam() - 1;
+        player.RpcPlayerSelectedTeam(player.connectionToClient, connectedPlayers[currentConnPlayerIndex].GetPlayerScoreboardInfo(playerTeam));
+    }
+
+    void UpdateScoreboard(Player player)
+    {
+        PlayerScoreboardInfo[] info = GetScoreboardInfo(player.GetPlayerTeam() - 1);
+        player.RpcShowScoreboard(player.connectionToClient, info);
     }
 }

@@ -14,7 +14,7 @@ public class UIPlayerInfo : MonoBehaviour
         }
     }
 
-    [SerializeField] Sprite[] team1ClassSprites, team2ClassSprites;
+    [SerializeField] Sprite playerDeadSprite;
     [SerializeField] Image imgPlayerClass;
     [SerializeField] TMP_Text lblplayerName, lblPlayerScore, lblPlayerRevives, lblPlayerDeaths;
 
@@ -23,7 +23,9 @@ public class UIPlayerInfo : MonoBehaviour
     public void UpdateInfo(PlayerScoreboardInfo playerInfo)
     {
         PlayerInfoData = playerInfo;
-        if (imgPlayerClass != null) imgPlayerClass.sprite = ClassesSprites[PlayerInfoData.playerClass];
+
+        if (imgPlayerClass != null)
+            imgPlayerClass.sprite = PlayerInfoData.isPLayerDead ? playerDeadSprite : ClassesSprites[PlayerInfoData.playerClass];
 
         if (lblplayerName != null)
         {

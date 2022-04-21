@@ -9,9 +9,10 @@ public readonly struct PlayerScoreboardInfo
     public readonly int playerScore;
     public readonly int playerRevives;
     public readonly int playerDeaths;
+    public readonly bool isPLayerDead;
     public readonly bool isLocalPlayer;
 
-    public PlayerScoreboardInfo(int team, int _playerClass, string name, int score, int revives, int deaths, bool _isLocalPlayer)
+    public PlayerScoreboardInfo(int team, int _playerClass, string name, int score, int revives, int deaths, bool dead, bool _isLocalPlayer)
     {
         playerTeam = team;
         playerClass = _playerClass;
@@ -19,6 +20,7 @@ public readonly struct PlayerScoreboardInfo
         playerScore = score;
         playerRevives = revives;
         playerDeaths = deaths;
+        isPLayerDead = dead;
         isLocalPlayer = _isLocalPlayer;
     }
 
@@ -29,7 +31,7 @@ public readonly struct PlayerScoreboardInfo
         playerScore = score;
 
         playerClass = playerRevives = playerDeaths = 0;
-        isLocalPlayer = false;
+        isLocalPlayer = isPLayerDead = false;
     }
 }
 
@@ -95,7 +97,7 @@ public class UIScoreBoard : MonoBehaviour
             if (info.PlayerInfoData.playerName == playerName)
             {
                 Destroy(info.gameObject);
-                playersInScore.Add(info);
+                playersInScore.Remove(info);
                 break;
             }
         }
