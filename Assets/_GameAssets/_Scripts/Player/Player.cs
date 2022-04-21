@@ -120,6 +120,7 @@ public class Player : Character
 
         if (!isDead && !firstSpawn && Input.GetKeyDown(KeyCode.Return))
         {
+            if (scoreboardMenuOpen || teamSelectionMenuOpen) return;
             if (classSelectionMenuOpen)
             {
                 movementScript.FreezeInputs = false;
@@ -141,6 +142,7 @@ public class Player : Character
 
         if (!isDead && !firstSpawn && Input.GetKeyDown(KeyCode.M))
         {
+            if (classSelectionMenuOpen || scoreboardMenuOpen) return;
             if (teamSelectionMenuOpen)
             {
                 movementScript.FreezeInputs = false;
