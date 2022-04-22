@@ -21,6 +21,7 @@ public class GameModeManager : NetworkBehaviour
     [SerializeField] TeamBase[] teamBases;
     [SerializeField] Transform clientCamera;
     [SerializeField] float scoreBoardUpdateTime = 2;
+    [SerializeField] GameObject dummyPlayerPrefab;
 
     public TeamManager TeamManagerInstance => teamManager;
 
@@ -51,6 +52,8 @@ public class GameModeManager : NetworkBehaviour
     {
         if (!isServer) return;
 
+        if (Input.GetKeyDown(KeyCode.O)) AddDummyPlayer();
+            
         if (playerTimerQueue.Count > 0)
         {
             int size = playerTimerQueue.Count;
@@ -107,7 +110,7 @@ public class GameModeManager : NetworkBehaviour
     {
         GameObject playerObject = Instantiate(playerPrefab, spectatorPoints[0].position, spectatorPoints[0].rotation);
         Player playerScript = playerObject.GetComponent<Player>();
-
+        
         if (playerScript == null)
         {
             Debug.LogError("Player prefab doesn't have a Player Component!");
@@ -138,7 +141,8 @@ public class GameModeManager : NetworkBehaviour
         
         if (!matchEnded)
         {
-            playerScript.RpcShowGreetings(playerScript.connectionToClient, TeamManagerInstance.GetTicketsFromTeam(1), TeamManagerInstance.GetTicketsFromTeam(2));
+            if (playerScript.connectionToClient != null) 
+                playerScript.RpcShowGreetings(playerScript.connectionToClient, TeamManagerInstance.GetTicketsFromTeam(1), TeamManagerInstance.GetTicketsFromTeam(2));
         }
     }
 
@@ -310,7 +314,7 @@ public class GameModeManager : NetworkBehaviour
         if (classIndex < 0 || classIndex >= classData.Length)
         {
             Debug.LogError("Class index out of bounds!");
-            playerScript.RpcClassSelectionError(connectionToClient, 0x00);
+            if (playerScript.connectionToClient != null) playerScript.RpcClassSelectionError(playerScript.connectionToClient, 0x00);
             return;
         }
 
@@ -319,13 +323,13 @@ public class GameModeManager : NetworkBehaviour
             if (classData[classIndex].teamSpecific != playerScript.GetPlayerTeam())
             {
                 Debug.LogError($"{playerScript.GetPlayerName()} tried to use {classData[classIndex].className} from {TeamManager.FactionNames[classData[classIndex].teamSpecific]}");
-                playerScript.RpcClassSelectionError(connectionToClient, 0x01);
+                if (playerScript.connectionToClient != null) playerScript.RpcClassSelectionError(playerScript.connectionToClient, 0x01);
                 return;
             }
         }
 
         playerScript.SetPlayerClass(classData[classIndex], classIndex);
-        playerScript.RpcClassSelectionSuccess(connectionToClient, classIndex);
+        if (playerScript.connectionToClient != null) playerScript.RpcClassSelectionSuccess(playerScript.connectionToClient, classIndex);
     }
 
     public Transform GetSpectatePointByIndex(int index) => spectatorPoints[index];
@@ -384,24 +388,32 @@ public class GameModeManager : NetworkBehaviour
 
     void PlayerDisconnectedEvent(Player player)
     {
-        player.RpcPlayerDisconnected(player.connectionToClient, connectedPlayers[currentDisconnPlayerIndex].GetPlayerName());
+        if (player.connectionToClient != null) 
+            player.RpcPlayerDisconnected(player.connectionToClient, connectedPlayers[currentDisconnPlayerIndex].GetPlayerName());
     }
 
     void PlayerConnectedEvent(Player player)
     {
         int playerTeam = player.GetPlayerTeam() - 1;
-        player.RpcPlayerConnected(player.connectionToClient, connectedPlayers[currentConnPlayerIndex].GetPlayerScoreboardInfo(playerTeam));
+        if (player.connectionToClient != null) player.RpcPlayerConnected(player.connectionToClient, connectedPlayers[currentConnPlayerIndex].GetPlayerScoreboardInfo(playerTeam));
     }
 
     void PlayerSelectedTeamEvent(Player player)
     {
         int playerTeam = player.GetPlayerTeam();
-        player.RpcPlayerSelectedTeam(player.connectionToClient, connectedPlayers[currentConnPlayerIndex].GetPlayerScoreboardInfo(playerTeam, true));
+        if (player.connectionToClient != null) player.RpcPlayerSelectedTeam(player.connectionToClient, connectedPlayers[currentConnPlayerIndex].GetPlayerScoreboardInfo(playerTeam, true));
     }
 
     void UpdateScoreboard(Player player)
     {
         PlayerScoreboardInfo[] info = GetScoreboardInfo(player.GetPlayerTeam() - 1);
-        player.RpcShowScoreboard(player.connectionToClient, info);
+        if (player.connectionToClient != null) player.RpcShowScoreboard(player.connectionToClient, info);
+    }
+
+    public void AddDummyPlayer()
+    {
+        GameObject playerObject = SpawnPlayerObject(dummyPlayerPrefab, "DummyPlayer");
+        OnPlayerConnection(playerObject);
+        NetworkServer.Spawn(playerObject);
     }
 }

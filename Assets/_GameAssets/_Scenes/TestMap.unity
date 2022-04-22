@@ -1269,6 +1269,8 @@ MonoBehaviour:
   - {fileID: 6044552126579899526}
   - {fileID: 2027028246}
   clientCamera: {fileID: 1896322421}
+  scoreBoardUpdateTime: 2
+  dummyPlayerPrefab: {fileID: 9207269670975588337, guid: e36ad72cf8383934585fcdd72b0cca96, type: 3}
   timeToChangeLevel: 15
 --- !u!4 &1869416524
 Transform:

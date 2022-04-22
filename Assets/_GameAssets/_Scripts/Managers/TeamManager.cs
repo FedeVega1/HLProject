@@ -131,7 +131,7 @@ public class TeamManager : NetworkBehaviour
         if (playerScript == null)
         {
             Debug.LogError($"TeamSelection Player component is null");
-            playerScript.RpcTeamSelectionError(connectionToClient, 0x00);
+            playerScript.RpcTeamSelectionError(playerScript.connectionToClient, 0x00);
             return;
         }
 
@@ -155,7 +155,7 @@ public class TeamManager : NetworkBehaviour
         if (oldPlayerTeam > 0) teamData[oldPlayerTeam - 1].playersInTeam.Remove(playerScript);
 
         playerScript.SetPlayerTeam(selectedTeam);
-        playerScript.RpcTeamSelectionSuccess(connectionToClient, selectedTeam);
+        if (playerScript.connectionToClient != null) playerScript.RpcTeamSelectionSuccess(playerScript.connectionToClient, selectedTeam);
         teamData[selectedTeam - 1].playersInTeam.Add(playerScript);
         GameModeManager.INS.OnPlayerSelectedTeam(playerScript);
         //GameModeManager.INS.SpawnPlayerByTeam(playerScript);

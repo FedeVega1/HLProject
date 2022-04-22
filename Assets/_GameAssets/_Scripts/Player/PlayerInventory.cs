@@ -70,7 +70,9 @@ public class PlayerInventory : NetworkBehaviour
             GameObject weaponObject = Instantiate(WeaponPrefab, wWeaponPivot);
             NetWeapon spawnedWeapon = weaponObject.GetComponent<NetWeapon>();
 
-            NetworkServer.Spawn(weaponObject, gameObject);
+            if (connectionToClient != null) NetworkServer.Spawn(weaponObject, gameObject);
+            else NetworkServer.Spawn(weaponObject);
+
             RpcSetWeaponParent(spawnedWeapon.netId, false);
             spawnedWeapon.Init(weaponsToLoad[i], playerScript);
             weaponsInventoryOnServer.Add(spawnedWeapon);
@@ -83,7 +85,7 @@ public class PlayerInventory : NetworkBehaviour
         print($"Finished server PlayerInventory Initialization");
 
         isServerInitialized = true;
-        RpcSetupWeaponInventory(connectionToClient, size, defaultWeaponIndex);
+        if (connectionToClient != null) RpcSetupWeaponInventory(connectionToClient, size, defaultWeaponIndex);
     }
 
     [Server]

@@ -9,24 +9,24 @@ public class Player : Character
     [Header("Player")]
 
     [SerializeField] GameObject playerCamera, playerCanvasPrefab;
-    [SerializeField] MeshRenderer playerMesh;
-    [SerializeField] PlayerMovement movementScript;
-    [SerializeField] float woundedMaxTime;
+    [SerializeField] protected MeshRenderer playerMesh;
+    [SerializeField] protected PlayerMovement movementScript;
+    [SerializeField] protected float woundedMaxTime;
 
-    [SyncVar(hook = nameof(OnTeamChange))] int playerTeam;
-    [SyncVar] bool isWounded, firstSpawn;
-    [SyncVar] string playerName;
-    [SyncVar] double timeToRespawn;
+    [SyncVar(hook = nameof(OnTeamChange))] protected int playerTeam;
+    [SyncVar] protected bool isWounded, firstSpawn;
+    [SyncVar] protected string playerName;
+    [SyncVar] protected double timeToRespawn;
 
     public float MaxRespawnTime { get; set; }
     public float BonusWoundTime { get; set; }
     public PlayerCanvas PlayerCanvasScript { get; private set; }
 
-    bool onControlPoint;
-    int currentClassIndex, kills, deaths, revives, score;
-    double woundedTime;
-    PlayerInventory inventory;
-    TeamClassData classData;
+    protected bool onControlPoint;
+    protected int currentClassIndex, kills, deaths, revives, score;
+    protected double woundedTime;
+    protected PlayerInventory inventory;
+    protected TeamClassData classData;
 
     #region Hooks
 
@@ -55,7 +55,7 @@ public class Player : Character
     //    playerMesh.enabled = true;
     //}
 
-    void Start()
+    protected virtual void Start()
     {
         if (!isLocalPlayer) Destroy(playerCamera);
         if (!IsDead && firstSpawn) playerMesh.enabled = false;
@@ -90,7 +90,7 @@ public class Player : Character
     #region Client
 
     [Client]
-    void CheckInputs()
+    protected virtual void CheckInputs()
     {
         if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Escape)) GameManager.INS.StopServer();
 
