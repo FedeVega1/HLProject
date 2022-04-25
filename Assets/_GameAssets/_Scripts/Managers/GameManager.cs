@@ -168,7 +168,9 @@ public class GameManager : MonoBehaviour
         videoOptions = new VideoOptions();
     }
 
-    void Start()
+    void Start() => InitMainMenu();
+
+    void InitMainMenu()
     {
         if (videoOptions.EnableMainMenuBackgrounds) 
             Instantiate(mainMenuBackgrounds[Random.Range(0, mainMenuBackgrounds.Length)]);
@@ -189,12 +191,20 @@ public class GameManager : MonoBehaviour
 
     public void StopServer()
     {
-        ShowLoadingScreen(netManager.StopHost);
+        ShowLoadingScreen(() => 
+        { 
+            netManager.StopHost();
+            InitMainMenu();
+        });
     }
 
     public void DisconnectFromServer()
     {
-        ShowLoadingScreen(netManager.StopClient);
+        ShowLoadingScreen(() =>
+        {
+            netManager.StopClient(); 
+            InitMainMenu();
+        });
     }
 
     public void OnLoadedScene()
