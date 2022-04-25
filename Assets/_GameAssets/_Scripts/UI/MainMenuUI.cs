@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Rendering.HighDefinition;
 
 public class MainMenuUI : MonoBehaviour
 {
@@ -11,6 +12,8 @@ public class MainMenuUI : MonoBehaviour
     [SerializeField] CanvasGroup rayCastBlocker;
     [SerializeField] RectTransform connectToServerPanel;
     [SerializeField] TMP_InputField txtConnectToServer;
+    [SerializeField] HDAdditionalCameraData mainMenuCamera;
+    [SerializeField] UIOptions optionsMenu;
 
     UIState currentState;
 
@@ -18,6 +21,8 @@ public class MainMenuUI : MonoBehaviour
     {
         txtConnectToServer.text = "localhost";
         currentState = UIState.MainMenu;
+
+        optionsMenu.Init();
     }
 
     void Update()
@@ -48,4 +53,10 @@ public class MainMenuUI : MonoBehaviour
     }
 
     public void QuitGame() => GameManager.INS.QuitGame();
+
+    public void DisableCameraBackground()
+    {
+        mainMenuCamera.clearColorMode = HDAdditionalCameraData.ClearColorMode.Color;
+        mainMenuCamera.backgroundColorHDR = new Color(0x11, 0x11, 0x11, 0xFF);
+    }
 }
