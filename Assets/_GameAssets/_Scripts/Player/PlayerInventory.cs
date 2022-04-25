@@ -72,7 +72,7 @@ public class PlayerInventory : NetworkBehaviour
 
             if (connectionToClient != null) NetworkServer.Spawn(weaponObject, gameObject);
             else NetworkServer.Spawn(weaponObject);
-
+            
             RpcSetWeaponParent(spawnedWeapon.netId, false);
             spawnedWeapon.Init(weaponsToLoad[i], playerScript);
             weaponsInventoryOnServer.Add(spawnedWeapon);
