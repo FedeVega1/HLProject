@@ -9,7 +9,7 @@ public readonly struct PlayerScoreboardInfo
     public readonly int playerScore;
     public readonly int playerRevives;
     public readonly int playerDeaths;
-    public readonly bool isPLayerDead;
+    public readonly bool isPlayerDead;
     public readonly bool isLocalPlayer;
 
     public PlayerScoreboardInfo(int team, int _playerClass, string name, int score, int revives, int deaths, bool dead, bool _isLocalPlayer)
@@ -20,7 +20,7 @@ public readonly struct PlayerScoreboardInfo
         playerScore = score;
         playerRevives = revives;
         playerDeaths = deaths;
-        isPLayerDead = dead;
+        isPlayerDead = dead;
         isLocalPlayer = _isLocalPlayer;
     }
 
@@ -31,7 +31,7 @@ public readonly struct PlayerScoreboardInfo
         playerScore = score;
 
         playerClass = playerRevives = playerDeaths = 0;
-        isLocalPlayer = isPLayerDead = false;
+        isLocalPlayer = isPlayerDead = false;
     }
 }
 
@@ -39,7 +39,7 @@ public class UIScoreBoard : MonoBehaviour
 {
     [SerializeField] CanvasGroup canvasGroup;
     [SerializeField] RectTransform[] teamsPivot;
-    [SerializeField] GameObject[] teamPrefabs;
+    [SerializeField] GameObject teamPrefabs;
 
     int playerTeam;
     List<UIPlayerInfo> playersInScore;
@@ -65,11 +65,13 @@ public class UIScoreBoard : MonoBehaviour
             if (playersInScore.Count > 0 && i < playersInScore.Count)
             {
                 info = playersInScore[i];
+                info.SetTeamLayout(teamIndex);
                 info.transform.parent = teamsPivot[teamIndex];
             }
             else
             {
-                info = Instantiate(teamPrefabs[teamIndex], teamsPivot[teamIndex]).GetComponent<UIPlayerInfo>();
+                info = Instantiate(teamPrefabs, teamsPivot[teamIndex]).GetComponent<UIPlayerInfo>();
+                info.SetTeamLayout(teamIndex);
                 updateList = true;
             }
             
@@ -83,9 +85,10 @@ public class UIScoreBoard : MonoBehaviour
     public void AddNewPlayer(PlayerScoreboardInfo playerInfo)
     {
         int teamIndex = playerInfo.playerTeam != playerTeam ? 1 : 0;
-        UIPlayerInfo info = Instantiate(teamPrefabs[teamIndex], teamsPivot[teamIndex]).GetComponent<UIPlayerInfo>();
+        UIPlayerInfo info = Instantiate(teamPrefabs, teamsPivot[teamIndex]).GetComponent<UIPlayerInfo>();
         if (info == null) return;
         playersInScore.Add(info);
+        info.SetTeamLayout(teamIndex);
         info.UpdateInfo(playerInfo);
     }
 

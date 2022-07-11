@@ -21,7 +21,7 @@ public class DummyPlayer : Player
     public void DummyStart()
     {
         GameModeManager.INS.TeamManagerInstance.PlayerSelectedTeam(this, -1);
-        GameModeManager.INS.PlayerChangeClass(this, Random.Range(0, GetClassForSelectedTeam()));
+        GameModeManager.INS.PlayerChangeClass(this, GetClassForSelectedTeam());
         GameModeManager.INS.SpawnPlayerByTeam(this);
     }
 
@@ -36,13 +36,13 @@ public class DummyPlayer : Player
             if (classDataArray[i].teamSpecific == playerTeam)
             {
                 filteredClassData.Add(i);
-                print($"{playerTeam} - {classDataArray[i]}");
+                //print($"{playerTeam} - {classDataArray[i]}");
             }
         }
 
         int index = Random.Range(0, filteredClassData.Count);
         classData = classDataArray[filteredClassData[index]];
-        print($"{index} - {filteredClassData[index]} - {classData}");
+        //print($"{index} - {filteredClassData[index]} - {classData}");
         return filteredClassData[index];
     }
 }

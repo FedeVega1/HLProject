@@ -35,7 +35,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -183.48236, y: 0}
+  m_AnchoredPosition: {x: -180, y: 0}
   m_SizeDelta: {x: 170.326, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6354114020085854315
@@ -170,7 +170,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 185.52942, y: 0}
+  m_AnchoredPosition: {x: 185, y: 0}
   m_SizeDelta: {x: 77.087, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3071500925829660692
@@ -303,7 +303,7 @@ RectTransform:
   - {fileID: 1868518765158064665}
   - {fileID: 8518523828061174755}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -342,8 +342,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74e72ce5e15594e48a1f93cbbd0a8e12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  team1ClassSprites: []
-  team2ClassSprites: []
+  playerDeadSprite: {fileID: 0}
   imgPlayerClass: {fileID: 0}
   lblplayerName: {fileID: 4123498889377440975}
   lblPlayerScore: {fileID: 3848372977896941895}

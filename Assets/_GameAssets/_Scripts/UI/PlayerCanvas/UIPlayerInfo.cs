@@ -25,7 +25,7 @@ public class UIPlayerInfo : MonoBehaviour
         PlayerInfoData = playerInfo;
 
         if (imgPlayerClass != null)
-            imgPlayerClass.sprite = PlayerInfoData.isPLayerDead ? playerDeadSprite : ClassesSprites[PlayerInfoData.playerClass];
+            imgPlayerClass.sprite = PlayerInfoData.isPlayerDead ? playerDeadSprite : ClassesSprites[PlayerInfoData.playerClass];
 
         if (lblplayerName != null)
         {
@@ -50,5 +50,26 @@ public class UIPlayerInfo : MonoBehaviour
             lblPlayerDeaths.text = PlayerInfoData.playerDeaths.ToString("00");
             lblplayerName.fontStyle = PlayerInfoData.isLocalPlayer ? FontStyles.Bold : FontStyles.Normal;
         }
+    }
+
+    public void SetTeamLayout(int team)
+    {
+        if (team == 0)
+        {
+            imgPlayerClass.rectTransform.localScale = Vector3.one;
+            lblPlayerDeaths.rectTransform.localScale = Vector3.one;
+            lblPlayerRevives.rectTransform.localScale = Vector3.one;
+
+            LeanTween.moveX(lblplayerName.rectTransform, -135, 0);
+            LeanTween.moveX(lblPlayerScore.rectTransform, 2, 0);
+            return;
+        }
+
+        imgPlayerClass.rectTransform.localScale = Vector3.zero;
+        lblPlayerDeaths.rectTransform.localScale = Vector3.zero;
+        lblPlayerRevives.rectTransform.localScale = Vector3.zero;
+
+        LeanTween.moveX(lblplayerName.rectTransform, -180, 0);
+        LeanTween.moveX(lblPlayerScore.rectTransform, 185, 0);
     }
 }

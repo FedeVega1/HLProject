@@ -157,7 +157,7 @@ public class TeamManager : NetworkBehaviour
         playerScript.SetPlayerTeam(selectedTeam);
         if (playerScript.connectionToClient != null) playerScript.RpcTeamSelectionSuccess(playerScript.connectionToClient, selectedTeam);
         teamData[selectedTeam - 1].playersInTeam.Add(playerScript);
-        GameModeManager.INS.OnPlayerSelectedTeam(playerScript);
+        GameModeManager.INS.OnPlayerSelectedTeam(playerScript, selectedTeam);
         //GameModeManager.INS.SpawnPlayerByTeam(playerScript);
     }
 

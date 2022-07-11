@@ -152,6 +152,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -1478,6 +1479,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -1649,8 +1651,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1217322379424824362}
   m_HandleRect: {fileID: 3581093174064462636}
   m_Direction: 2
-  m_Value: 0.00010222858
-  m_Size: 0.99856055
+  m_Value: -0.0009992006
+  m_Size: 0.9985696
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1902,7 +1904,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.5970607}
+  m_AnchoredPosition: {x: 0, y: 0.3057691}
   m_SizeDelta: {x: 0, y: 770}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &4955248732008260158
@@ -2798,7 +2800,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.5970607}
+  m_AnchoredPosition: {x: 0, y: 0.3057691}
   m_SizeDelta: {x: 0, y: 770}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &8408916995707539349
@@ -3391,6 +3393,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -3878,8 +3881,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8253518076337523317}
   m_HandleRect: {fileID: 7418890902801661086}
   m_Direction: 2
-  m_Value: 0.00010222858
-  m_Size: 0.99856055
+  m_Value: -0.0009992006
+  m_Size: 0.9985696
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -5551,6 +5554,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -5582,9 +5586,7 @@ MonoBehaviour:
   teamsPivot:
   - {fileID: 545827833816208994}
   - {fileID: 2667260723327962332}
-  teamPrefabs:
-  - {fileID: 5068913877078998921, guid: e35ef93b60d91354d86270be32279a49, type: 3}
-  - {fileID: 6461716938679539492, guid: 466b0d75b3a68dd46bc4e204f6e42343, type: 3}
+  teamPrefabs: {fileID: 5068913877078998921, guid: e35ef93b60d91354d86270be32279a49, type: 3}
 --- !u!1 &5983261144756943611
 GameObject:
   m_ObjectHideFlags: 0
@@ -6301,6 +6303,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -7334,6 +7337,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0

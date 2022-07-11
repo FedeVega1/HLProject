@@ -68,7 +68,6 @@ public class GameModeManager : NetworkBehaviour
             }
         }
 
-        // TODO: Fix scoreboardUpdate
         if (!enableScoreboardUpdate || NetworkTime.time < scoreBoardUpdateTimer) return;
         DoActionPerPlayer(UpdateScoreboard);
         scoreBoardUpdateTimer = NetworkTime.time + scoreBoardUpdateTime;
@@ -92,8 +91,8 @@ public class GameModeManager : NetworkBehaviour
         //controlPoints[size - 1].controlPoint.UnlockCP();
 
         TeamManagerInstance.GetGameModeData(ref currentGameModeData, size);
-        ((NetManager) NetManager.singleton).OnClientDisconnects += OnPlayerDisconnects;
-        //enableScoreboardUpdate = true;
+        NetManager.INS.OnClientDisconnects += OnPlayerDisconnects;
+        enableScoreboardUpdate = true;
     }
 
     public override void OnStopServer()
@@ -322,7 +321,7 @@ public class GameModeManager : NetworkBehaviour
         {
             if (classData[classIndex].teamSpecific != playerScript.GetPlayerTeam())
             {
-                Debug.LogError($"{playerScript.GetPlayerName()} tried to use {classData[classIndex].className} from {TeamManager.FactionNames[classData[classIndex].teamSpecific]}");
+                Debug.LogError($"{playerScript.GetPlayerName()} tried to use {classData[classIndex].className} from {TeamManager.FactionNames[classData[classIndex].teamSpecific - 1]}");
                 if (playerScript.connectionToClient != null) playerScript.RpcClassSelectionError(playerScript.connectionToClient, 0x01);
                 return;
             }
@@ -378,12 +377,10 @@ public class GameModeManager : NetworkBehaviour
         return classesSprites;
     }
 
-    // TODO: Fix Scoreboard when changing teams
-
-    public void OnPlayerSelectedTeam(Player player)
+    public void OnPlayerSelectedTeam(Player player, int selectedTeam)
     {
         currentConnPlayerIndex = GetPlayerIndex(player);
-        DoActionPerPlayer(PlayerSelectedTeamEvent);
+        DoActionPerPlayer(_ => PlayerSelectedTeamEvent(_, selectedTeam));
     }
 
     void PlayerDisconnectedEvent(Player player)
@@ -398,15 +395,15 @@ public class GameModeManager : NetworkBehaviour
         if (player.connectionToClient != null) player.RpcPlayerConnected(player.connectionToClient, connectedPlayers[currentConnPlayerIndex].GetPlayerScoreboardInfo(playerTeam));
     }
 
-    void PlayerSelectedTeamEvent(Player player)
+    void PlayerSelectedTeamEvent(Player player, int selectedTeam)
     {
-        int playerTeam = player.GetPlayerTeam();
-        if (player.connectionToClient != null) player.RpcPlayerSelectedTeam(player.connectionToClient, connectedPlayers[currentConnPlayerIndex].GetPlayerScoreboardInfo(playerTeam, true));
+        //int playerTeam = player.GetPlayerTeam();
+        if (player.connectionToClient != null) player.RpcPlayerSelectedTeam(player.connectionToClient, connectedPlayers[currentConnPlayerIndex].GetPlayerScoreboardInfo(selectedTeam, true));
     }
 
     void UpdateScoreboard(Player player)
     {
-        PlayerScoreboardInfo[] info = GetScoreboardInfo(player.GetPlayerTeam() - 1);
+        PlayerScoreboardInfo[] info = GetScoreboardInfo(player.GetPlayerTeam());
         if (player.connectionToClient != null) player.RpcShowScoreboard(player.connectionToClient, info);
     }
 

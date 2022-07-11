@@ -10,7 +10,15 @@ public struct AddCustomPlayerMessage : NetworkMessage
 
 public class NetManager : NetworkManager
 {
+    public static NetManager INS;
     public System.Action<NetworkConnection> OnClientDisconnects;
+
+    public override void Awake()
+    {
+        base.Awake();
+        if (INS == null) INS = this;
+        else Destroy(gameObject);
+    }
 
     public override void OnStartServer()
     {
@@ -18,21 +26,21 @@ public class NetManager : NetworkManager
         NetworkServer.RegisterHandler<AddCustomPlayerMessage>(OnCustomPlayer);
     }
 
-    public override void OnServerDisconnect(NetworkConnection conn)
+    public override void OnServerDisconnect(NetworkConnectionToClient conn)
     {
         base.OnServerDisconnect(conn);
         OnClientDisconnects?.Invoke(conn);
     }
 
-    public override void OnClientConnect(NetworkConnection conn)
+    public override void OnClientConnect()
     {
         //base.OnClientConnect(conn);
         if (clientLoadedScene) return;
 
         if (!NetworkClient.ready) NetworkClient.Ready();
-        if (conn.identity == null || !conn.isReady)
+        if (NetworkClient.connection.identity == null || !NetworkClient.connection.isReady)
         {
-            conn.Send(new AddCustomPlayerMessage());
+            NetworkClient.connection.Send(new AddCustomPlayerMessage());
         }
         //if (GameModeManager.INS == null) Debug.LogError("Couldn't find a GameModeManager in scene");
 
@@ -44,15 +52,14 @@ public class NetManager : NetworkManager
         //conn.Send(message);
     }
 
-    public override void OnClientSceneChanged(NetworkConnection conn)
+    public override void OnClientSceneChanged()
     {
-        base.OnClientSceneChanged(conn);
+        base.OnClientSceneChanged();
         GameManager.INS.OnLoadedScene();
-
         
-        if (conn.identity == null || !conn.isReady)
+        if (NetworkClient.connection.identity == null || !NetworkClient.connection.isReady)
         {
-            conn.Send(new AddCustomPlayerMessage());
+            NetworkClient.connection.Send(new AddCustomPlayerMessage());
         }
 
         //PlayerInfo message = new PlayerInfo
@@ -76,9 +83,9 @@ public class NetManager : NetworkManager
         GameManager.INS.OnLoadedScene();
     }
 
-    void OnCustomPlayer(NetworkConnection conn, AddCustomPlayerMessage msg) { OnServerAddPlayer(conn); }
+    void OnCustomPlayer(NetworkConnectionToClient conn, AddCustomPlayerMessage msg) { OnServerAddPlayer(conn); }
 
-    public override void OnServerAddPlayer(NetworkConnection conn)
+    public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
         GameObject playerObject = GameModeManager.INS.SpawnPlayerObject(playerPrefab, GameManager.INS.PlayerName);
         NetworkServer.AddPlayerForConnection(conn, playerObject);

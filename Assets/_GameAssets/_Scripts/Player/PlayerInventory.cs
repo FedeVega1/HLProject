@@ -53,6 +53,7 @@ public class PlayerInventory : NetworkBehaviour
 
     void Update()
     {
+        if (Utilities.MouseOverUI()) return;
         if (isLocalPlayer && !DisablePlayerInputs) CheckInputs();
     }
 
