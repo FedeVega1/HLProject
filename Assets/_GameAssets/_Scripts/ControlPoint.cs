@@ -155,7 +155,12 @@ public class ControlPoint : NetworkBehaviour
 
     protected virtual void NotifyPointCapture()
     {
-        GameModeManager.INS.DoActionPerPlayer((player) => { player.RpcControlPointCaptured(defyingTeam, currentTeam, name); });
+        GameModeManager.INS.DoActionPerPlayer((player) => 
+        {
+            player.UpdatePlayerScore(50);
+            player.RpcControlPointCaptured(defyingTeam, currentTeam, name);
+        });
+
         OnControllPointCaptured?.Invoke(defyingTeam, currentTeam);
     }
 

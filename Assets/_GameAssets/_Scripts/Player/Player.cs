@@ -252,6 +252,7 @@ public class Player : Character
         timeToRespawn = NetworkTime.time + MaxRespawnTime;
         woundedTime = criticalHit ? 0 : NetworkTime.time + (woundedMaxTime - BonusWoundTime);
 
+        deaths++;
         isWounded = true;
         RpcShowWoundedHUD(connectionToClient, woundedTime, timeToRespawn);
         movementScript.freezePlayer = true;
@@ -299,6 +300,8 @@ public class Player : Character
 
         return new PlayerScoreboardInfo(playerTeam, playerName, score);
     }
+
+    public void UpdatePlayerScore(int ammount) => score += ammount;
 
     #endregion
 
