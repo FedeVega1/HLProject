@@ -9,5 +9,5 @@ public class BulletData : ScriptableObject
     public GameObject bulletPrefab;
     public BulletType type;
     public DamageType damageType;
-    public float initialSpeed, damage, mass, maxTravelDistance, radius, timeToExplode;
+    public float initialSpeed, damage, maxTravelDistance, radius, timeToExplode, fallOff;
 }

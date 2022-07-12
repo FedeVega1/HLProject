@@ -83,26 +83,54 @@ public class Weapon : CachedTransform
         Ray weaponRay = new Ray(firePivot.position, firePivot.forward);
         if (Physics.Raycast(weaponRay, out rayHit, bulletData.maxTravelDistance, weaponLayerMask))
         {
-            //float height = MyTransform.position.y;
-            //float angle = MyTransform.eulerAngles.x;
-            //float speed = bulletData.initialSpeed;
+            Vector3 hitPos = rayHit.point;
+            bool fallOffCheck = CheckBulletFallOff(ref weaponRay, ref rayHit, out float distance);
 
-            //float root = Mathf.Sqrt(Mathf.Pow(speed * Mathf.Sin(angle), 2) + 2 * Physics.gravity.y * height);
-            //float range = speed * Mathf.Cos(angle) * (speed * Mathf.Sin(angle) + root) / Physics.gravity.y;
-            //float range = Mathf.Pow(bulletData.initialSpeed, 2) * Mathf.Sin(2 * angle) / Physics.gravity.y;
-            print($"Player Fire! Range[] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
-            Debug.DrawLine(weaponRay.origin, rayHit.point, Color.cyan, 2);
-            clientWeapon.Fire(rayHit.point, true);
+            if (!fallOffCheck) hitPos = rayHit.point;
+            clientWeapon.Fire(hitPos, true);
+
+            if (rayHit.collider != null) print($"Client Fire! Range[{bulletData.maxTravelDistance}] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
         }
         else
         {
-            clientWeapon.Fire(weaponRay.origin + (weaponRay.direction * bulletData.maxTravelDistance), false);
-            Debug.DrawRay(weaponRay.origin, weaponRay.direction, Color.red, 2);
+            Vector3 fallOff = Vector3.down * bulletData.fallOff;
+            clientWeapon.Fire(weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), false);
+
+            Debug.DrawRay(weaponRay.origin, weaponRay.direction + fallOff, Color.red, 2);
+            Debug.DrawLine(weaponRay.origin, weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), Color.red, 2);
         }
 
         BulletsInMag--;
         wTime = NetworkTime.time + weaponData.rateOfFire;
         netWeapon.CmdRequestFire();
+    }
+
+    bool CheckBulletFallOff(ref Ray weaponRay, ref RaycastHit rayHit, out float distance)
+    {
+        float fallStep = bulletData.maxTravelDistance / (float) NetWeapon.FallOffQuality;
+        distance = bulletData.maxTravelDistance - fallStep;
+        float lastDistance = distance;
+        Vector3 lastHit = rayHit.point;
+
+        for (int i = 0; i < NetWeapon.FallOffQuality; i++)
+        {
+            if (Physics.Raycast(weaponRay, out rayHit, distance, weaponLayerMask))
+            {
+                print($"Client Fire! Range[{distance}] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
+                Debug.DrawLine(weaponRay.origin, rayHit.point, Color.yellow, 5);
+
+                lastDistance = distance;
+                distance -= fallStep;
+                weaponRay.direction += Vector3.down * bulletData.fallOff;
+                continue;
+            }
+
+            distance = lastDistance;
+            rayHit.point = lastHit;
+            return false;
+        }
+
+        return true;
     }
 
     public void AltFire()

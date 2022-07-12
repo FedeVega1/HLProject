@@ -5,6 +5,8 @@ using Mirror;
 
 public class NetWeapon : CachedNetTransform
 {
+    public const int FallOffQuality = 5;
+
     public WeaponType WType => weaponData.weaponType;
 
     [SyncVar] bool serverInitialized;
@@ -105,35 +107,63 @@ public class NetWeapon : CachedNetTransform
     void ShootRayCastBullet()
     {
         Ray weaponRay = new Ray(firePivot.position, firePivot.forward);
+
         if (Physics.Raycast(weaponRay, out rayHit, bulletData.maxTravelDistance, weaponLayerMask))
         {
-            //float height = MyTransform.position.y;
-            //float angle = owningPlayer.GetPlayerCameraXAxis();
-            //float sin = angle > 0 ? Mathf.Sin(angle) : 1, cos = angle > 0 ? Mathf.Cos(angle) : 1;
-            //float speed = bulletData.initialSpeed;
+            Vector3 hitPos = rayHit.point;
 
-            //float root = Mathf.Sqrt(Mathf.Pow(speed * sin, 2) + 2 * Physics.gravity.y * height);
-            //float range = speed * cos * (speed * sin + root) / Physics.gravity.y;
-            //float range = Mathf.Pow(bulletData.initialSpeed, 2) * Mathf.Sin(2 * angle) / Physics.gravity.y;
-            HitBox hitBox = rayHit.transform.GetComponent<HitBox>();
-            if (hitBox != null)
+            bool fallOffCheck = CheckBulletFallOff(ref weaponRay, ref rayHit, out float distance);
+            if (!fallOffCheck) hitPos = rayHit.point;
+            RpcFireWeapon(hitPos, true);
+
+            if (fallOffCheck)
             {
-                ApplyDistanceToDamage(hitBox, rayHit.distance);
-                Debug.DrawLine(weaponRay.origin, rayHit.point, Color.green, 5);
-            }
-            else
-            {
-                Debug.DrawLine(weaponRay.origin, rayHit.point, Color.yellow, 5);
+                HitBox hitBox = rayHit.transform.GetComponent<HitBox>();
+                if (hitBox != null)
+                {
+                    ApplyDistanceToDamage(hitBox, rayHit.distance);
+                    Debug.DrawLine(weaponRay.origin, hitPos, Color.green, 5);
+                    return;
+                }
             }
 
-            print($"Server Fire! Range[] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
-            RpcFireWeapon(rayHit.point, true);
+            if (rayHit.collider != null) print($"Server Fire! Range[{bulletData.maxTravelDistance}] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
+            //else RpcFireWeapon(weaponRay.origin + (weaponRay.direction * distance), false);
         }
-        else
+
+        Vector3 fallOff = Vector3.down * bulletData.fallOff;
+        RpcFireWeapon(weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), false);
+
+        Debug.DrawRay(weaponRay.origin, weaponRay.direction + fallOff, Color.red, 2);
+        Debug.DrawLine(weaponRay.origin, weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), Color.red, 2);
+    }
+
+    bool CheckBulletFallOff(ref Ray weaponRay, ref RaycastHit rayHit, out float distance)
+    {
+        float fallStep = bulletData.maxTravelDistance / (float) FallOffQuality;
+        distance = bulletData.maxTravelDistance - fallStep;
+        float lastDistance = distance;
+        Vector3 lastHit = rayHit.point;
+
+        for (int i = 0; i < FallOffQuality; i++)
         {
-            RpcFireWeapon(weaponRay.origin + (weaponRay.direction * bulletData.maxTravelDistance), false);
-            Debug.DrawRay(weaponRay.origin, weaponRay.direction, Color.red, 2);
+            if (Physics.Raycast(weaponRay, out rayHit, distance, weaponLayerMask))
+            {
+                print($"Server Fire! Range[{distance}] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
+                Debug.DrawLine(weaponRay.origin, rayHit.point, Color.yellow, 5);
+
+                lastDistance = distance;
+                distance -= fallStep;
+                weaponRay.direction += Vector3.down * bulletData.fallOff;
+                continue;
+            }
+
+            distance = lastDistance;
+            rayHit.point = lastHit;
+            return false;
         }
+
+        return true;
     }
 
     [Server]
