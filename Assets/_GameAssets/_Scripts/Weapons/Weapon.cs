@@ -8,7 +8,7 @@ public enum WeaponType { Melee, Secondary, Primary, Tools, BandAids }
 
 public interface IWeapon
 {
-    public void Init(bool isServer, BulletData data, GameObject propPrefab);
+    public void Init(bool isServer, WeaponData wData, BulletData data, GameObject propPrefab);
 
     public void Fire(Vector3 destination, bool didHit);
     public void AltFire(Vector3 destination, bool didHit);
@@ -63,14 +63,14 @@ public class Weapon : CachedTransform
         clientWeapon = Instantiate(weaponData.clientPrefab, MyTransform).GetComponent<IWeapon>();
         if (clientWeapon != null)
         {
-            clientWeapon.Init(false, bulletData, weaponData.propPrefab);
+            clientWeapon.Init(false, weaponData, bulletData, weaponData.propPrefab);
             firePivot = clientWeapon.GetVirtualPivot();
         }
         else
         {
             GameObject nullWGO = new GameObject($"{weaponData.weaponName} (NULL)");
             clientWeapon = nullWGO.AddComponent<NullWeapon>();
-            clientWeapon.Init(false, bulletData, weaponData.propPrefab);
+            clientWeapon.Init(false, weaponData, bulletData, weaponData.propPrefab);
             Debug.LogError($"Client weapon prefab does not have a IWeapon type component.\nSwitching to default weapon");
         }
     }

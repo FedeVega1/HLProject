@@ -12,7 +12,7 @@ public class TestGranade : CachedTransform, IWeapon
     BulletData bulletData;
     GameObject weaponPropPrefab;
 
-    public void Init(bool isServer, BulletData data, GameObject propPrefab)
+    public void Init(bool isServer, WeaponData wData, BulletData data, GameObject propPrefab)
     {
         bulletData = data;
         weaponPropPrefab = propPrefab;

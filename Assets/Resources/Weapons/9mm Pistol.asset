@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbc436bff5906864d8060ea6fbb33a4f, type: 3}
+  m_Name: 9mm Pistol
+  m_EditorClassIdentifier: 
+  weaponName: 9mm Pistol
+  clientPrefab: {fileID: 2252030675643257087, guid: a2af925affc17474c93e54751ac410e1, type: 3}
+  propPrefab: {fileID: 6628245465620843539, guid: 633bc1a0f9edf444c8bf3b351421b72c, type: 3}
+  bulletData: {fileID: 11400000, guid: cc396ea161d868d478424de1629e4a84, type: 2}
+  maxBulletSpread: 1
+  rateOfFire: 1.5
+  weaponType: 1
+  weaponAnimsTiming:
+    fire: 0.75
+    reload: 2.167
+    holster: 0.5
+    draw: 1.208
+  bulletsPerMag: 20
+  mags: 10

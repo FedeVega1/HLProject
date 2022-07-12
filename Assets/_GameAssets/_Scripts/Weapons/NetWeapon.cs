@@ -323,13 +323,13 @@ public class NetWeapon : CachedNetTransform
             clientWeapon = Instantiate(weaponData.clientPrefab, MyTransform).GetComponent<IWeapon>();
             if (clientWeapon != null)
             {
-                clientWeapon.Init(true, bulletData, weaponData.propPrefab);
+                clientWeapon.Init(true, weaponData, bulletData, weaponData.propPrefab);
             }
             else
             {
                 GameObject nullWGO = new GameObject($"{weaponData.weaponName} (NULL)");
                 clientWeapon = nullWGO.AddComponent<NullWeapon>();
-                clientWeapon.Init(true, bulletData, weaponData.propPrefab);
+                clientWeapon.Init(true, weaponData, bulletData, weaponData.propPrefab);
                 Debug.LogError($"Client weapon prefab does not have a IWeapon type component.\nSwitching to default weapon");
             }
 
