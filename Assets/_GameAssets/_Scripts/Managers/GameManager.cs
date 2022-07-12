@@ -150,6 +150,8 @@ public class GameManager : MonoBehaviour
 
     public VideoOptions videoOptions { get; private set; }
 
+    bool returningtoMainMenu;
+
     void Awake()
     {
         if (INS == null)
@@ -164,7 +166,7 @@ public class GameManager : MonoBehaviour
 
         DontDestroyOnLoad(gameObject);
         SceneManager.sceneLoaded += (_, __) => OnLoadedScene();
-        
+
         videoOptions = new VideoOptions();
     }
 
@@ -194,7 +196,7 @@ public class GameManager : MonoBehaviour
         ShowLoadingScreen(() => 
         { 
             netManager.StopHost();
-            InitMainMenu();
+            returningtoMainMenu = true;
         });
     }
 
@@ -203,13 +205,14 @@ public class GameManager : MonoBehaviour
         ShowLoadingScreen(() =>
         {
             netManager.StopClient(); 
-            InitMainMenu();
+            returningtoMainMenu = true;
         });
     }
 
     public void OnLoadedScene()
     {
         if (loadingScreen != null) loadingScreen.HideLoadingScreen();
+        if (returningtoMainMenu) InitMainMenu();
     }
 
     void ShowLoadingScreen(System.Action OnLoadingScreenShown)

@@ -142,8 +142,9 @@ public class TeamManager : NetworkBehaviour
                 break;
 
             case 0:
-                SetAsSpectator(ref playerScript);
-                break;
+                //SetAsSpectator(ref playerScript);
+                if (playerScript.connectionToClient != null) playerScript.RpcTeamSelectionError(playerScript.connectionToClient, 1);
+                return;
 
             default:
                 if (selectedTeam > MAXTEAMS) Debug.LogError($"{playerScript.GetPlayerName()} selected a team out of range!");
@@ -153,10 +154,11 @@ public class TeamManager : NetworkBehaviour
 
         int oldPlayerTeam = playerScript.GetPlayerTeam();
         if (oldPlayerTeam > 0) teamData[oldPlayerTeam - 1].playersInTeam.Remove(playerScript);
+        else spectators.Remove(playerScript);
 
         playerScript.SetPlayerTeam(selectedTeam);
         if (playerScript.connectionToClient != null) playerScript.RpcTeamSelectionSuccess(playerScript.connectionToClient, selectedTeam);
-        teamData[selectedTeam - 1].playersInTeam.Add(playerScript);
+        if (selectedTeam > 0) teamData[selectedTeam - 1].playersInTeam.Add(playerScript);
         GameModeManager.INS.OnPlayerSelectedTeam(playerScript, selectedTeam);
         //GameModeManager.INS.SpawnPlayerByTeam(playerScript);
     }
@@ -182,6 +184,7 @@ public class TeamManager : NetworkBehaviour
     void SetAsSpectator(ref Player playerScript)
     {
         spectators.Add(playerScript);
+        playerScript.SetAsSpectator();
     }
 
     [Server]
@@ -303,7 +306,8 @@ public class TeamManager : NetworkBehaviour
         int playerTeam = playerDisconnected.GetPlayerTeam();
         if (playerTeam == 0)
         {
-            Debug.LogWarning("Spectators not implemented");
+            //Debug.LogWarning("Spectators not implemented");
+            spectators.Remove(playerDisconnected);
             return;
         }
 

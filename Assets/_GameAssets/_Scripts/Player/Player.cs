@@ -227,7 +227,18 @@ public class Player : Character
     }
 
     [Server]
-    public void SetAsSpectator() { }
+    public void SetAsSpectator() 
+    {
+        isInvencible = true;
+
+        Transform specPoint = GameModeManager.INS.GetSpectatePointByIndex(0);
+        MyTransform.position = specPoint.position;
+        MyTransform.rotation = specPoint.rotation;
+
+        movementScript.freezePlayer = false;
+        movementScript.spectatorMov = true;
+        movementScript.FreezeInputs = false;
+    }
 
     [Server]
     public void SpawnPlayer(Vector3 spawnPosition, Quaternion spawnRotation, float spawnTime)
@@ -285,6 +296,7 @@ public class Player : Character
     {
         currentClassIndex = classIndex;
         this.classData = classData;
+        movementScript.spectatorMov = false;
         print($"Server: CurrentClass {classData.className}");
     }
 
@@ -388,8 +400,12 @@ public class Player : Character
     {
         if (target.connectionId != connectionToServer.connectionId) return;
         PlayerCanvasScript.ToggleTeamSelection(false);
-        PlayerCanvasScript.OnTeamSelection(team);
-        PlayerCanvasScript.ToggleClassSelection(true);
+
+        if (team > 0)
+        {
+            PlayerCanvasScript.OnTeamSelection(team);
+            PlayerCanvasScript.ToggleClassSelection(true);
+        }
     }
 
     [TargetRpc]

@@ -17,5 +17,7 @@ MonoBehaviour:
   damageType: 2
   initialSpeed: 10
   damage: 5
-  mass: 5
   maxTravelDistance: 25
+  radius: 0
+  timeToExplode: 0
+  fallOff: 0.01
