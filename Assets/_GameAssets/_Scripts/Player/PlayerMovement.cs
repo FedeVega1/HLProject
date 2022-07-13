@@ -55,6 +55,8 @@ public class PlayerMovement : CachedNetTransform
     }
 
     public float CameraXAxis => xAxisRotaion;
+    public bool PlayerIsMoving => playerMovInput.magnitude > 0;
+    public bool PlayerIsRunning => inputFlags == 2;
 
     BitFlag8 inputFlags;
     float startHeight, playerSpeed, cameraRotInput, lastCameraRotInput, xAxisRotaion;
@@ -158,10 +160,10 @@ public class PlayerMovement : CachedNetTransform
         Crouch();
         Jump();
 
-        NoclipMovement();
+        if (spectatorMov) NoclipMovement();
 
         if (CharCtrl.isGrounded && velocity.y < 0) velocity.y = -.5f;
-        if (inputFlags == 2) playerSpeed = maxRunSpeed * Time.deltaTime;
+        if (inputFlags == 2) playerSpeed = maxRunSpeed;
 
         velocity = new Vector3(playerMovInput.x, velocity.y, playerMovInput.y);
         velocity = MyTransform.TransformDirection(velocity);
@@ -206,12 +208,12 @@ public class PlayerMovement : CachedNetTransform
 
         if (inputFlags == 0)
         {
-            playerSpeed = maxCrouchSpeed * Time.deltaTime;
+            playerSpeed = maxCrouchSpeed;
             newHeight = crouchAmmount * startHeight;
         }
         else
         {
-            playerSpeed = maxWalkSpeed * Time.deltaTime;
+            playerSpeed = maxWalkSpeed;
         }
 
         float lastHeight = CharCtrl.height;

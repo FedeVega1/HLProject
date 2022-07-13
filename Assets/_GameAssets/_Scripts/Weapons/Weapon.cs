@@ -10,7 +10,7 @@ public interface IWeapon
 {
     public void Init(bool isServer, WeaponData wData, BulletData data, GameObject propPrefab);
 
-    public void Fire(Vector3 destination, bool didHit);
+    public void Fire(Vector3 destination, bool didHit, bool lastBullet = false);
     public void AltFire(Vector3 destination, bool didHit);
     public void Scope();
 
@@ -25,6 +25,9 @@ public interface IWeapon
 
     public Transform GetVirtualPivot();
     public Transform GetWorldPivot();
+
+    public void CheckPlayerMovement(bool isMoving, bool isRunning);
+    public void OnCameraMovement(Vector2 axis);
 }
 
 public class Weapon : CachedTransform
@@ -87,21 +90,21 @@ public class Weapon : CachedTransform
             bool fallOffCheck = CheckBulletFallOff(ref weaponRay, ref rayHit, out float distance);
 
             if (!fallOffCheck) hitPos = rayHit.point;
-            clientWeapon.Fire(hitPos, true);
+            clientWeapon.Fire(hitPos, true, BulletsInMag < 2);
 
             if (rayHit.collider != null) print($"Client Fire! Range[{bulletData.maxTravelDistance}] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
         }
         else
         {
             Vector3 fallOff = Vector3.down * bulletData.fallOff;
-            clientWeapon.Fire(weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), false);
+            clientWeapon.Fire(weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), false, BulletsInMag < 2);
 
             Debug.DrawRay(weaponRay.origin, weaponRay.direction + fallOff, Color.red, 2);
             Debug.DrawLine(weaponRay.origin, weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), Color.red, 2);
         }
 
         BulletsInMag--;
-        wTime = NetworkTime.time + weaponData.rateOfFire;
+        wTime = NetworkTime.time + weaponData.weaponAnimsTiming.fire;
         netWeapon.CmdRequestFire();
     }
 
@@ -178,4 +181,6 @@ public class Weapon : CachedTransform
     public void DropWeapon() => clientWeapon.DropProp();
 
     public WeaponData GetWeaponData() => weaponData;
+
+    public void CheckPlayerMovement(bool isMoving, bool isRunning) => clientWeapon.CheckPlayerMovement(isMoving, isRunning);
 }

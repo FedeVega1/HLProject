@@ -7,7 +7,7 @@ public class NullWeapon : CachedTransform, IWeapon
     public void Init(bool isServer, WeaponData wData, BulletData data, GameObject propPrefab) { Debug.LogError($"Initialized {name} as a NULL Weapon on {stringCache[isServer ? 0 : 1]}"); }
 
     public void ToggleAllViewModels(bool toggle) { }
-    public void Fire(Vector3 destination, bool didHit) { }
+    public void Fire(Vector3 destination, bool didHit, bool lastBullet = false) { }
     public void AltFire(Vector3 destination, bool didHit) { }
     public void Scope() { }
     public void Reload() { }
@@ -17,4 +17,7 @@ public class NullWeapon : CachedTransform, IWeapon
 
     public Transform GetVirtualPivot() => MyTransform;
     public Transform GetWorldPivot() => MyTransform;
+
+    public void CheckPlayerMovement(bool isMoving, bool isRunning) { }
+    public void OnCameraMovement(Vector2 axis) { }
 }

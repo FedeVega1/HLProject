@@ -53,8 +53,13 @@ public class PlayerInventory : NetworkBehaviour
 
     void Update()
     {
+        if (!isLocalPlayer) return;
+
+        if (weaponsInvetoryOnClient != null && currentWeaponIndex < weaponsInvetoryOnClient.Count && weaponsInvetoryOnClient[currentWeaponIndex] != null)
+            weaponsInvetoryOnClient[currentWeaponIndex].CheckPlayerMovement(playerScript.PlayerIsMoving(), playerScript.PlayerIsRunning());
+
         if (Utilities.MouseOverUI()) return;
-        if (isLocalPlayer && !DisablePlayerInputs) CheckInputs();
+        if (!DisablePlayerInputs) CheckInputs();
     }
 
     #region Server

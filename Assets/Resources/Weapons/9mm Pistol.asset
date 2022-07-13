@@ -15,14 +15,14 @@ MonoBehaviour:
   weaponName: 9mm Pistol
   clientPrefab: {fileID: 2252030675643257087, guid: a2af925affc17474c93e54751ac410e1, type: 3}
   propPrefab: {fileID: 6628245465620843539, guid: 633bc1a0f9edf444c8bf3b351421b72c, type: 3}
-  bulletData: {fileID: 11400000, guid: cc396ea161d868d478424de1629e4a84, type: 2}
+  bulletData: {fileID: 11400000, guid: 4eadb97707037ad4dacc66138da84899, type: 2}
   maxBulletSpread: 1
   rateOfFire: 1.5
   weaponType: 1
   weaponAnimsTiming:
-    fire: 0.75
+    fire: 0.4
     reload: 2.167
     holster: 0.5
     draw: 1.208
-  bulletsPerMag: 20
-  mags: 10
+  bulletsPerMag: 18
+  mags: 8

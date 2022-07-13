@@ -85,6 +85,9 @@ public class Player : Character
     public int GetPlayerTeam() => playerTeam;
     public void SetPlayerTeam(int newPlayerTeam) => playerTeam = newPlayerTeam;
 
+    public bool PlayerIsMoving() => movementScript.PlayerIsMoving;
+    public bool PlayerIsRunning() => movementScript.PlayerIsRunning;
+
     #endregion
 
     #region Client

@@ -29,7 +29,7 @@ public class TestSMG : CachedTransform, IWeapon
         for (byte i = 0; i < size; i++) viewModels[i].SetActive(toggle);
     }
 
-    public void Fire(Vector3 destination, bool didHit)
+    public void Fire(Vector3 destination, bool didHit, bool lastBullet = false)
     {
         if (!isDrawn) return;
         GameObject bulletObject = Instantiate(bulletData.bulletPrefab, isServer ? worldBulletPivot : virtualBulletPivot);
@@ -74,4 +74,7 @@ public class TestSMG : CachedTransform, IWeapon
 
     public Transform GetVirtualPivot() => virtualBulletPivot;
     public Transform GetWorldPivot() => worldBulletPivot;
+
+    public void CheckPlayerMovement(bool isMoving, bool isRunning) { }
+    public void OnCameraMovement(Vector2 axis) { }
 }

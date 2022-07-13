@@ -210,10 +210,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  maxWalkSpeed: 500
-  maxCrouchSpeed: 150
+  maxWalkSpeed: 5
+  maxCrouchSpeed: 1
   crouchAmmount: 0.7
-  maxRunSpeed: 800
+  maxRunSpeed: 8.5
   jumpHeight: 1
   horizontalSens: 250
   verticalSens: 300

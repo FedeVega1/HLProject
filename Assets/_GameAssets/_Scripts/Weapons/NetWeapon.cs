@@ -87,7 +87,7 @@ public class NetWeapon : CachedNetTransform
                 break;
         }
 
-        fireTime = NetworkTime.time + weaponData.rateOfFire;
+        fireTime = NetworkTime.time + weaponData.weaponAnimsTiming.fire;
     }
 
     [Server]
@@ -121,7 +121,7 @@ public class NetWeapon : CachedNetTransform
                 HitBox hitBox = rayHit.transform.GetComponent<HitBox>();
                 if (hitBox != null)
                 {
-                    ApplyDistanceToDamage(hitBox, rayHit.distance);
+                    StartCoroutine(ApplyDistanceToDamage(hitBox, rayHit.distance));
                     Debug.DrawLine(weaponRay.origin, hitPos, Color.green, 5);
                     return;
                 }
@@ -153,7 +153,7 @@ public class NetWeapon : CachedNetTransform
                 Debug.DrawLine(weaponRay.origin, rayHit.point, Color.yellow, 5);
 
                 lastDistance = distance;
-                distance -= fallStep;
+                //distance -= fallStep;
                 weaponRay.direction += Vector3.down * bulletData.fallOff;
                 continue;
             }
