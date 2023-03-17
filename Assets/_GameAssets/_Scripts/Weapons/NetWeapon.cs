@@ -69,7 +69,7 @@ public class NetWeapon : CachedNetTransform
     {
         if (NetworkTime.time < fireTime) return;
 
-        MyTransform.eulerAngles = new Vector3(owningPlayer.GetPlayerCameraXAxis(), MyTransform.eulerAngles.y, MyTransform.eulerAngles.z);
+        MyTransform.eulerAngles = new Vector3(owningPlayer.GetPlayerCameraXAxis_Server(), MyTransform.eulerAngles.y, MyTransform.eulerAngles.z);
 
         switch (bulletData.type)
         {
@@ -98,7 +98,7 @@ public class NetWeapon : CachedNetTransform
         {
             float distance = Vector3.Distance(finalPos, hitBoxList[i].MyTransform.position);
             float damageFalloff = Mathf.Clamp(bulletData.radius - distance, 0, bulletData.radius) / bulletData.radius;
-            hitBoxList[i].GetCharacterScript().TakeDamage(bulletData.damage * damageFalloff, bulletData.damageType);
+            hitBoxList[i].GetCharacterScript().TakeDamage_Server(bulletData.damage * damageFalloff, bulletData.damageType);
         }
         RpcBulletExplosion(finalPos, finalRot);
     }
@@ -191,7 +191,7 @@ public class NetWeapon : CachedNetTransform
     IEnumerator ApplyDistanceToDamage(HitBox hitBoxToHit, float distance)
     {
         yield return new WaitForSeconds(distance / bulletData.initialSpeed);
-        hitBoxToHit.GetCharacterScript().TakeDamage(bulletData.damage, DamageType.Bullet);
+        hitBoxToHit.GetCharacterScript().TakeDamage_Server(bulletData.damage, DamageType.Bullet);
     }
 
     #endregion

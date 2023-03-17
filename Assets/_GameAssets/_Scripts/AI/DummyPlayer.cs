@@ -14,15 +14,15 @@ public class DummyPlayer : Player
     protected override void Start()
     {
         base.Start();
-        if (isServer) Invoke(nameof(DummyStart), .25f);
+        if (IsServer) Invoke(nameof(DummyStart), .25f);
     }
 
     [Server]
     public void DummyStart()
     {
-        GameModeManager.INS.TeamManagerInstance.PlayerSelectedTeam(this, -1);
-        GameModeManager.INS.PlayerChangeClass(this, GetClassForSelectedTeam());
-        GameModeManager.INS.SpawnPlayerByTeam(this);
+        GameModeManager.INS.TeamManagerInstance.PlayerSelectedTeam_Server(this, -1);
+        GameModeManager.INS.PlayerChangeClass_Server(this, GetClassForSelectedTeam());
+        GameModeManager.INS.SpawnPlayerByTeam_Server(this);
     }
 
     int GetClassForSelectedTeam()
@@ -33,7 +33,7 @@ public class DummyPlayer : Player
         int size = classDataArray.Length;
         for (int i = 0; i < size; i++)
         {
-            if (classDataArray[i].teamSpecific == playerTeam)
+            if (classDataArray[i].teamSpecific == playerTeam.Value)
             {
                 filteredClassData.Add(i);
                 //print($"{playerTeam} - {classDataArray[i]}");

@@ -118,7 +118,7 @@ public class ControlPoint : NetworkBehaviour
 
     protected virtual void CheckPlayerCount()
     {
-        canCapture = GameModeManager.INS.CanCaptureControlPoint(ref playersInCP, out int defyingTeam, currentTeam, PointOrder);
+        canCapture = GameModeManager.INS.CanCaptureControlPoint_Server(ref playersInCP, out int defyingTeam, currentTeam, PointOrder);
         if (defyingTeam != 0)
         {
             if (captureProgress > 0 && this.defyingTeam != defyingTeam)
@@ -155,10 +155,10 @@ public class ControlPoint : NetworkBehaviour
 
     protected virtual void NotifyPointCapture()
     {
-        GameModeManager.INS.DoActionPerPlayer((player) => 
+        GameModeManager.INS.DoActionPerPlayer_Server((player) => 
         {
-            player.UpdatePlayerScore(50);
-            player.RpcControlPointCaptured(defyingTeam, currentTeam, name);
+            player.UpdatePlayerScore_Server(50);
+            player.ControlPointCaptured_ClientRpc(defyingTeam, currentTeam, name);
         });
 
         OnControllPointCaptured?.Invoke(defyingTeam, currentTeam);
@@ -201,7 +201,7 @@ public class ControlPoint : NetworkBehaviour
     protected virtual int GetPlayersInTeam(int team)
     {
         if (team != 0) 
-            return GameModeManager.INS.TeamManagerInstance.SeparatePlayersPerTeam(ref playersInCP)[team - 1];
+            return GameModeManager.INS.TeamManagerInstance.SeparatePlayersPerTeam_Server(ref playersInCP)[team - 1];
         return 1;
     }
 

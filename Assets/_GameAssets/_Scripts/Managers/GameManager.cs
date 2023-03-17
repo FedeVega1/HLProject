@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Mirror;
+using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 
 public class VideoOptions
 {
@@ -116,9 +117,12 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager INS;
 
-    [SerializeField] NetManager netManager;
+    //[SerializeField] NetManager netManager;
+    //[SerializeField] NetworkManager netManager;
     [SerializeField] UILoadingScreen loadingScreen;
     [SerializeField] GameObject[] mainMenuBackgrounds;
+
+    UnityTransport netTransport;
 
     string _PlayerName = "";
     public string PlayerName 
@@ -170,7 +174,11 @@ public class GameManager : MonoBehaviour
         videoOptions = new VideoOptions();
     }
 
-    void Start() => InitMainMenu();
+    void Start() 
+    {
+        netTransport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        InitMainMenu();
+    }
 
     void InitMainMenu()
     {
@@ -182,21 +190,24 @@ public class GameManager : MonoBehaviour
 
     public void CreateMatch()
     {
-        ShowLoadingScreen(netManager.StartHost);
+        ShowLoadingScreen(NetworkManager.Singleton.StartHost);
+        LeanTween.delayedCall(1, () => NetworkManager.Singleton.SceneManager.LoadScene("TestMap", LoadSceneMode.Single));
     }
 
     public void ConnectToServerByIP(string serverIP)
     {
-        netManager.networkAddress = serverIP;
-        ShowLoadingScreen(netManager.StartClient);
+        //netManager.networkAddress = serverIP;
+        netTransport.SetConnectionData(serverIP, 7777);
+        ShowLoadingScreen(NetworkManager.Singleton.StartClient);
     }
 
     public void StopServer()
     {
         ShowLoadingScreen(() => 
         { 
-            netManager.StopHost();
+            NetworkManager.Singleton.Shutdown();
             returningtoMainMenu = true;
+            return true;
         });
     }
 
@@ -204,8 +215,9 @@ public class GameManager : MonoBehaviour
     {
         ShowLoadingScreen(() =>
         {
-            netManager.StopClient(); 
+            NetworkManager.Singleton.Shutdown();
             returningtoMainMenu = true;
+            return true;
         });
     }
 
@@ -215,7 +227,7 @@ public class GameManager : MonoBehaviour
         if (returningtoMainMenu) InitMainMenu();
     }
 
-    void ShowLoadingScreen(System.Action OnLoadingScreenShown)
+    void ShowLoadingScreen(System.Func<bool> OnLoadingScreenShown)
     {
         if (loadingScreen != null) loadingScreen.ShowLoadingScreen();
         LeanTween.value(0, 1, .5f).setOnComplete(() => { OnLoadingScreenShown?.Invoke(); });
@@ -223,7 +235,11 @@ public class GameManager : MonoBehaviour
 
     public void ServerChangeLevel()
     {
-        ShowLoadingScreen(() => { netManager.ServerChangeScene(netManager.onlineScene); });
+        ShowLoadingScreen(() => 
+        { 
+            NetworkManager.Singleton.SceneManager.LoadScene("TestMap", LoadSceneMode.Single);
+            return true;
+        });
     }
 
     public string SetPlayerName(string newName) => PlayerName = newName;

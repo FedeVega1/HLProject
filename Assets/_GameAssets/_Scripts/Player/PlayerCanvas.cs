@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using TMPro;
-using Mirror;
 
 public class PlayerCanvas : MonoBehaviour
 {
@@ -89,10 +87,10 @@ public class PlayerCanvas : MonoBehaviour
 
     #region Buttons
 
-    public void SelectTeam(int team) => playerScript.TrySelectTeam(team);
-    public void SelectClass(int classIndex) => playerScript.TrySelectClass(classIndex);
-    public void Respawn() => playerScript.TryPlayerSpawn();
-    public void GiveUp() => playerScript.TryWoundedGiveUp();
+    public void SelectTeam(int team) => playerScript.TrySelectTeam_Client(team);
+    public void SelectClass(int classIndex) => playerScript.TrySelectClass_Client(classIndex);
+    public void Respawn() => playerScript.TryPlayerSpawn_Client();
+    public void GiveUp() => playerScript.TryWoundedGiveUp_Client();
 
     #endregion
 

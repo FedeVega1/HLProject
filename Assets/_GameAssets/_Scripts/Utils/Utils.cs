@@ -1,9 +1,10 @@
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using Mirror;
+//using Mirror;
 
-public abstract class CachedTransform : MonoBehaviour
+public abstract class CachedTransform : CommonNetworkBehaviour
 {
     Transform _MyTransform;
     public Transform MyTransform
@@ -16,7 +17,7 @@ public abstract class CachedTransform : MonoBehaviour
     }
 }
 
-public abstract class CachedNetTransform : NetworkBehaviour
+public abstract class CachedNetTransform : CommonNetworkBehaviour
 {
     Transform _MyTransform;
     public Transform MyTransform
@@ -27,10 +28,12 @@ public abstract class CachedNetTransform : NetworkBehaviour
             return _MyTransform;
         }
     }
+
+
 }
 
 [RequireComponent(typeof(Rigidbody))]
-public abstract class CachedRigidBody : CachedTransform
+public abstract class CachedRigidBody : CommonNetworkBehaviour
 {
     Rigidbody _MyRigidBody;
     public Rigidbody MyRigidBody
@@ -55,6 +58,60 @@ public abstract class CachedRectTransform : MonoBehaviour
             return _MyRectTransform;
         }
     }
+}
+
+public abstract class CommonNetworkBehaviour : NetworkBehaviour
+{
+    protected double NetTime => NetworkManager.Singleton.ServerTime.Time;
+
+    protected ClientRpcParams SendRpcToPlayer;
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer)
+        {
+            SendRpcToPlayer = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new ulong[] { NetworkBehaviourId } } };
+            OnServerSpawn();
+            return;
+        }
+
+        OnClientSpawn();
+        if (IsLocalPlayer)
+        {
+            OnLocalPlayerSpawn();
+            return;
+        }
+
+        OnExternalClientSpawn();
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        if (IsServer)
+        {
+            OnServerDespawn();
+            return;
+        }
+
+        OnClientDespawn();
+        if (IsLocalPlayer)
+        {
+            OnLocalPlayerDespawn();
+            return;
+        }
+
+        OnExternalClientDespawn();
+    }
+
+    protected virtual void OnServerSpawn() { }
+    protected virtual void OnClientSpawn() { }
+    protected virtual void OnLocalPlayerSpawn() { }
+    protected virtual void OnExternalClientSpawn() { }
+
+    protected virtual void OnServerDespawn() { }
+    protected virtual void OnClientDespawn() { }
+    protected virtual void OnLocalPlayerDespawn() { }
+    protected virtual void OnExternalClientDespawn() { }
 }
 
 public static class Utilities
@@ -97,11 +154,11 @@ public class PlayerTimer
     public PlayerTimer(ref Player _Player, float time, System.Action<Player> action)
     {
         affectedPlayer = _Player;
-        timeToAction = NetworkTime.time + time;
+        timeToAction = NetworkManager.Singleton.ServerTime.Time + time;
         actionToPerform = action;
     }
 
     public bool IsAffectedPlayer(ref Player playerToCheck) => playerToCheck == affectedPlayer;
-    public bool OnTime() => NetworkTime.time >= timeToAction;
+    public bool OnTime() => NetworkManager.Singleton.ServerTime.Time >= timeToAction;
     public void PerformAction() => actionToPerform?.Invoke(affectedPlayer);
 }

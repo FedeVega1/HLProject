@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Mirror;
+using Unity.Netcode;
 
-public class TeamManager : NetworkBehaviour
+public class TeamManager : CommonNetworkBehaviour
 {
     [System.Serializable]
     class Team
@@ -89,7 +89,7 @@ public class TeamManager : NetworkBehaviour
 
     public System.Action<int, int> OnTicketChange;
 
-    public override void OnStartServer()
+    protected override void OnServerSpawn()
     {
         spectators = new List<Player>();
         //playersByTeam = new List<Player>[MAXTEAMS];
@@ -99,7 +99,7 @@ public class TeamManager : NetworkBehaviour
         {
             teamData[i] = new Team(i + 1);
             teamData[i].SetTickets(currentGameModeData.ticketsPerTeam[i]);
-            teamData[i].OnLostAllTickets += GameModeManager.INS.EndMatch;
+            teamData[i].OnLostAllTickets += GameModeManager.INS.EndMatch_Server;
         }
 
         teamData[0].nextPointToCapture = 0;
@@ -108,42 +108,41 @@ public class TeamManager : NetworkBehaviour
         teamData[0].UpdateTickets += (tickets) => { OnTicketChange?.Invoke(1, tickets); };
         teamData[1].UpdateTickets += (tickets) => { OnTicketChange?.Invoke(2, tickets); };
 
-        GameModeManager.INS.OnMatchEnded += MatchEnded;
+        GameModeManager.INS.OnMatchEnded += MatchEnded_Server;
         //for (int i = 0; i < MAXTEAMS; i++) playersByTeam[i] = new List<Player>();
     }
 
     void Update()
     {
-        if (!isServer) return;
+        if (!IsServer) return;
         for (int i = 0; i < MAXTEAMS; i++) teamData[i].Update();
     }
 
-    [Server]
-    public void GetGameModeData(ref GameModeData data, int totalCP)
+    public void GetGameModeData_Server(ref GameModeData data, int totalCP)
     {
         currentGameModeData = data;
         this.totalCP = totalCP;
     }
 
-    [Server]
-    public void PlayerSelectedTeam(Player playerScript, int selectedTeam)
+    public void PlayerSelectedTeam_Server(Player playerScript, int selectedTeam)
     {
+        ClientRpcParams rpcParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new ulong[] { playerScript.NetworkBehaviourId } } };
         if (playerScript == null)
         {
             Debug.LogError($"TeamSelection Player component is null");
-            playerScript.RpcTeamSelectionError(playerScript.connectionToClient, 0x00);
+            playerScript.TeamSelectionError_ClientRpc(0x00, rpcParams);
             return;
         }
 
         switch (selectedTeam)
         {
             case -1:
-                selectedTeam = SelectUnBalancedTeam();
+                selectedTeam = SelectUnBalancedTeam_Server();
                 break;
 
             case 0:
                 //SetAsSpectator(ref playerScript);
-                if (playerScript.connectionToClient != null) playerScript.RpcTeamSelectionError(playerScript.connectionToClient, 1);
+                if (playerScript.IsSpawned) playerScript.TeamSelectionError_ClientRpc(1, rpcParams);
                 return;
 
             default:
@@ -157,14 +156,13 @@ public class TeamManager : NetworkBehaviour
         else spectators.Remove(playerScript);
 
         playerScript.SetPlayerTeam(selectedTeam);
-        if (playerScript.connectionToClient != null) playerScript.RpcTeamSelectionSuccess(playerScript.connectionToClient, selectedTeam);
+        if (playerScript.IsSpawned) playerScript.TeamSelectionSuccess_ClientRpc(selectedTeam, rpcParams);
         if (selectedTeam > 0) teamData[selectedTeam - 1].playersInTeam.Add(playerScript);
         GameModeManager.INS.OnPlayerSelectedTeam(playerScript, selectedTeam);
         //GameModeManager.INS.SpawnPlayerByTeam(playerScript);
     }
 
-    [Server]
-    int SelectUnBalancedTeam()
+    int SelectUnBalancedTeam_Server()
     {
         int unbalancedTeam = -1, quantityOfPlayers = 9999;
         for (int i = 0; i < MAXTEAMS; i++)
@@ -180,15 +178,13 @@ public class TeamManager : NetworkBehaviour
         return unbalancedTeam;
     }
 
-    [Server]
-    void SetAsSpectator(ref Player playerScript)
+    void SetAsSpectator_Server(ref Player playerScript)
     {
         spectators.Add(playerScript);
-        playerScript.SetAsSpectator();
+        playerScript.SetAsSpectator_Server();
     }
 
-    [Server]
-    public int[] SeparatePlayersPerTeam(ref List<Player> players)
+    public int[] SeparatePlayersPerTeam_Server(ref List<Player> players)
     {
         int[] playersPerTeam = new int[MAXTEAMS];
 
@@ -203,8 +199,7 @@ public class TeamManager : NetworkBehaviour
         return playersPerTeam;
     }
 
-    [Server]
-    public void OnCapturedControlPoint(int team, int oldTeam)
+    public void OnCapturedControlPoint_Server(int team, int oldTeam)
     {
         switch (team)
         {
@@ -259,37 +254,31 @@ public class TeamManager : NetworkBehaviour
         }
     }
 
-    [Server]
-    public int GetTeamControlledPoints(int teamIndex)
+    public int GetTeamControlledPoints_Server(int teamIndex)
     {
         return teamData[Mathf.Clamp(teamIndex, 0, MAXTEAMS)].nextPointToCapture;
     }
 
-    [Server]
-    public void RemoveTicket(int team, int quanity)
+    public void RemoveTicket_Server(int team, int quanity)
     {
         teamData[team - 1].RemoveTicket(quanity);
     }
 
-    [Server]
-    public int GetLoosingTeam()
+    public int GetLoosingTeam_Server()
     {
         if (teamData[0].Tickets == teamData[1].Tickets) return -1;
         return teamData[0].Tickets > 0 ? 1 : 2;
     }
 
-    [Server]
-    public void MatchEnded(int loosingTeam)
+    public void MatchEnded_Server(int loosingTeam)
     {
         enabled = false;
         for (int i = 0; i < MAXTEAMS; i++) teamData[i].StopBleeding();
     }
 
-    [Server]
-    public int GetTicketsFromTeam(int team) => teamData[team - 1].Tickets;
+    public int GetTicketsFromTeam_Server(int team) => teamData[team - 1].Tickets;
     
-    [Server]
-    public List<Player> GetPlayersOnTeam(int teamIndex)
+    public List<Player> GetPlayersOnTeam_Server(int teamIndex)
     {
         List<Player> playersOnTeam = new List<Player>();
         teamIndex = Mathf.Clamp(teamIndex, 0, MAXTEAMS);

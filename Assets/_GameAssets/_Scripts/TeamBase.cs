@@ -13,7 +13,7 @@ public class TeamBase : ControlPoint
         if (uncapturablePoint)
         {
             Player playerScript = other.GetComponent<Player>();
-            if (playerScript.GetPlayerTeam() != currentTeam) GameModeManager.INS.PlayerOnEnemyBase(playerScript);
+            if (playerScript.GetPlayerTeam() != currentTeam) GameModeManager.INS.PlayerOnEnemyBase_Server(playerScript);
             playersInCP.Add(playerScript);
             return;
         }
@@ -32,7 +32,7 @@ public class TeamBase : ControlPoint
             {
                 if (playersInCP[i].gameObject == other.gameObject)
                 {
-                    if (playersInCP[i].GetPlayerTeam() != currentTeam) GameModeManager.INS.PlayerLeftEnemyBase(playersInCP[i]);
+                    if (playersInCP[i].GetPlayerTeam() != currentTeam) GameModeManager.INS.PlayerLeftEnemyBase_Server(playersInCP[i]);
                     playersInCP.RemoveAt(i);
                     break;
                 }

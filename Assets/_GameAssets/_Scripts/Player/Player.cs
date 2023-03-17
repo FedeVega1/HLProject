@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Networking;
 using UnityEngine;
-using Mirror;
+using Unity.Netcode;
 
 public class Player : Character
 {
@@ -13,10 +13,10 @@ public class Player : Character
     [SerializeField] protected PlayerMovement movementScript;
     [SerializeField] protected float woundedMaxTime;
 
-    [SyncVar(hook = nameof(OnTeamChange))] protected int playerTeam;
-    [SyncVar] protected bool isWounded, firstSpawn;
-    [SyncVar] protected string playerName;
-    [SyncVar] protected double timeToRespawn;
+    protected NetworkVariable<int> playerTeam = new NetworkVariable<int>();
+    protected NetworkVariable<bool> isWounded = new NetworkVariable<bool>(), firstSpawn = new NetworkVariable<bool>();
+    protected NetworkVariable<string> playerName = new NetworkVariable<string>();
+    protected NetworkVariable<double> timeToRespawn = new NetworkVariable<double>();
 
     public float MaxRespawnTime { get; set; }
     public float BonusWoundTime { get; set; }
@@ -30,23 +30,30 @@ public class Player : Character
 
     #region Hooks
 
-    void OnTeamChange(int oldTeam, int newTeam) => print($"{playerName} Team is {newTeam}");
+    void OnTeamChange(int oldTeam, int newTeam) => Debug.LogFormat("{0} Team is {1}", playerName, newTeam);
 
     #endregion
 
-    public override void OnStartServer()
+    protected override void OnServerSpawn()
     {
-        base.OnStartServer();
+        base.OnServerSpawn();
         movementScript.freezePlayer = true;
-        firstSpawn = true;
+        firstSpawn.Value = true;
     }
 
-    public override void OnStartLocalPlayer()
+    protected override void OnClientSpawn()
     {
+        base.OnClientSpawn();
+        playerTeam.OnValueChanged += OnTeamChange;
+    }
+
+    protected override void OnLocalPlayerSpawn()
+    {
+        base.OnLocalPlayerSpawn();
         PlayerCanvasScript = Instantiate(playerCanvasPrefab).GetComponent<PlayerCanvas>();
         PlayerCanvasScript.Init(this);
         movementScript.FreezeInputs = true;
-        GameModeManager.INS.TeamManagerInstance.OnTicketChange += UpdateMatchTickets;
+        GameModeManager.INS.TeamManagerInstance.OnTicketChange += UpdateMatchTickets_Client;
     }
 
     //public override void OnStartClient()
@@ -57,8 +64,8 @@ public class Player : Character
 
     protected virtual void Start()
     {
-        if (!isLocalPlayer) Destroy(playerCamera);
-        if (!IsDead && firstSpawn) playerMesh.enabled = false;
+        if (!IsLocalPlayer) Destroy(playerCamera);
+        if (!IsDead && firstSpawn.Value) playerMesh.enabled = false;
 
         inventory = GetComponent<PlayerInventory>();
         inventory.DisablePlayerInputs = true;
@@ -68,22 +75,22 @@ public class Player : Character
     {
         base.Update();
 
-        if (isLocalPlayer) CheckInputs();
-        if (isServer) PlayerWoundedUpdate();
+        if (IsLocalPlayer) CheckInputs_Client();
+        if (IsServer) PlayerWoundedUpdate();
     }
 
     void OnDisable()
     {
-        GameModeManager.INS.TeamManagerInstance.OnTicketChange -= UpdateMatchTickets;
+        GameModeManager.INS.TeamManagerInstance.OnTicketChange -= UpdateMatchTickets_Client;
     }
 
     #region Get/Set
 
-    public string SetPlayerName(string newName) => playerName = newName;
-    public string GetPlayerName() => playerName;
+    public string SetPlayerName(string newName) => playerName.Value = newName;
+    public string GetPlayerName() => playerName.Value;
 
-    public int GetPlayerTeam() => playerTeam;
-    public void SetPlayerTeam(int newPlayerTeam) => playerTeam = newPlayerTeam;
+    public int GetPlayerTeam() => playerTeam.Value;
+    public void SetPlayerTeam(int newPlayerTeam) => playerTeam.Value = newPlayerTeam;
 
     public bool PlayerIsMoving() => movementScript.PlayerIsMoving;
     public bool PlayerIsRunning() => movementScript.PlayerIsRunning;
@@ -92,19 +99,18 @@ public class Player : Character
 
     #region Client
 
-    [Client]
-    protected virtual void CheckInputs()
+    protected virtual void CheckInputs_Client()
     {
         if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Escape)) GameManager.INS.StopServer();
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (isServer && isClient) GameManager.INS.StopServer();
+            if (IsServer && IsClient) GameManager.INS.StopServer();
             else GameManager.INS.DisconnectFromServer();
         }
 
-        if (Input.GetKeyDown(KeyCode.Delete)) GameModeManager.INS.KillPlayer(this);
-        if (Input.GetKeyDown(KeyCode.F1)) GameModeManager.INS.EndMatch();
+        if (Input.GetKeyDown(KeyCode.Delete)) GameModeManager.INS.KillPlayer_Server(this);
+        if (Input.GetKeyDown(KeyCode.F1)) GameModeManager.INS.EndMatch_Server();
 
         if (Input.GetKeyDown(KeyCode.Tab))
         {
@@ -115,10 +121,10 @@ public class Player : Character
                 return;
             }
 
-            TryGetPlayerInfo();
+            TryGetPlayerInfo_Client();
         }
 
-        if (IsDead || firstSpawn) return;
+        if (IsDead || firstSpawn.Value) return;
 
         if (Input.GetKeyDown(KeyCode.Return))
         {
@@ -161,78 +167,70 @@ public class Player : Character
         }
     }
 
-    [Client]
-    public void TrySelectTeam(int team)
+    public void TrySelectTeam_Client(int team)
     {
-        if (!isLocalPlayer) return;
-        CmdRequestPlayerChangeTeam(team);
+        if (!IsLocalPlayer) return;
+        RequestPlayerChangeTeam_ServerRpc(team);
     }
 
-    public void TryGetPlayerInfo()
+    public void TryGetPlayerInfo_Client()
     {
-        if (!isLocalPlayer) return;
-        CmdRequestPlayerInfo();
+        if (!IsLocalPlayer) return;
+        RequestPlayerInfo_ServerRpc();
         PlayerCanvasScript.ToggleScoreboard(true);
     }
 
-    [Client]
-    public void UpdateMatchTickets(int team, int tickets)
+    public void UpdateMatchTickets_Client(int team, int tickets)
     {
-        if (isLocalPlayer) PlayerCanvasScript.SetTeamTickets(team - 1, tickets);
-        print($"{TeamManager.FactionNames[team - 1]} tickets: {tickets}");
+        if (IsLocalPlayer) PlayerCanvasScript.SetTeamTickets(team - 1, tickets);
+        Debug.LogFormat("{0} tickets: {1}", TeamManager.FactionNames[team - 1], tickets);
     }
 
-    [Client]
-    public void TrySelectClass(int classIndex)
+    public void TrySelectClass_Client(int classIndex)
     {
-        if (!isLocalPlayer) return;
-        CmdRequestPlayerChangeClass(classIndex);
+        if (!IsLocalPlayer) return;
+        RequestPlayerChangeClass_ServerRpc(classIndex);
     }
 
-    [Client]
-    public void TryPlayerSpawn()
+    public void TryPlayerSpawn_Client()
     {
-        if (!isLocalPlayer) return;
-        CmdRequestPlayerRespawn();
+        if (!IsLocalPlayer) return;
+        RequestPlayerRespawn_ServerRpc();
     }
 
-    [Client]
-    public void TryWoundedGiveUp()
+    public void TryWoundedGiveUp_Client()
     {
-        if (!isLocalPlayer) return;
-        CmdRequestWoundedGiveUp();
+        if (!IsLocalPlayer) return;
+        RequestWoundedGiveUp_ServerRpc();
     }
 
     #endregion
 
     #region Server
 
-    [Server]
-    public override void TakeDamage(float ammount, DamageType damageType = DamageType.Base)
+    public override void TakeDamage_Server(float ammount, DamageType damageType = DamageType.Base)
     {
-        if (isWounded) return;
-        base.TakeDamage(ammount, damageType);
+        if (isWounded.Value) return;
+        base.TakeDamage_Server(ammount, damageType);
     }
 
-    [Server]
     public void PlayerWoundedUpdate()
     {
-        if (isDead || isInvencible || !isWounded || NetworkTime.time < woundedTime) return;
-        isWounded = false;
-        isDead = true;
+        if (IsDead || isInvencible.Value || !isWounded.Value || NetTime < woundedTime) return;
+        isWounded.Value = false;
+        isDead.Value = true;
 
         Transform specPoint = GameModeManager.INS.GetSpectatePointByIndex(0);
         MyTransform.position = specPoint.position;
         MyTransform.rotation = specPoint.rotation;
 
-        RpcWoundedCanGiveUp(connectionToClient);
-        RpcCharacterDied();
+        WoundedCanGiveUp_ClientRpc(SendRpcToPlayer);
+        CharacterDied_ClientRpc();
     }
 
-    [Server]
-    public void SetAsSpectator() 
+    public void SetAsSpectator_Server() 
     {
-        isInvencible = true;
+        isInvencible.Value = true;
 
         Transform specPoint = GameModeManager.INS.GetSpectatePointByIndex(0);
         MyTransform.position = specPoint.position;
@@ -243,46 +241,42 @@ public class Player : Character
         movementScript.FreezeInputs = false;
     }
 
-    [Server]
-    public void SpawnPlayer(Vector3 spawnPosition, Quaternion spawnRotation, float spawnTime)
+    public void SpawnPlayer_Server(Vector3 spawnPosition, Quaternion spawnRotation, float spawnTime)
     {
         //print($"NewPos: {MyTransform.position}");
-        InitCharacter();
+        InitCharacter_Server();
         MaxRespawnTime = spawnTime;
         movementScript.ForceMoveCharacter(spawnPosition, spawnRotation);
         movementScript.freezePlayer = false;
         //movementScript.RpcToggleFreezePlayer(connectionToClient, false);
-        print($"Server: Setup weapon inventory for {playerName} player - ClassName: {classData.className}");
-        inventory.SetupWeaponInventory(classData.classWeapons, 0);
-        RpcPlayerSpawns();
+        Debug.LogFormat("Server: Setup weapon inventory for {0} player - ClassName: {1}", playerName, classData.className);
+        inventory.SetupWeaponInventory_Server(classData.classWeapons, 0);
+        PlayerSpawns_ClientRpc();
     }
 
-    [Server]
-    protected override void CharacterDies(bool criticalHit)
+    protected override void CharacterDies_Server(bool criticalHit)
     {
-        if (isDead || isInvencible) return;
+        if (isDead.Value || isInvencible.Value) return;
 
-        isBleeding = false;
-        timeToRespawn = NetworkTime.time + MaxRespawnTime;
-        woundedTime = criticalHit ? 0 : NetworkTime.time + (woundedMaxTime - BonusWoundTime);
+        isBleeding.Value = false;
+        timeToRespawn.Value = NetTime + MaxRespawnTime;
+        woundedTime = criticalHit ? 0 : NetTime + (woundedMaxTime - BonusWoundTime);
 
         deaths++;
-        isWounded = true;
-        RpcShowWoundedHUD(connectionToClient, woundedTime, timeToRespawn);
+        isWounded.Value = true;
+        ShowWoundedHUD_ClientRpc(woundedTime, timeToRespawn.Value, SendRpcToPlayer);
         movementScript.freezePlayer = true;
         OnPlayerDead?.Invoke();
         //movementScript.RpcToggleFreezePlayer(connectionToClient, true);
         //base.CharacterDies();
     }
 
-    [Server]
-    public void Init()
+    public void Init_Server()
     {
-        GameModeManager.INS.OnMatchEnded += MatchEnded;
+        GameModeManager.INS.OnMatchEnded += MatchEnded_Server;
     }
 
-    [Server]
-    void MatchEnded(int loosingTeam)
+    void MatchEnded_Server(int loosingTeam)
     {
         movementScript.freezePlayer = true;
         movementScript.ToggleCharacterController(false);
@@ -291,11 +285,10 @@ public class Player : Character
         movementScript.MyTransform.position = spectPoint.position;
         movementScript.MyTransform.rotation = spectPoint.rotation;
 
-        RpcMatchEndPlayerSetup(loosingTeam, GameModeManager.INS.timeToChangeLevel);
+        MatchEndPlayerSetup_ClientRpc(loosingTeam, GameModeManager.INS.timeToChangeLevel);
     }
 
-    [Server]
-    public void SetPlayerClass(TeamClassData classData, int classIndex)
+    public void SetPlayerClass_Server(TeamClassData classData, int classIndex)
     {
         currentClassIndex = classIndex;
         this.classData = classData;
@@ -303,59 +296,54 @@ public class Player : Character
         print($"Server: CurrentClass {classData.className}");
     }
 
-    [Server]
-    public float GetPlayerCameraXAxis() => movementScript.CameraXAxis;
+    public float GetPlayerCameraXAxis_Server() => movementScript.CameraXAxis;
 
-    public PlayerScoreboardInfo GetPlayerScoreboardInfo(int requesterTeam, bool ignoreTeamFilter = false)
+    public PlayerScoreboardInfo GetPlayerScoreboardInfo_Server(int requesterTeam, bool ignoreTeamFilter = false)
     {
-        if (ignoreTeamFilter || requesterTeam == playerTeam)
+        if (ignoreTeamFilter || requesterTeam == playerTeam.Value)
         {
-            return new PlayerScoreboardInfo(playerTeam, currentClassIndex, playerName, score, revives, deaths, IsDead, isLocalPlayer);
+            return new PlayerScoreboardInfo(playerTeam.Value, currentClassIndex, playerName.Value, score, revives, deaths, IsDead, IsLocalPlayer);
         }
 
-        return new PlayerScoreboardInfo(playerTeam, playerName, score);
+        return new PlayerScoreboardInfo(playerTeam.Value, playerName.Value, score);
     }
 
-    public void UpdatePlayerScore(int ammount) => score += ammount;
+    public void UpdatePlayerScore_Server(int ammount) => score += ammount;
 
     #endregion
 
     #region ServerCommands
 
-    [Command]
-    void CmdRequestPlayerInfo()
+    [ServerRpc]
+    void RequestPlayerInfo_ServerRpc()
     {
-        PlayerScoreboardInfo[] info = GameModeManager.INS.GetScoreboardInfo(playerTeam);
-        RpcShowScoreboard(connectionToClient, info);
+        PlayerScoreboardInfo[] info = GameModeManager.INS.GetScoreboardInfo_Server(playerTeam.Value);
+        ShowScoreboard_ClientRpc(info, SendRpcToPlayer);
     }
 
-    [Command]
-    void CmdRequestPlayerChangeTeam(int team)
+    void RequestPlayerChangeTeam_ServerRpc(int team)
     {
         movementScript.freezePlayer = true;
-        if (!isDead && !firstSpawn) GameModeManager.INS.KillPlayer(this);
+        if (!isDead.Value && !firstSpawn.Value) GameModeManager.INS.KillPlayer_Server(this);
         classData = null;
-        GameModeManager.INS.TeamManagerInstance.PlayerSelectedTeam(this, team);
+        GameModeManager.INS.TeamManagerInstance.PlayerSelectedTeam_Server(this, team);
     }
 
-    [Command]
-    void CmdRequestPlayerChangeClass(int teamClass)
+    void RequestPlayerChangeClass_ServerRpc(int teamClass)
     {
-        GameModeManager.INS.PlayerChangeClass(this, teamClass);
+        GameModeManager.INS.PlayerChangeClass_Server(this, teamClass);
     }
 
-    [Command]
-    void CmdRequestPlayerRespawn()
+    void RequestPlayerRespawn_ServerRpc()
     {
-        if ((!isDead && !firstSpawn) || NetworkTime.time < timeToRespawn || classData == null) return;
-        GameModeManager.INS.RespawnPlayer(this);
-        firstSpawn = false;
+        if ((!isDead .Value && !firstSpawn.Value) || NetTime < timeToRespawn.Value || classData == null) return;
+        GameModeManager.INS.RespawnPlayer_Server(this);
+        firstSpawn.Value = false;
     }
 
-    [Command]
-    void CmdRequestWoundedGiveUp()
+    void RequestWoundedGiveUp_ServerRpc()
     {
-        if (isDead || !isWounded) return;
+        if (isDead.Value || !isWounded.Value) return;
         woundedTime = 0;
         //isWounded = false;
         //RpcCharacterDied();
@@ -366,42 +354,42 @@ public class Player : Character
 
     #region TargetRpc
 
-    [TargetRpc]
-    public void RpcShowScoreboard(NetworkConnection target, PlayerScoreboardInfo[] scoreboardInfo)
+    [ClientRpc]
+    public void ShowScoreboard_ClientRpc(PlayerScoreboardInfo[] scoreboardInfo, ClientRpcParams rpcParams = default)
     {
-        if (target.connectionId != connectionToServer.connectionId || !PlayerCanvasScript.IsScoreboardMenuOpen) return;
-        PlayerCanvasScript.InitScoreboard(scoreboardInfo, playerTeam);
+        if (IsOwner || !PlayerCanvasScript.IsScoreboardMenuOpen) return;
+        PlayerCanvasScript.InitScoreboard(scoreboardInfo, playerTeam.Value);
     }
 
-    [TargetRpc]
-    void RpcWoundedCanGiveUp(NetworkConnection target)
+    [ClientRpc]
+    void WoundedCanGiveUp_ClientRpc(ClientRpcParams rpcParams = default)
     {
-        if (target.connectionId != connectionToServer.connectionId) return;
+        if (IsOwner) return;
         PlayerCanvasScript.PlayerNotWounded();
         PlayerCanvasScript.ToggleClassSelection(true);
     }
 
-    [TargetRpc]
-    public void RpcShowGreetings(NetworkConnection target, int team1Tickets, int team2Tickets)
+    [ClientRpc]
+    public void ShowGreetings_ClientRpc(int team1Tickets, int team2Tickets, ClientRpcParams rpcParams = default)
     {
-        if (target.connectionId != connectionToServer.connectionId) return;
+        if (IsOwner) return;
 
         PlayerCanvasScript.ToggleTeamSelection(true);
         PlayerCanvasScript.SetTeamTickets(0, team1Tickets);
         PlayerCanvasScript.SetTeamTickets(1, team2Tickets);
     }
 
-    [TargetRpc]
-    public void RpcTeamSelectionError(NetworkConnection target, int error)
+    [ClientRpc]
+    public void TeamSelectionError_ClientRpc(int error, ClientRpcParams rpcParams = default)
     {
-        if (target.connectionId != connectionToServer.connectionId) return;
-        Debug.LogError($"Client: TeamSelection error code: {error}");
+        if (IsOwner) return;
+        Debug.LogErrorFormat("Client: TeamSelection error code: {0}", error);
     }
 
-    [TargetRpc]
-    public void RpcTeamSelectionSuccess(NetworkConnection target, int team)
+    [ClientRpc]
+    public void TeamSelectionSuccess_ClientRpc(int team, ClientRpcParams rpcParams = default)
     {
-        if (target.connectionId != connectionToServer.connectionId) return;
+        if (IsOwner) return;
         PlayerCanvasScript.ToggleTeamSelection(false);
 
         if (team > 0)
@@ -411,93 +399,93 @@ public class Player : Character
         }
     }
 
-    [TargetRpc]
-    public void RpcClassSelectionError(NetworkConnection target, int error)
+    [ClientRpc]
+    public void ClassSelectionError_ClientRpc(int error, ClientRpcParams rpcParams = default)
     {
-        if (target.connectionId != connectionToServer.connectionId) return;
-        Debug.LogError($"Client: ClassSelection error code: {error}");
+        if (IsOwner) return;
+        Debug.LogErrorFormat("Client: ClassSelection error code: {0}", error);
         PlayerCanvasScript.ToggleSpawnButton(true);
     }
 
-    [TargetRpc]
-    public void RpcClassSelectionSuccess(NetworkConnection target, int classIndex)
+    [ClientRpc]
+    public void ClassSelectionSuccess_ClientRpc(int classIndex, ClientRpcParams rpcParams = default)
     { 
-        if (target.connectionId != connectionToServer.connectionId) return;
-        if (isDead || firstSpawn) PlayerCanvasScript.ToggleSpawnButton(true);
+        if (IsOwner) return;
+        if (isDead.Value || firstSpawn.Value) PlayerCanvasScript.ToggleSpawnButton(true);
         PlayerCanvasScript.OnClassSelection(classIndex);
-        print($"Client: CurrentClass {classIndex}");
+        Debug.LogFormat("Client: CurrentClass {0}", classIndex);
     }
 
-    [TargetRpc]
-    public void RpcOnControlPoint(NetworkConnection target, int currentCPController, float cpCaptureProgress, int defyingTeam)
+    [ClientRpc]
+    public void OnControlPoint_ClientRpc(int currentCPController, float cpCaptureProgress, int defyingTeam, ClientRpcParams rpcParams = default)
     {
-        if (target.connectionId != connectionToServer.connectionId) return;
+        if (IsOwner) return;
         PlayerCanvasScript.OnControlPoint(currentCPController, defyingTeam, cpCaptureProgress);
         onControlPoint = true;
     }
 
-    [TargetRpc]
-    public void RpcExitControlPoint(NetworkConnection target)
+    [ClientRpc]
+    public void ExitControlPoint_ClientRpc(ClientRpcParams rpcParams = default)
     {
-        if (target.connectionId != connectionToServer.connectionId) return;
+        if (IsOwner) return;
         PlayerCanvasScript.OnExitControlPoint();
         onControlPoint = false;
     }
 
-    [TargetRpc]
-    public void RpcUpdateCPProgress(NetworkConnection target, float progress)
+    [ClientRpc]
+    public void UpdateCPProgress_ClientRpc(float progress, ClientRpcParams rpcParams = default)
     {
-        if (target.connectionId != connectionToServer.connectionId) return;
+        if (IsOwner) return;
         PlayerCanvasScript.UpdateCPProgress(progress);
     }
 
-    [TargetRpc]
-    public void RpcPlayerOutOfBounds(NetworkConnection target, float timeToReturn)
+    [ClientRpc]
+    public void PlayerOutOfBounds_ClientRpc(float timeToReturn, ClientRpcParams rpcParams = default)
     {
-        if (target.connectionId != connectionToServer.connectionId) return;
+        if (IsOwner) return;
         PlayerCanvasScript.PlayerOutOfBounds(timeToReturn);
     }
 
-    [TargetRpc]
-    public void RpcPlayerReturned(NetworkConnection target)
+    [ClientRpc]
+    public void PlayerReturned_ClientRpc(ClientRpcParams rpcParams = default)
     {
-        if (target.connectionId != connectionToServer.connectionId) return;
+        if (IsOwner) return;
         PlayerCanvasScript.PlayerInBounds();
     }
 
-    [TargetRpc]
-    void RpcShowWoundedHUD(NetworkConnection target, double _woundedTime, double _respawnTime)
+    [ClientRpc]
+    void ShowWoundedHUD_ClientRpc(double _woundedTime, double _respawnTime, ClientRpcParams rpcParams = default)
     {
-        if (target.connectionId != connectionToServer.connectionId) return;
+        if (IsOwner) return;
         movementScript.FreezeInputs = true;
         inventory.DisablePlayerInputs = true;
         PlayerCanvasScript.PlayerIsWounded(_woundedTime);
         PlayerCanvasScript.ShowRespawnTimer(_respawnTime);
     }
 
-    [TargetRpc]
-    public void RpcPlayerConnected(NetworkConnection target, PlayerScoreboardInfo playerInfo)
+    [ClientRpc]
+    public void PlayerConnected_ClientRpc(PlayerScoreboardInfo playerInfo, ClientRpcParams rpcParams = default)
     {
-        if (target.connectionId != connectionToServer.connectionId) return;
-        Debug.Log($"Client: Player {playerInfo.playerName} connected");
+        if (IsOwner) return;
+        Debug.LogFormat("Client: Player {0} connected", playerInfo.playerName);
         //if (!PlayerCanvasScript.IsScoreboardMenuOpen) return;
         //PlayerCanvasScript.AddPlayerToScoreboard(playerInfo);
     }
 
-    [TargetRpc]
-    public void RpcPlayerSelectedTeam(NetworkConnection target, PlayerScoreboardInfo playerInfo)
+    [ClientRpc]
+    public void PlayerSelectedTeam_ClientRpc(PlayerScoreboardInfo playerInfo, ClientRpcParams rpcParams = default)
     {
-        if (target.connectionId != connectionToServer.connectionId) return;
-        Debug.Log($"Client: Player {playerInfo.playerName} changes his team to {playerInfo.playerTeam}");
+        if (IsOwner) return;
+        Debug.LogFormat("Client: Player {0} changes his team to {1}", playerInfo.playerName, playerInfo.playerTeam);
         if (!PlayerCanvasScript.IsScoreboardMenuOpen) return;
         PlayerCanvasScript.AddPlayerToScoreboard(playerInfo);
     }
 
-    [TargetRpc]
-    public void RpcPlayerDisconnected(NetworkConnection target, string playerName)
+    [ClientRpc]
+    public void PlayerDisconnected_ClientRpc(string playerName, ClientRpcParams rpcParams = default)
     {
-        if (target.connectionId != connectionToServer.connectionId) return;
-        Debug.Log($"Client: Player {playerName} disconnected");
+        if (IsOwner) return;
+        Debug.LogFormat("Client: Player {0} disconnected", playerName);
         PlayerCanvasScript.RemovePlayerFromScoreboard(playerName);
     }
 
@@ -506,9 +494,9 @@ public class Player : Character
     #region ClientRpc
 
     [ClientRpc]
-    protected override void RpcCharacterDied()
+    protected override void CharacterDied_ClientRpc()
     {
-        if (isLocalPlayer)
+        if (IsLocalPlayer)
         {
             movementScript.FreezeInputs = true;
             inventory.DisablePlayerInputs = true;
@@ -518,7 +506,7 @@ public class Player : Character
     }
 
     [ClientRpc]
-    public void RpcControlPointCaptured(int cpTeam, int oldTeam, string cpName)
+    public void ControlPointCaptured_ClientRpc(int cpTeam, int oldTeam, string cpName)
     {
         if (PlayerCanvasScript == null) return;
         if (onControlPoint) PlayerCanvasScript.OnPointCaptured(cpTeam, oldTeam != 0 ? oldTeam : 1);
@@ -526,9 +514,9 @@ public class Player : Character
     }
 
     [ClientRpc]
-    public void RpcPlayerSpawns()
+    public void PlayerSpawns_ClientRpc()
     {
-        if (isLocalPlayer)
+        if (IsLocalPlayer)
         {
             PlayerCanvasScript.PlayerRespawn();
             PlayerCanvasScript.ToggleWeaponInfo(true);
@@ -541,9 +529,9 @@ public class Player : Character
     }
 
     [ClientRpc]
-    public void RpcMatchEndPlayerSetup(int loosingTeam, float timeToChangeLevel)
+    public void MatchEndPlayerSetup_ClientRpc(int loosingTeam, float timeToChangeLevel)
     {
-        if (isLocalPlayer)
+        if (IsLocalPlayer)
         {
             PlayerCanvasScript.ShowGameOverScreen(loosingTeam, timeToChangeLevel);
         }

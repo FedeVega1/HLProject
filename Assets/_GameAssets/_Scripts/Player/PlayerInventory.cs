@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Mirror;
+using Unity.Netcode;
 
 [RequireComponent(typeof(Player))]
-public class PlayerInventory : NetworkBehaviour
+public class PlayerInventory : CommonNetworkBehaviour
 {
     static KeyCode[] WeaponCycleKeys = new KeyCode[5] 
     { 
@@ -16,7 +16,7 @@ public class PlayerInventory : NetworkBehaviour
     [SerializeField] Transform wWeaponPivot;
     [SerializeField] GameObject WeaponPrefab;
 
-    [SyncVar] bool isServerInitialized, isSwappingWeapons;
+    NetworkVariable<bool> isServerInitialized = new NetworkVariable<bool>(), isSwappingWeapons = new NetworkVariable<bool>();
 
     public bool DisablePlayerInputs { get; set; }
 
@@ -31,15 +31,16 @@ public class PlayerInventory : NetworkBehaviour
 
     void Awake() => playerScript = GetComponent<Player>();
 
-    public override void OnStartClient()
+    protected override void OnClientSpawn()
     {
-        if (hasAuthority || !isServerInitialized) return;
-        CmdRequestWeaponInventory();
+        if (IsOwner || !isServerInitialized.Value) return;
+        ServerRpcParams rpcParams = new ServerRpcParams { Receive = new ServerRpcReceiveParams { SenderClientId = NetworkBehaviourId } };
+        RequestWeaponInventory_ServerRpc(rpcParams);
     }
 
-    public override void OnStartServer()
+    protected override void OnServerSpawn()
     {
-        playerScript.OnPlayerDead += OnPlayerDies;
+        playerScript.OnPlayerDead += OnPlayerDies_Server;
     }
 
     void Start()
@@ -53,33 +54,32 @@ public class PlayerInventory : NetworkBehaviour
 
     void Update()
     {
-        if (!isLocalPlayer) return;
+        if (!IsLocalPlayer) return;
 
         if (weaponsInvetoryOnClient != null && currentWeaponIndex < weaponsInvetoryOnClient.Count && weaponsInvetoryOnClient[currentWeaponIndex] != null)
             weaponsInvetoryOnClient[currentWeaponIndex].CheckPlayerMovement(playerScript.PlayerIsMoving(), playerScript.PlayerIsRunning());
 
         if (Utilities.MouseOverUI()) return;
-        if (!DisablePlayerInputs) CheckInputs();
+        if (!DisablePlayerInputs) CheckInputs_Client();
     }
 
     #region Server
 
-    [Server]
-    public void SetupWeaponInventory(WeaponData[] weaponsToLoad, int defaultWeaponIndex)
+    public void SetupWeaponInventory_Server(WeaponData[] weaponsToLoad, int defaultWeaponIndex)
     {
         weaponsInventoryOnServer.Clear();
 
         int size = weaponsToLoad.Length;
         for (int i = 0; i < size; i++)
         {
-            print($"Server: Spawn NetWeapon {weaponsToLoad[i].weaponName} of type {weaponsToLoad[i].weaponType}");
+            Debug.LogFormat("Server: Spawn NetWeapon {0} of type {1}", weaponsToLoad[i].weaponName, weaponsToLoad[i].weaponType);
             GameObject weaponObject = Instantiate(WeaponPrefab, wWeaponPivot);
             NetWeapon spawnedWeapon = weaponObject.GetComponent<NetWeapon>();
 
-            if (connectionToClient != null) NetworkServer.Spawn(weaponObject, gameObject);
-            else NetworkServer.Spawn(weaponObject);
+            if (IsSpawned) weaponObject.GetComponent<NetworkObject>().SpawnWithOwnership(NetworkObjectId);
+            else weaponObject.GetComponent<NetworkObject>().Spawn();
             
-            RpcSetWeaponParent(spawnedWeapon.netId, false);
+            SetWeaponParent_ClientRpc(spawnedWeapon.NetworkBehaviourId, false);
             spawnedWeapon.Init(weaponsToLoad[i], playerScript);
             weaponsInventoryOnServer.Add(spawnedWeapon);
         }
@@ -87,46 +87,47 @@ public class PlayerInventory : NetworkBehaviour
         currentWeaponIndex = defaultWeaponIndex;
         weaponsInventoryOnServer[currentWeaponIndex].RpcToggleClientWeapon(true);
 
-        print($"Server: Default Weapon {weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponName} of index {currentWeaponIndex}");
-        print($"Finished server PlayerInventory Initialization");
+        Debug.LogFormat("Server: Default Weapon {0} of index {1}", weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponName, currentWeaponIndex);
+        print("Finished server PlayerInventory Initialization");
 
-        isServerInitialized = true;
-        if (connectionToClient != null) RpcSetupWeaponInventory(connectionToClient, size, defaultWeaponIndex);
+        isServerInitialized.Value = true;
+        if (IsSpawned)
+        {
+            ClientRpcParams rpcParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new ulong[] { NetworkBehaviourId } } };
+            SetupWeaponInventory_ClientRpc(size, defaultWeaponIndex, rpcParams);
+        }
     }
 
-    [Server]
-    void OnPlayerDies()
+    void OnPlayerDies_Server()
     {
         int size = weaponsInventoryOnServer.Count;
         for (int i = 0; i < size; i++) weaponsInventoryOnServer[i].DropClientWeaponAndDestroy();
-        RpcClearWeaponInventory();
+        ClearWeaponInventory_ClientRpc();
     }
 
     #endregion
 
     #region Client
 
-    [Client]
-    void CheckInputs()
+    void CheckInputs_Client()
     {
         if (weaponsInvetoryOnClient == null || currentWeaponIndex >= weaponsInvetoryOnClient.Count || weaponsInvetoryOnClient[currentWeaponIndex] == null) return;
 
-        if (WeaponSelectorCycle() || isSwappingWeapons) return;
+        if (WeaponSelectorCycle_Client() || isSwappingWeapons.Value) return;
 
         //print($"Down: {Input.GetMouseButtonDown(0)} Up: {Input.GetMouseButtonUp(0)} - Pressed: {Input.GetMouseButton(0)}");
 		
         if (!Input.GetMouseButtonUp(0) && Input.GetMouseButton(0))        
 		{
             weaponsInvetoryOnClient[currentWeaponIndex].Fire();
-            UpdateWeaponAmmo();
+            UpdateWeaponAmmo_Client();
         }
 		
         if (Input.GetMouseButton(1)) weaponsInvetoryOnClient[currentWeaponIndex].Scope();
         if (Input.GetKeyDown(KeyCode.R)) weaponsInvetoryOnClient[currentWeaponIndex].Reload();
     }
 
-    [Client]
-    bool WeaponSelectorCycle()
+    bool WeaponSelectorCycle_Client()
     {
         if (!Input.anyKeyDown) return false;
 
@@ -136,8 +137,8 @@ public class PlayerInventory : NetworkBehaviour
             bool success = false;
             if (weaponsInvetoryOnClient[currentWeaponIndex].WType != currentCyclerType || checkWeaponIndex)
             {
-                isSwappingWeapons = true;
-                CmdRequestWeaponChange(weaponCyclerList[currentCyclerIndex]);
+                isSwappingWeapons.Value = true;
+                RequestWeaponChange_ServerRpc(weaponCyclerList[currentCyclerIndex]);
                 success = true;
             }
 
@@ -156,7 +157,7 @@ public class PlayerInventory : NetworkBehaviour
             {
                 if (currentCyclerType == (WeaponType) i)
                 {
-                    if (SearchForWeaponsType((WeaponType) i, out weaponIndex))
+                    if (SearchForWeaponsType_Client((WeaponType) i, out weaponIndex))
                     {
                         weaponCyclerList.Add(weaponIndex);
                         currentCyclerIndex++;
@@ -170,7 +171,7 @@ public class PlayerInventory : NetworkBehaviour
 
                 currentCyclerIndex = 0;
                 if (weaponCyclerList.Count > 0) weaponCyclerList.Clear();
-                if (SearchForWeaponsType((WeaponType) i, out weaponIndex)) weaponCyclerList.Add(weaponIndex);
+                if (SearchForWeaponsType_Client((WeaponType) i, out weaponIndex)) weaponCyclerList.Add(weaponIndex);
                 currentCyclerType = (WeaponType) i;
                 break;
             }
@@ -179,8 +180,7 @@ public class PlayerInventory : NetworkBehaviour
         return false;
     }
 
-    [Client]
-    bool SearchForWeaponsType(WeaponType TypeToSearch, out int weaponIndex)
+    bool SearchForWeaponsType_Client(WeaponType TypeToSearch, out int weaponIndex)
     {
         weaponIndex = -1;
         int size = weaponsInvetoryOnClient.Count;
@@ -196,67 +196,67 @@ public class PlayerInventory : NetworkBehaviour
         return false;
     }
 
-    [Client]
-    void UpdateWeaponAmmo() => playerScript.PlayerCanvasScript.SetCurrentAmmo(weaponsInvetoryOnClient[currentWeaponIndex].BulletsInMag, weaponsInvetoryOnClient[currentWeaponIndex].Mags);
+    void UpdateWeaponAmmo_Client() => playerScript.PlayerCanvasScript.SetCurrentAmmo(weaponsInvetoryOnClient[currentWeaponIndex].BulletsInMag, weaponsInvetoryOnClient[currentWeaponIndex].Mags);
 
-    [Client]
-    void UpdateCurrenWeaponName() => playerScript.PlayerCanvasScript.SetCurrentWeapon(weaponsInvetoryOnClient[currentWeaponIndex].GetWeaponData().weaponName);
+    void UpdateCurrenWeaponName_Client() => playerScript.PlayerCanvasScript.SetCurrentWeapon(weaponsInvetoryOnClient[currentWeaponIndex].GetWeaponData().weaponName);
 
     #endregion
 
     #region Commands
 
-    [Command]
-    public void CmdRequestWeaponChange(int weaponIndex)
+    [ServerRpc]
+    public void RequestWeaponChange_ServerRpc(int weaponIndex)
     {
         if (weaponIndex == currentWeaponIndex) return;
 
-        isSwappingWeapons = true;
+        isSwappingWeapons.Value = true;
         weaponsInventoryOnServer[currentWeaponIndex].RpcToggleClientWeapon(false);
         weaponsInventoryOnServer[weaponIndex].RpcToggleClientWeapon(true);
 
-        RpcChangeWeapon(connectionToClient, weaponIndex, currentWeaponIndex);
+        ClientRpcParams rpcParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new ulong[] { NetworkBehaviourId } } };
+        ChangeWeapon_ClientRpc(weaponIndex, currentWeaponIndex, rpcParams);
         currentWeaponIndex = weaponIndex;
-        isSwappingWeapons = false;
+        isSwappingWeapons.Value = false;
     }
 
-    [Command(requiresAuthority = false)]
-    void CmdRequestWeaponInventory()
+    [ServerRpc(RequireOwnership = false)]
+    void RequestWeaponInventory_ServerRpc(ServerRpcParams rpcParams)
     {
+        if (!NetworkManager.ConnectedClients.ContainsKey(rpcParams.Receive.SenderClientId)) return;
         int size = weaponsInventoryOnServer.Count;
         for (int i = 0; i < size; i++)
-            RpcSetWeaponParent(weaponsInventoryOnServer[i].netId, i == currentWeaponIndex);
+            SetWeaponParent_ClientRpc(weaponsInventoryOnServer[i].NetworkBehaviourId, i == currentWeaponIndex);
     }
 
     #endregion
 
     #region RPCs
 
-    [TargetRpc]
-    public void RpcChangeWeapon(NetworkConnection target, int weaponIndex, int oldIndex)
+    [ClientRpc]
+    public void ChangeWeapon_ClientRpc(int weaponIndex, int oldIndex, ClientRpcParams rpcParams)
     {
         weaponsInvetoryOnClient[oldIndex].ToggleWeapon(false);
         weaponsInvetoryOnClient[weaponIndex].ToggleWeapon(true);
         currentWeaponIndex = weaponIndex;
-        isSwappingWeapons = false;
+        isSwappingWeapons.Value = false;
 
-        UpdateCurrenWeaponName();
-        UpdateWeaponAmmo();
+        UpdateCurrenWeaponName_Client();
+        UpdateWeaponAmmo_Client();
     }
 
     [ClientRpc]
-    void RpcSetWeaponParent(uint weaponID, bool isCurrentWeapon)
+    void SetWeaponParent_ClientRpc(uint weaponID, bool isCurrentWeapon)
     {
-        if (!NetworkClient.spawned.ContainsKey(weaponID))
+        if (!NetworkManager.SpawnManager.SpawnedObjects.ContainsKey(weaponID))
         {
-            Debug.LogError($"Weapon with Network ID: {weaponID} not found");
+            Debug.LogErrorFormat("Weapon with Network ID: {0} not found", weaponID);
             return;
         }
 
-        NetworkIdentity weaponIdentity = NetworkClient.spawned[weaponID];
+        NetworkObject weaponNetObject = NetworkManager.SpawnManager.SpawnedObjects[weaponID];
         //if (weaponIdentity.transform.parent == vWeaponPivot) return;
 
-        NetWeapon spawnedWeapon = weaponIdentity.GetComponent<NetWeapon>();
+        NetWeapon spawnedWeapon = weaponNetObject.GetComponent<NetWeapon>();
         if (spawnedWeapon != null)
         {
             spawnedWeapon.MyTransform.SetParent(wWeaponPivot);
@@ -264,7 +264,7 @@ public class PlayerInventory : NetworkBehaviour
             spawnedWeapon.MyTransform.localRotation = Quaternion.identity;
 
             if (isCurrentWeapon)
-                StartCoroutine(WaitForWeaponSync(spawnedWeapon.MyTransform));
+                StartCoroutine(WaitForWeaponSync_Client(spawnedWeapon.MyTransform));
         }
         else
         {
@@ -273,13 +273,13 @@ public class PlayerInventory : NetworkBehaviour
     }
 
 
-    [TargetRpc]
-    void RpcSetupWeaponInventory(NetworkConnection target, int weaponsToSpawn, int defaultWeaponIndex)
+    [ClientRpc]
+    void SetupWeaponInventory_ClientRpc(int weaponsToSpawn, int defaultWeaponIndex, ClientRpcParams rpcParams)
     {
         print("Player: Setup Weapon Inventory");
         weaponsInvetoryOnClient.Clear();
 
-        StartCoroutine(WaitForPlayerWeaponSync(() =>
+        StartCoroutine(WaitForPlayerWeaponSync_Client(() =>
         {
             for (int i = 0; i < weaponsToSpawn; i++)
             {
@@ -294,8 +294,8 @@ public class PlayerInventory : NetworkBehaviour
                     spawnedWeapon.MyTransform.localRotation = Quaternion.identity;
 
                     spawnedWeapon.Init(netWeapon.GetWeaponData(), netWeapon);
-                    spawnedWeapon.OnFinishedReload += UpdateWeaponAmmo;
-                    print($"Client: Spawn weapon {netWeapon.GetWeaponData().weaponName} of type {netWeapon.GetWeaponData().weaponType}");
+                    spawnedWeapon.OnFinishedReload += UpdateWeaponAmmo_Client;
+                    Debug.LogFormat("Client: Spawn weapon {0} of type {1}", netWeapon.GetWeaponData().weaponName, netWeapon.GetWeaponData().weaponType);
                     weaponsInvetoryOnClient.Add(spawnedWeapon);
                 }
             }
@@ -303,16 +303,16 @@ public class PlayerInventory : NetworkBehaviour
             currentWeaponIndex = defaultWeaponIndex;
             weaponsInvetoryOnClient[currentWeaponIndex].ToggleWeapon(true);
 
-            UpdateCurrenWeaponName();
-            UpdateWeaponAmmo();
+            UpdateCurrenWeaponName_Client();
+            UpdateWeaponAmmo_Client();
 
-            print($"Client: Default Weapon index {currentWeaponIndex}");
-            print($"Finished client PlayerInventory Initialization");
+            Debug.LogFormat("Client: Default Weapon index {0}", currentWeaponIndex);
+            print("Finished client PlayerInventory Initialization");
         }));
     }
 
     [ClientRpc]
-    void RpcClearWeaponInventory()
+    void ClearWeaponInventory_ClientRpc()
     {
         int size = weaponsInvetoryOnClient.Count;
         for (int i = 0; i < size; i++)
@@ -328,22 +328,20 @@ public class PlayerInventory : NetworkBehaviour
 
     #region Coroutines
 
-    [Client]
-    IEnumerator WaitForWeaponSync(Transform weaponToLookAt)
+    IEnumerator WaitForWeaponSync_Client(Transform weaponToLookAt)
     {
         while (weaponToLookAt.childCount <= 0) yield return new WaitForSeconds(.1f); 
         IWeapon clientWeapon = weaponToLookAt.GetComponentInChildren<IWeapon>(true);
         if (clientWeapon != null) clientWeapon.DrawWeapon();
-        else Debug.LogError($"Couln't find IWeapon Component or NetWeapon doesn't have a client weapon child!");
+        else Debug.LogError("Couln't find IWeapon Component or NetWeapon doesn't have a client weapon child!");
     }
 
-    [Client]
-    IEnumerator WaitForPlayerWeaponSync(System.Action OnWeaponSync)
+    IEnumerator WaitForPlayerWeaponSync_Client(System.Action OnWeaponSync)
     {
         int debug = 0;
         while (wWeaponPivot.childCount == 0)
         {
-            print($"Player waiting for weaponSync {debug++}");
+            Debug.LogFormat("Player waiting for weaponSync {0}", debug++);
             yield return new WaitForSeconds(.1f);
         }
 
