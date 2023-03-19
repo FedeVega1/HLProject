@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Mirror;
+using Unity.Netcode;
 
 public enum BulletType { RayCast, Physics }
 public enum WeaponType { Melee, Secondary, Primary, Tools, BandAids }
@@ -74,13 +74,13 @@ public class Weapon : CachedTransform
             GameObject nullWGO = new GameObject($"{weaponData.weaponName} (NULL)");
             clientWeapon = nullWGO.AddComponent<NullWeapon>();
             clientWeapon.Init(false, weaponData, bulletData, weaponData.propPrefab);
-            Debug.LogError($"Client weapon prefab does not have a IWeapon type component.\nSwitching to default weapon");
+            Debug.LogError("Client weapon prefab does not have a IWeapon type component.\nSwitching to default weapon");
         }
     }
 
     public void Fire()
     {
-        if (NetworkTime.time < wTime) return;
+        if (NetworkManager.NetworkTimeSystem.LocalTime < wTime) return;
         if (BulletsInMag <= 0) return;
 
         Ray weaponRay = new Ray(firePivot.position, firePivot.forward);
@@ -92,7 +92,7 @@ public class Weapon : CachedTransform
             if (!fallOffCheck) hitPos = rayHit.point;
             clientWeapon.Fire(hitPos, true, BulletsInMag < 2);
 
-            if (rayHit.collider != null) print($"Client Fire! Range[{bulletData.maxTravelDistance}] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
+            if (rayHit.collider != null) Debug.LogFormat("Client Fire! Range[{0}] - HitPoint: {1}|{2}", bulletData.maxTravelDistance, rayHit.point, rayHit.collider.name);
         }
         else
         {
@@ -104,8 +104,8 @@ public class Weapon : CachedTransform
         }
 
         BulletsInMag--;
-        wTime = NetworkTime.time + weaponData.weaponAnimsTiming.fire;
-        netWeapon.CmdRequestFire();
+        wTime = NetworkManager.NetworkTimeSystem.LocalTime + weaponData.weaponAnimsTiming.fire;
+        netWeapon.RequestFire_ServerRpc();
     }
 
     bool CheckBulletFallOff(ref Ray weaponRay, ref RaycastHit rayHit, out float distance)
@@ -119,7 +119,7 @@ public class Weapon : CachedTransform
         {
             if (Physics.Raycast(weaponRay, out rayHit, distance, weaponLayerMask))
             {
-                print($"Client Fire! Range[{distance}] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
+                Debug.LogFormat("Client Fire! Range[{0}] - HitPoint: {1}|{2}", distance, rayHit.point, rayHit.collider.name);
                 Debug.DrawLine(weaponRay.origin, rayHit.point, Color.yellow, 5);
 
                 lastDistance = distance;
@@ -151,7 +151,7 @@ public class Weapon : CachedTransform
         if (BulletsInMag >= weaponData.bulletsPerMag || Mags <= 0) return;
         clientWeapon.Reload();
         StartCoroutine(ReloadRoutine());
-        netWeapon.CmdRequestReload();
+        netWeapon.RequestReload_ServerRpc();
     }
 
     IEnumerator ReloadRoutine()
@@ -169,12 +169,12 @@ public class Weapon : CachedTransform
         if (toggle)
         {
             clientWeapon.DrawWeapon();
-            wTime = NetworkTime.time + weaponData.weaponAnimsTiming.draw;
+            wTime = NetworkManager.NetworkTimeSystem.LocalTime + weaponData.weaponAnimsTiming.draw;
         }
         else
         {
             clientWeapon.HolsterWeapon();
-            wTime = NetworkTime.time + weaponData.weaponAnimsTiming.draw;
+            wTime = NetworkManager.NetworkTimeSystem.LocalTime + weaponData.weaponAnimsTiming.draw;
         }
     }
 

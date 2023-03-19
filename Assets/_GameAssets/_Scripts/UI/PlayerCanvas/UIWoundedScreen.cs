@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using Mirror;
+using Unity.Netcode;
 
 public class UIWoundedScreen : MonoBehaviour
 {
@@ -20,7 +20,7 @@ public class UIWoundedScreen : MonoBehaviour
     {
         if (!playerisWounded) return;
 
-        double time = woundTime - NetworkTime.time;
+        double time = woundTime - NetworkManager.Singleton.NetworkTimeSystem.LocalTime;
 
         if (time <= 0)
         {

@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Mirror;
+using Unity.Netcode;
 
 public class DummyPlayer : Player
 {
@@ -14,11 +14,10 @@ public class DummyPlayer : Player
     protected override void Start()
     {
         base.Start();
-        if (IsServer) Invoke(nameof(DummyStart), .25f);
+        if (IsServer) Invoke(nameof(DummyStart_Server), .25f);
     }
 
-    [Server]
-    public void DummyStart()
+    public void DummyStart_Server()
     {
         GameModeManager.INS.TeamManagerInstance.PlayerSelectedTeam_Server(this, -1);
         GameModeManager.INS.PlayerChangeClass_Server(this, GetClassForSelectedTeam());

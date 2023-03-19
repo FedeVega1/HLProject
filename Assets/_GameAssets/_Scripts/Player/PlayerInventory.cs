@@ -43,8 +43,9 @@ public class PlayerInventory : CommonNetworkBehaviour
         playerScript.OnPlayerDead += OnPlayerDies_Server;
     }
 
-    void Start()
+    public override void OnNetworkSpawn()
     {
+        base.OnNetworkSpawn();
         weaponsInventoryOnServer = new List<NetWeapon>();
         weaponsInvetoryOnClient = new List<Weapon>();
         weaponCyclerList = new List<int>();
@@ -85,7 +86,7 @@ public class PlayerInventory : CommonNetworkBehaviour
         }
 
         currentWeaponIndex = defaultWeaponIndex;
-        weaponsInventoryOnServer[currentWeaponIndex].RpcToggleClientWeapon(true);
+        weaponsInventoryOnServer[currentWeaponIndex].ToggleClientWeapon_ClientRpc(true, SendRpcToEveryoneExceptPlayer);
 
         Debug.LogFormat("Server: Default Weapon {0} of index {1}", weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponName, currentWeaponIndex);
         print("Finished server PlayerInventory Initialization");
@@ -101,7 +102,7 @@ public class PlayerInventory : CommonNetworkBehaviour
     void OnPlayerDies_Server()
     {
         int size = weaponsInventoryOnServer.Count;
-        for (int i = 0; i < size; i++) weaponsInventoryOnServer[i].DropClientWeaponAndDestroy();
+        for (int i = 0; i < size; i++) weaponsInventoryOnServer[i].DropClientWeaponAndDestroy_Server();
         ClearWeaponInventory_ClientRpc();
     }
 
@@ -210,8 +211,8 @@ public class PlayerInventory : CommonNetworkBehaviour
         if (weaponIndex == currentWeaponIndex) return;
 
         isSwappingWeapons.Value = true;
-        weaponsInventoryOnServer[currentWeaponIndex].RpcToggleClientWeapon(false);
-        weaponsInventoryOnServer[weaponIndex].RpcToggleClientWeapon(true);
+        weaponsInventoryOnServer[currentWeaponIndex].ToggleClientWeapon_ClientRpc(false, SendRpcToEveryoneExceptPlayer);
+        weaponsInventoryOnServer[weaponIndex].ToggleClientWeapon_ClientRpc(true, SendRpcToEveryoneExceptPlayer);
 
         ClientRpcParams rpcParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new ulong[] { NetworkBehaviourId } } };
         ChangeWeapon_ClientRpc(weaponIndex, currentWeaponIndex, rpcParams);

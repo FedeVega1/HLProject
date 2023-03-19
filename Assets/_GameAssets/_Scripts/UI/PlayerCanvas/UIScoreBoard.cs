@@ -1,16 +1,17 @@
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public readonly struct PlayerScoreboardInfo
+public struct PlayerScoreboardInfo : INetworkSerializable
 {
-    public readonly int playerTeam;
-    public readonly int playerClass;
-    public readonly string playerName;
-    public readonly int playerScore;
-    public readonly int playerRevives;
-    public readonly int playerDeaths;
-    public readonly bool isPlayerDead;
-    public readonly bool isLocalPlayer;
+    public int playerTeam;
+    public int playerClass;
+    public string playerName;
+    public int playerScore;
+    public int playerRevives;
+    public int playerDeaths;
+    public bool isPlayerDead;
+    public bool isLocalPlayer;
 
     public PlayerScoreboardInfo(int team, int _playerClass, string name, int score, int revives, int deaths, bool dead, bool _isLocalPlayer)
     {
@@ -32,6 +33,18 @@ public readonly struct PlayerScoreboardInfo
 
         playerClass = playerRevives = playerDeaths = 0;
         isLocalPlayer = isPlayerDead = false;
+    }
+
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref playerTeam);
+        serializer.SerializeValue(ref playerClass);
+        serializer.SerializeValue(ref playerName);
+        serializer.SerializeValue(ref playerScore);
+        serializer.SerializeValue(ref playerRevives);
+        serializer.SerializeValue(ref playerDeaths);
+        serializer.SerializeValue(ref isPlayerDead);
+        serializer.SerializeValue(ref isLocalPlayer);
     }
 }
 

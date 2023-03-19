@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using Mirror;
+using Unity.Netcode;
 
 public class UIGameOverScreen : MonoBehaviour
 {
@@ -19,7 +19,7 @@ public class UIGameOverScreen : MonoBehaviour
     {
         if (!onScreen) return;
 
-        double time = timeToChangeLevel - NetworkTime.time;
+        double time = timeToChangeLevel - NetworkManager.Singleton.NetworkTimeSystem.LocalTime;
         if (time <= 0) return;
 
         lblTimeToChangeLevel.text = $"Time to change level: {System.Math.Round(time, 0)}";

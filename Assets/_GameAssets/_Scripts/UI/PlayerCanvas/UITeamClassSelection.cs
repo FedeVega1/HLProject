@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using Mirror;
+using Unity.Netcode;
 
 public class UITeamClassSelection : MonoBehaviour
 {
@@ -41,7 +41,7 @@ public class UITeamClassSelection : MonoBehaviour
             return;
         }
 
-            double time = respawnTime - NetworkTime.time;
+        double time = respawnTime - NetworkManager.Singleton.NetworkTimeSystem.LocalTime;
         if (time <= 0)
         {
             respawnTime = 0;

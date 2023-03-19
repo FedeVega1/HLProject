@@ -64,17 +64,46 @@ public abstract class CommonNetworkBehaviour : NetworkBehaviour
 {
     protected double NetTime => NetworkManager.Singleton.ServerTime.Time;
 
-    protected ClientRpcParams SendRpcToPlayer;
+    ClientRpcParams _SendRpcToPlayer, _SendRpcToEveryoneExceptPlayer;
+    protected ClientRpcParams SendRpcToPlayer
+    {
+        get
+        {
+            if (_SendRpcToPlayer.Send.TargetClientIds == null) _SendRpcToPlayer = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new ulong[] { NetworkBehaviourId } } };
+            return _SendRpcToPlayer;
+        }
+    }
+
+    protected ClientRpcParams SendRpcToEveryoneExceptPlayer
+    {
+        get
+        {
+            if (_SendRpcToEveryoneExceptPlayer.Send.TargetClientIds == null)
+                SetBlacklistParam();
+
+            return _SendRpcToEveryoneExceptPlayer;
+        }
+    }
+
+    NetworkObject _NetObject;
+    protected NetworkObject NetObject
+    {
+        get
+        {
+            if (_NetObject == null) _NetObject = GetComponent<NetworkObject>();
+            return _NetObject;
+        }
+    }
 
     public override void OnNetworkSpawn()
     {
         if (IsServer)
         {
-            SendRpcToPlayer = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new ulong[] { NetworkBehaviourId } } };
             OnServerSpawn();
             return;
         }
 
+        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
         OnClientSpawn();
         if (IsLocalPlayer)
         {
@@ -112,6 +141,22 @@ public abstract class CommonNetworkBehaviour : NetworkBehaviour
     protected virtual void OnClientDespawn() { }
     protected virtual void OnLocalPlayerDespawn() { }
     protected virtual void OnExternalClientDespawn() { }
+
+    void OnClientConnected(ulong clientID) => SetBlacklistParam();
+
+    void SetBlacklistParam()
+    {
+        int size = NetworkManager.ConnectedClientsIds.Count;
+        ulong[] array = new ulong[size - 1];
+
+        for (int i = 0, n = 0; i < size; i++)
+        {
+            if (NetworkManager.ConnectedClientsIds[i] == NetworkBehaviourId) continue;
+            array[n] = NetworkManager.ConnectedClientsIds[i];
+        }
+
+        _SendRpcToEveryoneExceptPlayer = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = array } };
+    }
 }
 
 public static class Utilities

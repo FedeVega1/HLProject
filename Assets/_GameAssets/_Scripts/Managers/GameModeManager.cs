@@ -21,7 +21,7 @@ public class GameModeManager : CommonNetworkBehaviour
     [SerializeField] TeamBase[] teamBases;
     [SerializeField] Transform clientCamera;
     [SerializeField] float scoreBoardUpdateTime = 2;
-    [SerializeField] GameObject dummyPlayerPrefab;
+    [SerializeField] NetworkObject playerPrefab, dummyPlayerPrefab;
 
     public TeamManager TeamManagerInstance => teamManager;
 
@@ -92,6 +92,7 @@ public class GameModeManager : CommonNetworkBehaviour
 
         TeamManagerInstance.GetGameModeData_Server(ref currentGameModeData, size);
         //NetManager.INS.OnClientDisconnects += OnPlayerDisconnects;
+        NetworkManager.Singleton.OnClientConnectedCallback += OnPlayerConnects_Server;
         NetworkManager.Singleton.OnClientDisconnectCallback += OnPlayerDisconnects_Server;
         enableScoreboardUpdate = true;
     }
@@ -105,9 +106,9 @@ public class GameModeManager : CommonNetworkBehaviour
         }
     }
 
-    public GameObject SpawnPlayerObject_Server(GameObject playerPrefab, string playerName)
+    public NetworkObject SpawnPlayerObject_Server(NetworkObject playerPrefab, string playerName)
     {
-        GameObject playerObject = Instantiate(playerPrefab, spectatorPoints[0].position, spectatorPoints[0].rotation);
+        NetworkObject playerObject = Instantiate(playerPrefab, spectatorPoints[0].position, spectatorPoints[0].rotation);
         Player playerScript = playerObject.GetComponent<Player>();
         
         if (playerScript == null)
@@ -123,7 +124,7 @@ public class GameModeManager : CommonNetworkBehaviour
         return playerObject;
     }
 
-    public void OnPlayerConnection_Server(GameObject playerObject)
+    public void SetupPlayerConnection_Server(GameObject playerObject)
     {
         Player playerScript = playerObject.GetComponent<Player>();
 
@@ -164,6 +165,12 @@ public class GameModeManager : CommonNetworkBehaviour
 
         Debug.LogErrorFormat("Client {0} disconnected but was not found in the connected players list", clientID);
     }
+
+    void OnPlayerConnects_Server(ulong clientID)
+    {
+        NetworkObject playerObject = SpawnPlayerObject_Server(playerPrefab, GameManager.INS.PlayerName);
+        SetupPlayerConnection_Server(playerObject.gameObject);
+}
 
     public void SpawnPlayerByTeam_Server(Player playerToSpawn)
     {
@@ -413,8 +420,8 @@ public class GameModeManager : CommonNetworkBehaviour
 
     public void AddDummyPlayer()
     {
-        GameObject playerObject = SpawnPlayerObject_Server(dummyPlayerPrefab, "DummyPlayer");
-        OnPlayerConnection_Server(playerObject);
-        playerObject.GetComponent<NetworkObject>().Spawn();
+        NetworkObject playerObject = SpawnPlayerObject_Server(dummyPlayerPrefab, "DummyPlayer");
+        SetupPlayerConnection_Server(playerObject.gameObject);
+        playerObject.Spawn();
     }
 }

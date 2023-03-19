@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
-using Mirror;
+using Unity.Netcode;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : CachedNetTransform
@@ -10,8 +10,8 @@ public class PlayerMovement : CachedNetTransform
     [SerializeField] float maxWalkSpeed, maxCrouchSpeed, crouchAmmount, maxRunSpeed, jumpHeight, horizontalSens, verticalSens;
     [SerializeField] CinemachineVirtualCamera playerVCam;
 
-    [SyncVar(hook = nameof(OnFreezePlayerSet))] public bool freezePlayer;
-    [SyncVar(hook = nameof(OnSpectatorMovSet))] public bool spectatorMov;
+    public  NetworkVariable<bool> freezePlayer = new NetworkVariable<bool>();
+    public NetworkVariable<bool> spectatorMov = new NetworkVariable<bool>();
 
     bool _FreezeInputs;
     public bool FreezeInputs
@@ -25,7 +25,7 @@ public class PlayerMovement : CachedNetTransform
             if (value)
             {
                 PovComponent.m_VerticalAxis.m_MaxSpeed = 0;
-                CmdSendPlayerInputs(Vector2.zero, Vector2.zero, 0x00);
+                SendPlayerInputs_ServerRpc(Vector2.zero, Vector2.zero, 0x00);
             }
             else
             {
@@ -49,7 +49,7 @@ public class PlayerMovement : CachedNetTransform
     {
         get
         {
-            if (isLocalPlayer && _PovComponent == null) _PovComponent = playerVCam.GetCinemachineComponent<CinemachinePOV>();
+            if (IsLocalPlayer && _PovComponent == null) _PovComponent = playerVCam.GetCinemachineComponent<CinemachinePOV>();
             return _PovComponent;
         }
     }
@@ -65,37 +65,43 @@ public class PlayerMovement : CachedNetTransform
 
     void OnFreezePlayerSet(bool oldValue, bool newValue)
     {
-        if (isLocalPlayer) PovComponent.m_VerticalAxis.m_MaxSpeed = newValue ? 0 : 300;
-        ToggleCharacterController(!newValue);
+        if (IsLocalPlayer) PovComponent.m_VerticalAxis.m_MaxSpeed = newValue ? 0 : 300;
+        ToggleCharacterController_Server(!newValue);
     }
 
     void OnSpectatorMovSet(bool oldValue, bool newValue)
     {
         velocity = Vector3.zero;
-        ToggleCharacterController(!newValue);
+        ToggleCharacterController_Server(!newValue);
+    }
+
+    protected override void OnClientSpawn()
+    {
+        base.OnClientSpawn();
+        freezePlayer.OnValueChanged += OnFreezePlayerSet;
+        spectatorMov.OnValueChanged += OnSpectatorMovSet;
     }
 
     void Start()
     {
         startHeight = CharCtrl.height;
         playerSpeed = maxWalkSpeed;
-        ToggleCharacterController(false);
+        ToggleCharacterController_Server(false);
     }
 
     void Update()
     {
-        if (freezePlayer) return;
-        if (isLocalPlayer) CheckForInput();
+        if (freezePlayer.Value) return;
+        if (IsLocalPlayer) CheckForInput_Client();
 
-        if (!isServer) return;
+        if (!IsServer) return;
 
         Move();
         Rotate();
         Lean();
     }
 
-    [Client]
-    void CheckForInput()
+    void CheckForInput_Client()
     {
         if (FreezeInputs) return;
         bool newInput = false;
@@ -137,13 +143,13 @@ public class PlayerMovement : CachedNetTransform
             newInput = true;
         }
 
-        if (newInput) CmdSendPlayerInputs(playerMovInput, new Vector2(cameraRotInput, Input.GetAxis("Mouse Y")), inputFlags.GetByte());
+        if (newInput) SendPlayerInputs_ServerRpc(playerMovInput, new Vector2(cameraRotInput, Input.GetAxis("Mouse Y")), inputFlags.GetByte());
         lastCameraRotInput = cameraRotInput;
         lastPlayerMovInput = playerMovInput;
     }
 
-    [Command]
-    void CmdSendPlayerInputs(Vector2 movAxis, Vector2 rotAxis, byte _inputFlags)
+    [ServerRpc]
+    void SendPlayerInputs_ServerRpc(Vector2 movAxis, Vector2 rotAxis, byte _inputFlags)
     {
         movAxis.x = Mathf.Clamp(movAxis.x, -1, 1);
         movAxis.y = Mathf.Clamp(movAxis.y, -1, 1);
@@ -160,7 +166,7 @@ public class PlayerMovement : CachedNetTransform
         Crouch();
         Jump();
 
-        if (spectatorMov) NoclipMovement();
+        if (spectatorMov.Value) NoclipMovement();
 
         if (CharCtrl.isGrounded && velocity.y < 0) velocity.y = -.5f;
         if (inputFlags == 2) playerSpeed = maxRunSpeed;
@@ -183,7 +189,7 @@ public class PlayerMovement : CachedNetTransform
 
     void Jump()
     {
-        if (spectatorMov)
+        if (spectatorMov.Value)
         {
             velocity.y = inputFlags == 1 ? 1 : velocity.y;
             return;
@@ -198,7 +204,7 @@ public class PlayerMovement : CachedNetTransform
 
     void Crouch()
     {
-        if (spectatorMov)
+        if (spectatorMov.Value)
         {
             velocity.y = inputFlags == 0 ? -1 : velocity.y;
             return;
@@ -224,7 +230,7 @@ public class PlayerMovement : CachedNetTransform
 
     void Lean()
     {
-        if (spectatorMov) return;
+        if (spectatorMov.Value) return;
     }
 
     void Rotate()
@@ -233,14 +239,12 @@ public class PlayerMovement : CachedNetTransform
         MyTransform.rotation = Quaternion.AngleAxis(rotationX, Vector3.up);
     }
 
-    [Server]
-    public void ForceMoveCharacter(Vector3 pos, Quaternion rotation)
+    public void ForceMoveCharacter_Server(Vector3 pos, Quaternion rotation)
     {
         MyTransform.position = pos + Vector3.up;
         MyTransform.rotation = rotation;
         CharCtrl.enabled = true;
     }
 
-    [Server]
-    public void ToggleCharacterController(bool toggle) => CharCtrl.enabled = toggle;
+    public void ToggleCharacterController_Server(bool toggle) => CharCtrl.enabled = toggle;
 }

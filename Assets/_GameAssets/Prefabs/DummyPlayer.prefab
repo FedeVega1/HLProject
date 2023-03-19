@@ -74,9 +74,17 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3470236661702184069}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &266514606941194046
@@ -220,8 +228,8 @@ GameObject:
   - component: {fileID: 259264720188151769}
   - component: {fileID: 3516450856430869840}
   - component: {fileID: 171290548406564984}
-  - component: {fileID: 6741849327431726004}
-  - component: {fileID: 5977417963164415031}
+  - component: {fileID: 2889167892064599699}
+  - component: {fileID: 5863490445835601013}
   m_Layer: 0
   m_Name: DummyPlayer
   m_TagString: Player
@@ -254,9 +262,17 @@ CharacterController:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9207269670975588337}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Height: 2
   m_Radius: 0.5
   m_SlopeLimit: 45
@@ -276,13 +292,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fb6ad6bfcc7ea6499e3734eb0b507c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
   maxHealth: 100
   maxArmor: 0
   maxBleedTime: 0
   bleedThreshold: 0
-  isInvencible: 0
+  isInvencible:
+    m_InternalValue: 0
   playerCamera: {fileID: 0}
   playerCanvasPrefab: {fileID: 0}
   playerMesh: {fileID: 8642612960159134589}
@@ -300,16 +315,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 587ae94eeb245bc429581a784f3b4651, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
   maxWalkSpeed: 500
   maxCrouchSpeed: 150
   crouchAmmount: 0.7
   maxRunSpeed: 800
   jumpHeight: 1
   horizontalSens: 100
+  verticalSens: 0
   playerVCam: {fileID: 0}
-  freezePlayer: 0
+  freezePlayer:
+    m_InternalValue: 0
+  spectatorMov:
+    m_InternalValue: 0
 --- !u!114 &171290548406564984
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -322,11 +339,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fda0aa5ee7b2f04e9e4c03f2d9abacd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
   wWeaponPivot: {fileID: 3070975332416317270}
   WeaponPrefab: {fileID: 3785819744807672695, guid: 6722d7d0484e2e149950b8cb45d87cb5, type: 3}
---- !u!114 &6741849327431726004
+--- !u!114 &2889167892064599699
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -335,15 +350,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 9207269670975588337}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneId: 0
-  serverOnly: 0
-  visible: 0
-  m_AssetId: e36ad72cf8383934585fcdd72b0cca96
-  hasSpawned: 0
---- !u!114 &5977417963164415031
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+--- !u!114 &5863490445835601013
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -352,23 +366,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 9207269670975588337}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+  m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  clientAuthority: 0
-  sendInterval: 0.05
-  syncPosition: 1
-  syncRotation: 1
-  syncScale: 0
-  interpolatePosition: 1
-  interpolateRotation: 1
-  interpolateScale: 0
-  bufferTimeMultiplier: 1
-  bufferSizeLimit: 64
-  catchupThreshold: 4
-  catchupMultiplier: 0.1
-  showGizmos: 0
-  showOverlay: 0
-  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  SyncPositionX: 1
+  SyncPositionY: 1
+  SyncPositionZ: 1
+  SyncRotAngleX: 1
+  SyncRotAngleY: 1
+  SyncRotAngleZ: 1
+  SyncScaleX: 1
+  SyncScaleY: 1
+  SyncScaleZ: 1
+  PositionThreshold: 0.001
+  RotAngleThreshold: 0.01
+  ScaleThreshold: 0.01
+  InLocalSpace: 0
+  Interpolate: 1

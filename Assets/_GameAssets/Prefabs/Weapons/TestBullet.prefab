@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3379702560865758902}
   - component: {fileID: 4750918993526432524}
   - component: {fileID: 2539466242184134573}
+  - component: {fileID: 4823089889098007778}
   m_Layer: 0
   m_Name: TestBullet
   m_TagString: Untagged
@@ -99,9 +100,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bulletDecal: {fileID: 3785450377083467627}
+  explosionPS: {fileID: 0}
 --- !u!96 &2539466242184134573
 TrailRenderer:
-  serializedVersion: 2
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -142,6 +144,7 @@ TrailRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Time: 0.025
+  m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.05
@@ -187,22 +190,43 @@ TrailRenderer:
       atime6: 0
       atime7: 0
       m_Mode: 0
+      m_ColorSpace: -1
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
     numCornerVertices: 0
     numCapVertices: 1
     alignment: 0
     textureMode: 0
+    textureScale: {x: 1, y: 1}
     shadowBias: 0.5
     generateLightingData: 0
   m_MinVertexDistance: 0.1
+  m_MaskInteraction: 0
   m_Autodestruct: 0
   m_Emitting: 1
+  m_ApplyActiveColorSpace: 0
+--- !u!114 &4823089889098007778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1596550173281179572}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1001 &3677829251073082822
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 8812765938468761721}
     m_Modifications:
     - target: {fileID: 4062229901704942896, guid: a6a6f18ae3ca9e14da6f1bc8a4ff5d14, type: 3}
@@ -258,6 +282,9 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a6a6f18ae3ca9e14da6f1bc8a4ff5d14, type: 3}
 --- !u!114 &3785450377083467627 stripped
 MonoBehaviour:

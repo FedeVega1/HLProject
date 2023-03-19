@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
 public class TeamBase : ControlPoint
 {
@@ -8,7 +9,7 @@ public class TeamBase : ControlPoint
 
     protected override void OnTriggerEnter(Collider other)
     {
-        if (!isServer || !other.CompareTag("Player")) return;
+        if (!IsServer || !other.CompareTag("Player")) return;
 
         if (uncapturablePoint)
         {
@@ -23,7 +24,7 @@ public class TeamBase : ControlPoint
 
     protected override void OnTriggerExit(Collider other)
     {
-        if (!isServer || !other.CompareTag("Player")) return;
+        if (!IsServer || !other.CompareTag("Player")) return;
 
         if (uncapturablePoint)
         {

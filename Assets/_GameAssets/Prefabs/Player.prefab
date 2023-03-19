@@ -127,8 +127,8 @@ GameObject:
   - component: {fileID: 4995908781376038965}
   - component: {fileID: 8303033203183977524}
   - component: {fileID: -4497347803742756580}
-  - component: {fileID: -7027478099048125744}
-  - component: {fileID: 1225735766619204947}
+  - component: {fileID: -8892745284534228811}
+  - component: {fileID: 9011122759239694099}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -162,9 +162,17 @@ CharacterController:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4337097435313233557}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Height: 2
   m_Radius: 0.5
   m_SlopeLimit: 45
@@ -184,13 +192,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcdedcbd28b6b85468de28e53a53d53a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
   maxHealth: 100
   maxArmor: 0
   maxBleedTime: 0
   bleedThreshold: 0
-  isInvencible: 0
+  isInvencible:
+    m_InternalValue: 0
   playerCamera: {fileID: 8486365275955650098}
   playerCanvasPrefab: {fileID: 1464683063064833345, guid: 9325dfb170a97dd48931fcf4c43e9c0a, type: 3}
   playerMesh: {fileID: 3748691895452756505}
@@ -208,8 +215,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 587ae94eeb245bc429581a784f3b4651, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
   maxWalkSpeed: 5
   maxCrouchSpeed: 1
   crouchAmmount: 0.7
@@ -218,8 +223,10 @@ MonoBehaviour:
   horizontalSens: 250
   verticalSens: 300
   playerVCam: {fileID: 2527544677063496800}
-  freezePlayer: 0
-  spectatorMov: 0
+  freezePlayer:
+    m_InternalValue: 0
+  spectatorMov:
+    m_InternalValue: 0
 --- !u!114 &-4497347803742756580
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -232,11 +239,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fda0aa5ee7b2f04e9e4c03f2d9abacd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
   wWeaponPivot: {fileID: 7595591337169747506}
   WeaponPrefab: {fileID: 3785819744807672695, guid: 6722d7d0484e2e149950b8cb45d87cb5, type: 3}
---- !u!114 &-7027478099048125744
+--- !u!114 &-8892745284534228811
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -245,15 +250,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 4337097435313233557}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneId: 0
-  serverOnly: 0
-  visible: 0
-  m_AssetId: bd3d71c148704cb41a5e9cd49c5c27d6
-  hasSpawned: 0
---- !u!114 &1225735766619204947
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+--- !u!114 &9011122759239694099
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -262,31 +266,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 4337097435313233557}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+  m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  clientAuthority: 0
-  sendInterval: 0.05
-  syncPosition: 1
-  syncRotation: 1
-  syncScale: 0
-  interpolatePosition: 1
-  interpolateRotation: 1
-  interpolateScale: 0
-  bufferTimeMultiplier: 1
-  bufferSizeLimit: 64
-  catchupThreshold: 4
-  catchupMultiplier: 0.1
-  onlySyncOnChange: 1
-  bufferResetMultiplier: 5
-  positionSensitivity: 0.01
-  rotationSensitivity: 0.01
-  scaleSensitivity: 0.01
-  showGizmos: 0
-  showOverlay: 0
-  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  SyncPositionX: 1
+  SyncPositionY: 1
+  SyncPositionZ: 1
+  SyncRotAngleX: 1
+  SyncRotAngleY: 1
+  SyncRotAngleZ: 1
+  SyncScaleX: 1
+  SyncScaleY: 1
+  SyncScaleZ: 1
+  PositionThreshold: 0.001
+  RotAngleThreshold: 0.01
+  ScaleThreshold: 0.01
+  InLocalSpace: 0
+  Interpolate: 1
 --- !u!1 &5979957549666649720
 GameObject:
   m_ObjectHideFlags: 0
@@ -491,9 +487,17 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8349247112305432033}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &4630936576297197146
@@ -572,7 +576,8 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7814207, y: 1}
+    FocusDistance: 10
+    m_SensorSize: {x: 1, y: 1}
     Iso: 200
     ShutterSpeed: 0.005
     Aperture: 16

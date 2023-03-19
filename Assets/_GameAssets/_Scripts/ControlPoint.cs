@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Mirror;
+using Unity.Netcode;
 
 [RequireComponent(typeof(BoxCollider))]
-public class ControlPoint : NetworkBehaviour
+public class ControlPoint : CommonNetworkBehaviour
 {
     [SerializeField] protected bool debugShowBounds;
 
@@ -52,44 +52,46 @@ public class ControlPoint : NetworkBehaviour
 
     protected virtual void OnTriggerEnter(Collider other)
     {
-        if (IsBlocked || !isServer || !other.CompareTag("Player")) return;    
+        if (IsBlocked || !IsServer || !other.CompareTag("Player")) return;    
         Player playerScript = other.GetComponent<Player>();
 
         if (playerScript != null)
         {
             if (playersInCP.Contains(playerScript))
             {
-                Debug.LogError($"{playerScript.GetPlayerName()} is on {name} control point bounds, but he was already inside!");
+                Debug.LogErrorFormat("{0} is on {1} control point bounds, but he was already inside!", playerScript.GetPlayerName(), name);
                 return;
             }
 
             playersInCP.Add(playerScript);
             CheckPlayerCount();
 
-            playerScript.RpcOnControlPoint(playerScript.connectionToClient, currentTeam, captureProgress, defyingTeam);
+            ClientRpcParams rpcParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new ulong[] { playerScript.NetworkBehaviourId } } };
+            playerScript.OnControlPoint_ClientRpc(currentTeam, captureProgress, defyingTeam, rpcParams);
         }
         else
         {
-            Debug.LogError($"{name} control point detected a player object without a Player component!");
+            Debug.LogErrorFormat("{0} control point detected a player object without a Player component!", name);
         }
     }
 
     protected virtual void OnTriggerStay(Collider other)
     {
-        if (IsBlocked || !canCapture || !isServer || !other.CompareTag("Player")) return;
+        if (IsBlocked || !canCapture || !IsServer || !other.CompareTag("Player")) return;
         CaptureControlPoint();
     }
 
     protected virtual void OnTriggerExit(Collider other)
     {
-        if (IsBlocked || !isServer || !other.CompareTag("Player")) return;
+        if (IsBlocked || !IsServer || !other.CompareTag("Player")) return;
 
         int size = playersInCP.Count;
         for (int i = 0; i < size; i++)
         {
             if (playersInCP[i].gameObject == other.gameObject)
             {
-                playersInCP[i].RpcExitControlPoint(playersInCP[i].connectionToClient);
+                ClientRpcParams rpcParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new ulong[] { playersInCP[i].NetworkBehaviourId } } };
+                playersInCP[i].ExitControlPoint_ClientRpc(rpcParams);
                 playersInCP.RemoveAt(i);
                 break;
             }
@@ -149,7 +151,10 @@ public class ControlPoint : NetworkBehaviour
         {
             int size = playersInCP.Count;
             for (int i = 0; i < size; i++)
-                playersInCP[i].RpcUpdateCPProgress(playersInCP[i].connectionToClient, captureProgress);
+            { 
+                ClientRpcParams rpcParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new ulong[] { playersInCP[i].NetworkBehaviourId } } };
+                playersInCP[i].UpdateCPProgress_ClientRpc(captureProgress, rpcParams);
+            }
         }
     }
 
@@ -173,7 +178,10 @@ public class ControlPoint : NetworkBehaviour
 
         int size = playersInCP.Count;
         for (int i = 0; i < size; i++)
-            playersInCP[i].RpcOnControlPoint(playersInCP[i].connectionToClient, currentTeam, captureProgress, defyingTeam);
+        {
+            ClientRpcParams rpcParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new ulong[] { playersInCP[i].NetworkBehaviourId } } };
+            playersInCP[i].OnControlPoint_ClientRpc(currentTeam, captureProgress, defyingTeam, rpcParams);
+        }
     }
 
     public void SetPointOrder(int newOrder)

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4085987747615992330}
   - component: {fileID: 8163763830363512694}
   - component: {fileID: 6330719235943840962}
+  - component: {fileID: 2812774303788923884}
   m_Layer: 0
   m_Name: Weapon
   m_TagString: Untagged
@@ -62,8 +63,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa1e443461efba94e87433eee7811268, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  weaponLayerMask:
-    serializedVersion: 2
-    m_Bits: 2147483647
+--- !u!114 &2812774303788923884
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3785819744807672695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1

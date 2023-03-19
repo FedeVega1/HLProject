@@ -87,9 +87,9 @@ public class NetManager : NetworkManager
 
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
-        GameObject playerObject = GameModeManager.INS.SpawnPlayerObject_Server(playerPrefab, GameManager.INS.PlayerName);
-        NetworkServer.AddPlayerForConnection(conn, playerObject);
-        GameModeManager.INS.OnPlayerConnection_Server(playerObject);
+        //GameObject playerObject = GameModeManager.INS.SpawnPlayerObject_Server(playerPrefab, GameManager.INS.PlayerName);
+        //NetworkServer.AddPlayerForConnection(conn, playerObject);
+        //GameModeManager.INS.SetupPlayerConnection_Server(playerObject);
     }
 
     //void OnPlayerConnection(NetworkConnection conn, PlayerInfo message)

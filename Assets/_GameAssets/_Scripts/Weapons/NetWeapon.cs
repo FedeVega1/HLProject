@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Mirror;
+using Unity.Netcode;
 
 public class NetWeapon : CachedNetTransform
 {
@@ -9,7 +9,7 @@ public class NetWeapon : CachedNetTransform
 
     public WeaponType WType => weaponData.weaponType;
 
-    [SyncVar] bool serverInitialized;
+    NetworkVariable<bool> serverInitialized = new NetworkVariable<bool>();
 
     public bool IsDroppingWeapons { get; private set; }
 
@@ -26,10 +26,10 @@ public class NetWeapon : CachedNetTransform
     BulletData bulletData;
     Transform firePivot;
 
-    public override void OnStartClient()
+    protected override void OnClientSpawn()
     {
-        if (hasAuthority) return;
-        CmdRequestWeaponData();
+        if (IsOwner) return;
+        RequestWeaponData_ServerRpc();
     }
 
     void Start() => weaponLayerMask = LayerMask.GetMask("PlayerHitBoxes", "SceneObjects");
@@ -37,7 +37,7 @@ public class NetWeapon : CachedNetTransform
     public void Init(WeaponData data, Player owner)
     {
         weaponData = data;
-        RpcSyncWeaponData(weaponData.name);
+        SyncWeaponData_ClientRpc(weaponData.name);
 
         bulletData = data.bulletData;
         owningPlayer = owner;
@@ -58,23 +58,22 @@ public class NetWeapon : CachedNetTransform
             firePivot = MyTransform;
         }
 
-        serverInitialized = true;
-        RpcInitClientWeapon();
+        serverInitialized.Value = true;
+        InitClientWeapon_ClientRpc(SendRpcToEveryoneExceptPlayer);
     }
 
     #region Server
 
-    [Server]
-    void Fire()
+    void Fire_Server()
     {
-        if (NetworkTime.time < fireTime) return;
+        if (NetTime < fireTime) return;
 
         MyTransform.eulerAngles = new Vector3(owningPlayer.GetPlayerCameraXAxis_Server(), MyTransform.eulerAngles.y, MyTransform.eulerAngles.z);
 
         switch (bulletData.type)
         {
             case BulletType.RayCast:
-                ShootRayCastBullet();
+                ShootRayCastBullet_Server();
                 break;
 
             case BulletType.Physics:
@@ -82,16 +81,16 @@ public class NetWeapon : CachedNetTransform
                 Bullet granadeBulletScript = granade.GetComponent<Bullet>();
                 granadeBulletScript.Init(bulletData.initialSpeed, true);
                 granadeBulletScript.PhysicsTravelTo(true, firePivot.forward, bulletData.radius, false, bulletData.timeToExplode);
-                granadeBulletScript.OnExplode += OnBulletExplode;
-                NetworkServer.Spawn(granade);
+                granadeBulletScript.OnExplode += OnBulletExplode_Server;
+                granade.GetComponent<NetworkObject>().Spawn();
+                //NetworkServer.Spawn(granade);
                 break;
         }
 
-        fireTime = NetworkTime.time + weaponData.weaponAnimsTiming.fire;
+        fireTime = NetTime + weaponData.weaponAnimsTiming.fire;
     }
 
-    [Server]
-    void OnBulletExplode(List<HitBox> hitBoxList, Vector3 finalPos, Quaternion finalRot)
+    void OnBulletExplode_Server(List<HitBox> hitBoxList, Vector3 finalPos, Quaternion finalRot)
     {
         int size = hitBoxList.Count;
         for (int i = 0; i < size; i++)
@@ -100,11 +99,10 @@ public class NetWeapon : CachedNetTransform
             float damageFalloff = Mathf.Clamp(bulletData.radius - distance, 0, bulletData.radius) / bulletData.radius;
             hitBoxList[i].GetCharacterScript().TakeDamage_Server(bulletData.damage * damageFalloff, bulletData.damageType);
         }
-        RpcBulletExplosion(finalPos, finalRot);
+        BulletExplosion_ClientRpc(finalPos, finalRot);
     }
 
-    [Server]
-    void ShootRayCastBullet()
+    void ShootRayCastBullet_Server()
     {
         Ray weaponRay = new Ray(firePivot.position, firePivot.forward);
 
@@ -114,25 +112,25 @@ public class NetWeapon : CachedNetTransform
 
             bool fallOffCheck = CheckBulletFallOff(ref weaponRay, ref rayHit, out float distance);
             if (!fallOffCheck) hitPos = rayHit.point;
-            RpcFireWeapon(hitPos, true);
+            FireWeapon_ClientRpc(hitPos, true, SendRpcToEveryoneExceptPlayer);
 
             if (fallOffCheck)
             {
                 HitBox hitBox = rayHit.transform.GetComponent<HitBox>();
                 if (hitBox != null)
                 {
-                    StartCoroutine(ApplyDistanceToDamage(hitBox, rayHit.distance));
+                    StartCoroutine(ApplyDistanceToDamage_Server(hitBox, rayHit.distance));
                     Debug.DrawLine(weaponRay.origin, hitPos, Color.green, 5);
                     return;
                 }
             }
 
-            if (rayHit.collider != null) print($"Server Fire! Range[{bulletData.maxTravelDistance}] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
+            if (rayHit.collider != null) Debug.LogFormat("Server Fire! Range[{0}] - HitPoint: {1}|{2}", bulletData.maxTravelDistance, rayHit.point, rayHit.collider.name);
             //else RpcFireWeapon(weaponRay.origin + (weaponRay.direction * distance), false);
         }
 
         Vector3 fallOff = Vector3.down * bulletData.fallOff;
-        RpcFireWeapon(weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), false);
+        FireWeapon_ClientRpc(weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), false, SendRpcToEveryoneExceptPlayer);
 
         Debug.DrawRay(weaponRay.origin, weaponRay.direction + fallOff, Color.red, 2);
         Debug.DrawLine(weaponRay.origin, weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), Color.red, 2);
@@ -149,7 +147,7 @@ public class NetWeapon : CachedNetTransform
         {
             if (Physics.Raycast(weaponRay, out rayHit, distance, weaponLayerMask))
             {
-                print($"Server Fire! Range[{distance}] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
+                Debug.LogFormat("Server Fire! Range[{0}] - HitPoint: {1}|{2}", distance, rayHit.point, rayHit.collider.name);
                 Debug.DrawLine(weaponRay.origin, rayHit.point, Color.yellow, 5);
 
                 lastDistance = distance;
@@ -166,29 +164,25 @@ public class NetWeapon : CachedNetTransform
         return true;
     }
 
-    [Server]
-    void AltFire()
+    void AltFire_Server()
     {
 
     }
 
-    [Server]
-    void Reload()
+    void Reload_Server()
     {
         if (bulletsInMag >= weaponData.bulletsPerMag || mags <= 0) return;
         clientWeapon.Reload();
-        StartCoroutine(ReloadRoutine());
+        StartCoroutine(ReloadRoutine_Server());
     }
 
-    [Server]
-    public void DropClientWeaponAndDestroy()
+    public void DropClientWeaponAndDestroy_Server()
     {
         IsDroppingWeapons = true;
-        RpcDropWeapon();
+        DropWeapon_ClientRpc();
     }
 
-    [Server]
-    IEnumerator ApplyDistanceToDamage(HitBox hitBoxToHit, float distance)
+    IEnumerator ApplyDistanceToDamage_Server(HitBox hitBoxToHit, float distance)
     {
         yield return new WaitForSeconds(distance / bulletData.initialSpeed);
         hitBoxToHit.GetCharacterScript().TakeDamage_Server(bulletData.damage, DamageType.Bullet);
@@ -198,35 +192,36 @@ public class NetWeapon : CachedNetTransform
 
     #region Commands
 
-    [Command]
-    public void CmdRequestFire()
+    [ServerRpc]
+    public void RequestFire_ServerRpc()
     {
-        Fire();
+        Fire_Server();
     }
 
-    [Command]
-    public void CmdRequestAltFire()
+    [ServerRpc]
+    public void RequestAltFire_ServerRpc()
     {
-        AltFire();
+        AltFire_Server();
     }
 
-    [Command]
-    public void CmdRequestReload()
+    [ServerRpc]
+    public void RequestReload_ServerRpc()
     {
-        Reload();
+        Reload_Server();
     }
 
-    [Command(requiresAuthority = false)]
-    public void CmdRequestWeaponData()
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestWeaponData_ServerRpc()
     {
-        RpcSyncWeaponData(weaponData.name);
+        SyncWeaponData_ClientRpc(weaponData.name);
     }
 
-    [Command(requiresAuthority = false)]
-    public void CmdOnPlayerDroppedWeapon()
+    [ServerRpc(RequireOwnership = false)]
+    public void OnPlayerDroppedWeapon_ServerRpc()
     {
         if (!IsDroppingWeapons) return;
-        NetworkServer.Destroy(gameObject);
+        NetObject.Despawn(true);
+        //NetworkServer.Destroy(gameObject);
     }
 
     #endregion
@@ -234,7 +229,7 @@ public class NetWeapon : CachedNetTransform
     #region RPCs
 
     [ClientRpc]
-    public void RpcBulletExplosion(Vector3 pos, Quaternion rot)
+    public void BulletExplosion_ClientRpc(Vector3 pos, Quaternion rot)
     {
         GameObject granade = Instantiate(bulletData.bulletPrefab, pos, rot);
         Bullet granadeBulletScript = granade.GetComponent<Bullet>();
@@ -242,49 +237,49 @@ public class NetWeapon : CachedNetTransform
         granadeBulletScript.PhysicsTravelTo(false, Vector3.zero, bulletData.radius, false, 0);
     }
 
-    [ClientRpc(includeOwner = false)]
-    public void RpcToggleClientWeapon(bool toggle)
+    [ClientRpc]
+    public void ToggleClientWeapon_ClientRpc(bool toggle, ClientRpcParams rpcParams)
     {
-        StartCoroutine(WaitForServerAndClientInitialization(true, true, () => {
+        StartCoroutine(WaitForServerAndClientInitialization_Client(true, true, () => {
             if (toggle) clientWeapon.DrawWeapon();
             else clientWeapon.HolsterWeapon();
         }));
     }
 
-    [ClientRpc(includeOwner = false)]
-    public void RpcInitClientWeapon()
+    [ClientRpc]
+    public void InitClientWeapon_ClientRpc(ClientRpcParams rpcParams)
     {
         print("INIT CLIENT WEAPON");
-        InitClientWeapon();
+        InitClientWeapon_Client();
     }
 
-    [ClientRpc(includeOwner = false)]
-    public void RpcFireWeapon(Vector3 destination, bool didHit)
+    [ClientRpc]
+    public void FireWeapon_ClientRpc(Vector3 destination, bool didHit, ClientRpcParams rpcParams)
     {
         clientWeapon.Fire(destination, didHit);
     }
 
     [ClientRpc]
-    void RpcSyncWeaponData(string weaponAssetName)//(int weaponID)
+    void SyncWeaponData_ClientRpc(string weaponAssetName)//(int weaponID)
     {
         if (weaponData == null) weaponData = Resources.Load<WeaponData>($"Weapons/{weaponAssetName}");
         if (bulletData == null) bulletData = weaponData.bulletData;
 
-        if (serverInitialized && clientWeapon == null) InitClientWeapon();
+        if (serverInitialized.Value && clientWeapon == null) InitClientWeapon_Client();
     }
 
     [ClientRpc]
-    public void RpcDropWeapon()
+    public void DropWeapon_ClientRpc()
     {
-        if (hasAuthority)
+        if (IsOwner)
         {
-            CmdOnPlayerDroppedWeapon();
+            OnPlayerDroppedWeapon_ServerRpc();
             return;
         }
 
-            StartCoroutine(WaitForServerAndClientInitialization(true, true, () => {
+            StartCoroutine(WaitForServerAndClientInitialization_Client(true, true, () => {
             clientWeapon.DropProp();
-            CmdOnPlayerDroppedWeapon();
+            OnPlayerDroppedWeapon_ServerRpc();
         }));
     }
 
@@ -292,21 +287,19 @@ public class NetWeapon : CachedNetTransform
 
     #region Coroutines
 
-    [Server]
-    IEnumerator ReloadRoutine()
+    IEnumerator ReloadRoutine_Server()
     {
         yield return new WaitForSeconds(2);
         bulletsInMag = weaponData.bulletsPerMag;
         mags--;
     }
 
-    [Client]
-    IEnumerator WaitForServerAndClientInitialization(bool waitForClient, bool waitForServer, System.Action OnServerAndClientInitialized)
+    IEnumerator WaitForServerAndClientInitialization_Client(bool waitForClient, bool waitForServer, System.Action OnServerAndClientInitialized)
     {
         int debug = 0;
-        while ((!serverInitialized && waitForServer) || (!clientWeaponInit && waitForClient))
+        while ((!serverInitialized.Value && waitForServer) || (!clientWeaponInit && waitForClient))
         {
-            print($"Waiting for client Initialization {debug++}");
+            Debug.LogFormat("Waiting for client Initialization {0}", debug++);
             yield return new WaitForSeconds(.1f);
         }
         OnServerAndClientInitialized?.Invoke();
@@ -314,11 +307,10 @@ public class NetWeapon : CachedNetTransform
 
     #endregion
 
-    [Client]
-    void InitClientWeapon()
+    void InitClientWeapon_Client()
     {
-        if (hasAuthority) return;
-        StartCoroutine(WaitForServerAndClientInitialization(false, true, () =>
+        if (IsOwner) return;
+        StartCoroutine(WaitForServerAndClientInitialization_Client(false, true, () =>
         {
             clientWeapon = Instantiate(weaponData.clientPrefab, MyTransform).GetComponent<IWeapon>();
             if (clientWeapon != null)

@@ -37,7 +37,7 @@ public class Player : Character
     protected override void OnServerSpawn()
     {
         base.OnServerSpawn();
-        movementScript.freezePlayer = true;
+        movementScript.freezePlayer.Value = true;
         firstSpawn.Value = true;
     }
 
@@ -236,8 +236,8 @@ public class Player : Character
         MyTransform.position = specPoint.position;
         MyTransform.rotation = specPoint.rotation;
 
-        movementScript.freezePlayer = false;
-        movementScript.spectatorMov = true;
+        movementScript.freezePlayer.Value = false;
+        movementScript.spectatorMov.Value = true;
         movementScript.FreezeInputs = false;
     }
 
@@ -246,8 +246,8 @@ public class Player : Character
         //print($"NewPos: {MyTransform.position}");
         InitCharacter_Server();
         MaxRespawnTime = spawnTime;
-        movementScript.ForceMoveCharacter(spawnPosition, spawnRotation);
-        movementScript.freezePlayer = false;
+        movementScript.ForceMoveCharacter_Server(spawnPosition, spawnRotation);
+        movementScript.freezePlayer.Value = false;
         //movementScript.RpcToggleFreezePlayer(connectionToClient, false);
         Debug.LogFormat("Server: Setup weapon inventory for {0} player - ClassName: {1}", playerName, classData.className);
         inventory.SetupWeaponInventory_Server(classData.classWeapons, 0);
@@ -265,7 +265,7 @@ public class Player : Character
         deaths++;
         isWounded.Value = true;
         ShowWoundedHUD_ClientRpc(woundedTime, timeToRespawn.Value, SendRpcToPlayer);
-        movementScript.freezePlayer = true;
+        movementScript.freezePlayer.Value = true;
         OnPlayerDead?.Invoke();
         //movementScript.RpcToggleFreezePlayer(connectionToClient, true);
         //base.CharacterDies();
@@ -278,8 +278,8 @@ public class Player : Character
 
     void MatchEnded_Server(int loosingTeam)
     {
-        movementScript.freezePlayer = true;
-        movementScript.ToggleCharacterController(false);
+        movementScript.freezePlayer.Value = true;
+        movementScript.ToggleCharacterController_Server(false);
 
         Transform spectPoint = GameModeManager.INS.GetSpectatePointByIndex(0);
         movementScript.MyTransform.position = spectPoint.position;
@@ -292,7 +292,7 @@ public class Player : Character
     {
         currentClassIndex = classIndex;
         this.classData = classData;
-        movementScript.spectatorMov = false;
+        movementScript.spectatorMov.Value = false;
         print($"Server: CurrentClass {classData.className}");
     }
 
@@ -321,19 +321,22 @@ public class Player : Character
         ShowScoreboard_ClientRpc(info, SendRpcToPlayer);
     }
 
+    [ServerRpc]
     void RequestPlayerChangeTeam_ServerRpc(int team)
     {
-        movementScript.freezePlayer = true;
+        movementScript.freezePlayer.Value = true;
         if (!isDead.Value && !firstSpawn.Value) GameModeManager.INS.KillPlayer_Server(this);
         classData = null;
         GameModeManager.INS.TeamManagerInstance.PlayerSelectedTeam_Server(this, team);
     }
 
+    [ServerRpc]
     void RequestPlayerChangeClass_ServerRpc(int teamClass)
     {
         GameModeManager.INS.PlayerChangeClass_Server(this, teamClass);
     }
 
+    [ServerRpc]
     void RequestPlayerRespawn_ServerRpc()
     {
         if ((!isDead .Value && !firstSpawn.Value) || NetTime < timeToRespawn.Value || classData == null) return;
@@ -341,6 +344,7 @@ public class Player : Character
         firstSpawn.Value = false;
     }
 
+    [ServerRpc]
     void RequestWoundedGiveUp_ServerRpc()
     {
         if (isDead.Value || !isWounded.Value) return;
