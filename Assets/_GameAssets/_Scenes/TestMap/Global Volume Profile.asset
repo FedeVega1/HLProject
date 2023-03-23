@@ -222,6 +222,9 @@ MonoBehaviour:
     opacityA:
       m_OverrideState: 0
       m_Value: 0
+    altitude:
+      m_OverrideState: 0
+      m_Value: 2000
     rotation:
       m_OverrideState: 0
       m_Value: 0
@@ -256,10 +259,13 @@ MonoBehaviour:
       m_Value: 1
     steps:
       m_OverrideState: 0
-      m_Value: 1
+      m_Value: 2
     thickness:
       m_OverrideState: 0
       m_Value: 0.5
+    ambientProbeDimmer:
+      m_OverrideState: 0
+      m_Value: 1
     castShadows:
       m_OverrideState: 0
       m_Value: 1
@@ -279,6 +285,9 @@ MonoBehaviour:
     opacityA:
       m_OverrideState: 0
       m_Value: 0
+    altitude:
+      m_OverrideState: 0
+      m_Value: 2000
     rotation:
       m_OverrideState: 0
       m_Value: 0
@@ -317,6 +326,9 @@ MonoBehaviour:
     thickness:
       m_OverrideState: 0
       m_Value: 0.5
+    ambientProbeDimmer:
+      m_OverrideState: 0
+      m_Value: 1
     castShadows:
       m_OverrideState: 0
       m_Value: 0

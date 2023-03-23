@@ -8,6 +8,8 @@ public enum WeaponType { Melee, Secondary, Primary, Tools, BandAids }
 
 public interface IWeapon
 {
+    public Quaternion CameraTargetRotation { get; set; }
+
     public void Init(bool isServer, WeaponData wData, BulletData data, GameObject propPrefab);
 
     public void Fire(Vector3 destination, bool didHit, bool lastBullet = false);
@@ -27,7 +29,8 @@ public interface IWeapon
     public Transform GetWorldPivot();
 
     public void CheckPlayerMovement(bool isMoving, bool isRunning);
-    public void OnCameraMovement(Vector2 axis);
+
+    public float CameraLerpTime();
 }
 
 public class Weapon : CachedTransform
@@ -38,6 +41,7 @@ public class Weapon : CachedTransform
     public int BulletsInMag { get; private set; }
     public int Mags { get; private set; }
 
+    bool isReloading;
     RaycastHit rayHit;
 
     IWeapon clientWeapon;
@@ -74,13 +78,13 @@ public class Weapon : CachedTransform
             GameObject nullWGO = new GameObject($"{weaponData.weaponName} (NULL)");
             clientWeapon = nullWGO.AddComponent<NullWeapon>();
             clientWeapon.Init(false, weaponData, bulletData, weaponData.propPrefab);
-            Debug.LogError($"Client weapon prefab does not have a IWeapon type component.\nSwitching to default weapon");
+            Debug.LogError("Client weapon prefab does not have a IWeapon type component.\nSwitching to default weapon");
         }
     }
 
     public void Fire()
     {
-        if (NetworkTime.time < wTime) return;
+        if (NetworkTime.time < wTime || isReloading) return;
         if (BulletsInMag <= 0) return;
 
         Ray weaponRay = new Ray(firePivot.position, firePivot.forward);
@@ -92,7 +96,7 @@ public class Weapon : CachedTransform
             if (!fallOffCheck) hitPos = rayHit.point;
             clientWeapon.Fire(hitPos, true, BulletsInMag < 2);
 
-            if (rayHit.collider != null) print($"Client Fire! Range[{bulletData.maxTravelDistance}] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
+            if (rayHit.collider != null) Debug.LogFormat("Client Fire! Range[{0}] - HitPoint: {1}|{2}", bulletData.maxTravelDistance, rayHit.point, rayHit.collider.name);
         }
         else
         {
@@ -119,7 +123,7 @@ public class Weapon : CachedTransform
         {
             if (Physics.Raycast(weaponRay, out rayHit, distance, weaponLayerMask))
             {
-                print($"Client Fire! Range[{distance}] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
+                Debug.LogFormat("Client Fire! Range[{0}] - HitPoint: {1}|{2}", distance, rayHit.point, rayHit.collider.name);
                 Debug.DrawLine(weaponRay.origin, rayHit.point, Color.yellow, 5);
 
                 lastDistance = distance;
@@ -148,7 +152,8 @@ public class Weapon : CachedTransform
 
     public void Reload()
     {
-        if (BulletsInMag >= weaponData.bulletsPerMag || Mags <= 0) return;
+        if (isReloading || BulletsInMag >= weaponData.bulletsPerMag || Mags <= 0) return;
+        isReloading = true;
         clientWeapon.Reload();
         StartCoroutine(ReloadRoutine());
         netWeapon.CmdRequestReload();
@@ -157,6 +162,7 @@ public class Weapon : CachedTransform
     IEnumerator ReloadRoutine()
     {
         yield return new WaitForSeconds(weaponData.weaponAnimsTiming.reload);
+        isReloading = false;
         BulletsInMag = weaponData.bulletsPerMag;
         Mags--;
         OnFinishedReload?.Invoke();
@@ -183,4 +189,5 @@ public class Weapon : CachedTransform
     public WeaponData GetWeaponData() => weaponData;
 
     public void CheckPlayerMovement(bool isMoving, bool isRunning) => clientWeapon.CheckPlayerMovement(isMoving, isRunning);
+    public void CheckCameraMovement(Quaternion cameraRot) => clientWeapon.CameraTargetRotation = cameraRot;
 }

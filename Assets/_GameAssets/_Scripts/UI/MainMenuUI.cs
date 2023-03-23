@@ -34,6 +34,8 @@ public class MainMenuUI : MonoBehaviour
                     ConnectToServer();
                 break;
         }
+
+        Cursor.lockState = CursorLockMode.Confined;
     }
 
     public void StartGameServer() => GameManager.INS.CreateMatch();

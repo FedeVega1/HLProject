@@ -7,7 +7,9 @@ using Mirror;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : CachedNetTransform
 {
-    [SerializeField] float maxWalkSpeed, maxCrouchSpeed, crouchAmmount, maxRunSpeed, jumpHeight, horizontalSens, verticalSens;
+    [System.Flags] enum InputFlag { Empty = 0b0, Crouch = 0b1, Jump = 0b10, Sprint = 0b100 }
+
+    [SerializeField] float maxWalkSpeed, maxCrouchSpeed, crouchAmmount, maxRunSpeed, jumpHeight, horizontalSens, verticalSens, timeBetweenJumps;
     [SerializeField] CinemachineVirtualCamera playerVCam;
 
     [SyncVar(hook = nameof(OnFreezePlayerSet))] public bool freezePlayer;
@@ -56,10 +58,12 @@ public class PlayerMovement : CachedNetTransform
 
     public float CameraXAxis => xAxisRotaion;
     public bool PlayerIsMoving => playerMovInput.magnitude > 0;
-    public bool PlayerIsRunning => inputFlags == 2;
+    public bool PlayerIsRunning => CheckInput(inputFlags, InputFlag.Sprint);
 
-    BitFlag8 inputFlags;
+    bool jumped;
+    InputFlag inputFlags;
     float startHeight, playerSpeed, cameraRotInput, lastCameraRotInput, xAxisRotaion;
+    double jumpTimer;
     Vector2 playerMovInput, lastPlayerMovInput;
     Vector3 velocity;
 
@@ -98,52 +102,51 @@ public class PlayerMovement : CachedNetTransform
     void CheckForInput()
     {
         if (FreezeInputs) return;
-        bool newInput = false;
         playerMovInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         cameraRotInput = Input.GetAxis("Mouse X");
 
-        newInput = lastPlayerMovInput != playerMovInput || lastCameraRotInput != cameraRotInput;
+        bool newInput = lastPlayerMovInput != playerMovInput || lastCameraRotInput != cameraRotInput;
 
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            inputFlags += 0;
+            inputFlags |= InputFlag.Crouch;
             newInput = true;
         }
         else if (Input.GetKeyUp(KeyCode.LeftControl))
         {
-            inputFlags -= 0;
+            inputFlags ^= InputFlag.Crouch;
             newInput = true;
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            inputFlags += 1;
+            inputFlags |= InputFlag.Jump;
             newInput = true;
         }
         else if (Input.GetKeyUp(KeyCode.Space))
         {
-            inputFlags -= 1;
+            inputFlags ^= InputFlag.Jump;
             newInput = true;
         }
 
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
-            inputFlags += 2;
+            inputFlags |= InputFlag.Sprint;
             newInput = true;
         }
         else if (Input.GetKeyUp(KeyCode.LeftShift))
         {
-            inputFlags -= 2;
+            inputFlags ^= InputFlag.Sprint;
             newInput = true;
         }
 
-        if (newInput) CmdSendPlayerInputs(playerMovInput, new Vector2(cameraRotInput, Input.GetAxis("Mouse Y")), inputFlags.GetByte());
+        if (newInput) CmdSendPlayerInputs(playerMovInput, new Vector2(cameraRotInput, Input.GetAxis("Mouse Y")), inputFlags);
         lastCameraRotInput = cameraRotInput;
         lastPlayerMovInput = playerMovInput;
     }
 
     [Command]
-    void CmdSendPlayerInputs(Vector2 movAxis, Vector2 rotAxis, byte _inputFlags)
+    void CmdSendPlayerInputs(Vector2 movAxis, Vector2 rotAxis, InputFlag _inputFlags)
     {
         movAxis.x = Mathf.Clamp(movAxis.x, -1, 1);
         movAxis.y = Mathf.Clamp(movAxis.y, -1, 1);
@@ -152,7 +155,7 @@ public class PlayerMovement : CachedNetTransform
         playerMovInput = movAxis;
         cameraRotInput = rotAxis.x;
         xAxisRotaion = Mathf.Clamp(rotAxis.y, -70, 70);
-        inputFlags = new BitFlag8(_inputFlags);
+        inputFlags = _inputFlags;
     }
 
     void Move()
@@ -160,10 +163,23 @@ public class PlayerMovement : CachedNetTransform
         Crouch();
         Jump();
 
-        if (spectatorMov) NoclipMovement();
+        if (spectatorMov)
+        {
+            NoclipMovement();
+            return;
+        }
 
-        if (CharCtrl.isGrounded && velocity.y < 0) velocity.y = -.5f;
-        if (inputFlags == 2) playerSpeed = maxRunSpeed;
+        if (CharCtrl.isGrounded)
+        {
+            if (jumped)
+            {
+                jumped = false;
+                jumpTimer = NetworkTime.time + timeBetweenJumps;
+            }
+
+            if (velocity.y < 0) velocity.y = -.5f;
+            if (CheckInput(inputFlags, InputFlag.Sprint)) playerSpeed = maxRunSpeed;
+        }
 
         velocity = new Vector3(playerMovInput.x, velocity.y, playerMovInput.y);
         velocity = MyTransform.TransformDirection(velocity);
@@ -174,7 +190,7 @@ public class PlayerMovement : CachedNetTransform
     // TODO: Fix spectator camera movement
     void NoclipMovement()
     {
-        if (inputFlags == 2) playerSpeed = maxRunSpeed * Time.deltaTime;
+        if (CheckInput(inputFlags, InputFlag.Sprint)) playerSpeed = maxRunSpeed * Time.deltaTime;
         else playerSpeed = maxWalkSpeed;
 
         velocity = new Vector3(playerVCam.transform.forward.x * playerMovInput.x, playerVCam.transform.forward.y * velocity.y, playerVCam.transform.forward.z * playerMovInput.y);
@@ -185,12 +201,16 @@ public class PlayerMovement : CachedNetTransform
     {
         if (spectatorMov)
         {
-            velocity.y = inputFlags == 1 ? 1 : velocity.y;
+            velocity.y = CheckInput(inputFlags, InputFlag.Jump) ? 1 : velocity.y;
             return;
         }
 
-        if (inputFlags == 1 && CharCtrl.isGrounded)
+        if (NetworkTime.time < jumpTimer) return;
+        if (CheckInput(inputFlags, InputFlag.Jump) && CharCtrl.isGrounded)
+        {
             velocity.y += Mathf.Sqrt(jumpHeight * -2 * Physics.gravity.y);
+            jumped = true;
+        }
 
         velocity.y += Physics.gravity.y * Time.deltaTime;
         //if (CharCtrl.enabled) CharCtrl.Move(velocity * Time.deltaTime);
@@ -200,13 +220,13 @@ public class PlayerMovement : CachedNetTransform
     {
         if (spectatorMov)
         {
-            velocity.y = inputFlags == 0 ? -1 : velocity.y;
+            velocity.y = CheckInput(inputFlags, InputFlag.Crouch) ? -1 : velocity.y;
             return;
         }
 
         float newHeight = startHeight;
 
-        if (inputFlags == 0)
+        if (CheckInput(inputFlags, InputFlag.Crouch))
         {
             playerSpeed = maxCrouchSpeed;
             newHeight = crouchAmmount * startHeight;
@@ -243,4 +263,6 @@ public class PlayerMovement : CachedNetTransform
 
     [Server]
     public void ToggleCharacterController(bool toggle) => CharCtrl.enabled = toggle;
+
+    bool CheckInput(InputFlag flag, InputFlag inputToCheck) => (flag & inputToCheck) == inputToCheck;
 }

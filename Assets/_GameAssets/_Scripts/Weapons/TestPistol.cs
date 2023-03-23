@@ -8,6 +8,8 @@ public class TestPistol : CachedTransform, IWeapon
     [SerializeField] Transform virtualBulletPivot, worldBulletPivot;
     [SerializeField] Animator weaponAnim;
 
+    public Quaternion CameraTargetRotation { get; set; }
+
     bool isServer, isDrawn;
     BulletData bulletData;
     GameObject weaponPropPrefab;
@@ -23,6 +25,8 @@ public class TestPistol : CachedTransform, IWeapon
         this.isServer = isServer;
         gameObject.SetActive(false);
     }
+
+    void Update() => MyTransform.rotation = Quaternion.Slerp(MyTransform.rotation, CameraTargetRotation, Time.deltaTime * CameraLerpTime());
 
     public void ToggleAllViewModels(bool toggle)
     {
@@ -77,5 +81,5 @@ public class TestPistol : CachedTransform, IWeapon
     public Transform GetWorldPivot() => worldBulletPivot;
 
     public void CheckPlayerMovement(bool isMoving, bool isRunning) { }
-    public void OnCameraMovement(Vector2 axis) { }
+    public float CameraLerpTime() => 15;
 }

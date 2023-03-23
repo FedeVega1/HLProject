@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Mirror;
+using UnityEditor.ShaderGraph.Internal;
+using System.Drawing.Printing;
 
 public abstract class CachedTransform : MonoBehaviour
 {
@@ -73,6 +75,15 @@ public static class Utilities
         }
 
         return newPlayerName;
+    }
+
+    public static Vector3 RandomVector3(Vector3 axis, float min, float max)
+    {
+        float x = axis.x != 0 ? Random.Range(min, max) : 0;
+        float y = axis.y != 0 ? Random.Range(min, max) : 0;
+        float z = axis.z != 0 ? Random.Range(min, max) : 0;
+
+        return new Vector3(x, y, z);
     }
 
     public static bool MouseOverUI()

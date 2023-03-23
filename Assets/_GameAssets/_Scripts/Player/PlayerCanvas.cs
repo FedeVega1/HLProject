@@ -44,6 +44,7 @@ public class PlayerCanvas : MonoBehaviour
         teamClassSelection.ToggleSpawnButton(false);
 
         teamTickets = new int[TeamManager.MAXTEAMS];
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     public void PlayerNotWounded()
@@ -66,6 +67,7 @@ public class PlayerCanvas : MonoBehaviour
     void ResetHUD()
     {
         PlayerInBounds();
+        Cursor.lockState = CursorLockMode.Locked;
 
         teamSelection.ToggleTeamSelection(false);
         teamClassSelection.ToggleClassSelection(false);
@@ -83,6 +85,7 @@ public class PlayerCanvas : MonoBehaviour
         ResetHUD();
         woundedScreen.SetObscurerColor(new Color32(0x0, 0x0, 0x0, 0x43));
         gameOverScreen.ShowGameOverScreen(loosingTeam, teamTickets, levelChangeTime);
+        Cursor.lockState = CursorLockMode.Confined;
     }
 
     public void SetTeamTickets(int team, int tickets) => teamTickets[team] = tickets;
@@ -99,12 +102,14 @@ public class PlayerCanvas : MonoBehaviour
     public void ToggleTeamSelection(bool toggle)
     {
         teamSelection.ToggleTeamSelection(toggle);
+        Cursor.lockState = toggle ? CursorLockMode.Confined : CursorLockMode.Locked;
         IsTeamSelectionMenuOpen = toggle;
     }
 
     public void ToggleClassSelection(bool toggle)
     {
         teamClassSelection.ToggleClassSelection(toggle);
+        Cursor.lockState = toggle ? CursorLockMode.Confined : CursorLockMode.Locked;
         IsClassSelectionMenuOpen = toggle;
     }
 
@@ -112,8 +117,8 @@ public class PlayerCanvas : MonoBehaviour
     {
         scoreBoard.Toggle(toggle);
         IsScoreboardMenuOpen = toggle;
+        //Cursor.lockState = toggle ? CursorLockMode.Confined : CursorLockMode.Locked;
     }
-
 
     #region Redirections
 

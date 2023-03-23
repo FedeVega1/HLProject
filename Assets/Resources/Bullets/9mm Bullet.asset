@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1174933ccb941f147b63b7ed36c160c4, type: 3}
   m_Name: 9mm Bullet
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 1596550173281179572, guid: 286809440e3147746a2517aa521686cd, type: 3}
+  bulletPrefab: {fileID: 1596550173281179572, guid: 02e398d583b606f40907e594cbbce54c, type: 3}
   type: 0
   damageType: 2
-  initialSpeed: 10
+  initialSpeed: 360
   damage: 8
   maxTravelDistance: 25
   radius: 0

@@ -95,9 +95,7 @@ public class Player : Character
     [Client]
     protected virtual void CheckInputs()
     {
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Escape)) GameManager.INS.StopServer();
-
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Escape))
         {
             if (isServer && isClient) GameManager.INS.StopServer();
             else GameManager.INS.DisconnectFromServer();
@@ -305,6 +303,7 @@ public class Player : Character
 
     [Server]
     public float GetPlayerCameraXAxis() => movementScript.CameraXAxis;
+
 
     public PlayerScoreboardInfo GetPlayerScoreboardInfo(int requesterTeam, bool ignoreTeamFilter = false)
     {

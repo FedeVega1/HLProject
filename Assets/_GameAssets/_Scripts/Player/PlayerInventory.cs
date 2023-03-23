@@ -56,7 +56,10 @@ public class PlayerInventory : NetworkBehaviour
         if (!isLocalPlayer) return;
 
         if (weaponsInvetoryOnClient != null && currentWeaponIndex < weaponsInvetoryOnClient.Count && weaponsInvetoryOnClient[currentWeaponIndex] != null)
+        {
             weaponsInvetoryOnClient[currentWeaponIndex].CheckPlayerMovement(playerScript.PlayerIsMoving(), playerScript.PlayerIsRunning());
+            weaponsInvetoryOnClient[currentWeaponIndex].CheckCameraMovement(GameModeManager.INS.GetClientCamera().rotation);
+        }
 
         if (Utilities.MouseOverUI()) return;
         if (!DisablePlayerInputs) CheckInputs();

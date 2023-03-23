@@ -13,7 +13,7 @@ public class NetWeapon : CachedNetTransform
 
     public bool IsDroppingWeapons { get; private set; }
 
-    bool clientWeaponInit;
+    bool clientWeaponInit, isReloading;
     int bulletsInMag, mags;
     double fireTime;
     RaycastHit rayHit;
@@ -67,7 +67,8 @@ public class NetWeapon : CachedNetTransform
     [Server]
     void Fire()
     {
-        if (NetworkTime.time < fireTime) return;
+        if (NetworkTime.time < fireTime || isReloading) return;
+        if (bulletsInMag <= 0) return;
 
         MyTransform.eulerAngles = new Vector3(owningPlayer.GetPlayerCameraXAxis(), MyTransform.eulerAngles.y, MyTransform.eulerAngles.z);
 
@@ -127,10 +128,11 @@ public class NetWeapon : CachedNetTransform
                 }
             }
 
-            if (rayHit.collider != null) print($"Server Fire! Range[{bulletData.maxTravelDistance}] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
+            if (rayHit.collider != null) Debug.LogFormat("Server Fire! Range[{0}] - HitPoint: {1}|{2}", bulletData.maxTravelDistance, rayHit.point, rayHit.collider.name);
             //else RpcFireWeapon(weaponRay.origin + (weaponRay.direction * distance), false);
         }
 
+        bulletsInMag--;
         Vector3 fallOff = Vector3.down * bulletData.fallOff;
         RpcFireWeapon(weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), false);
 
@@ -175,8 +177,9 @@ public class NetWeapon : CachedNetTransform
     [Server]
     void Reload()
     {
-        if (bulletsInMag >= weaponData.bulletsPerMag || mags <= 0) return;
-        clientWeapon.Reload();
+        if (isReloading || bulletsInMag >= weaponData.bulletsPerMag || mags <= 0) return;
+        isReloading = true;
+        RpcReloadWeapon();
         StartCoroutine(ReloadRoutine());
     }
 
@@ -264,6 +267,12 @@ public class NetWeapon : CachedNetTransform
         clientWeapon.Fire(destination, didHit);
     }
 
+    [ClientRpc(includeOwner = false)]
+    public void RpcReloadWeapon()
+    {
+        clientWeapon.Reload();
+    }
+
     [ClientRpc]
     void RpcSyncWeaponData(string weaponAssetName)//(int weaponID)
     {
@@ -298,6 +307,7 @@ public class NetWeapon : CachedNetTransform
         yield return new WaitForSeconds(2);
         bulletsInMag = weaponData.bulletsPerMag;
         mags--;
+        isReloading = false;
     }
 
     [Client]
@@ -306,7 +316,7 @@ public class NetWeapon : CachedNetTransform
         int debug = 0;
         while ((!serverInitialized && waitForServer) || (!clientWeaponInit && waitForClient))
         {
-            print($"Waiting for client Initialization {debug++}");
+            Debug.LogFormat("Waiting for client Initialization {0}", debug++);
             yield return new WaitForSeconds(.1f);
         }
         OnServerAndClientInitialized?.Invoke();
@@ -330,7 +340,7 @@ public class NetWeapon : CachedNetTransform
                 GameObject nullWGO = new GameObject($"{weaponData.weaponName} (NULL)");
                 clientWeapon = nullWGO.AddComponent<NullWeapon>();
                 clientWeapon.Init(true, weaponData, bulletData, weaponData.propPrefab);
-                Debug.LogError($"Client weapon prefab does not have a IWeapon type component.\nSwitching to default weapon");
+                Debug.LogError("Client weapon prefab does not have a IWeapon type component.\nSwitching to default weapon");
             }
 
             clientWeaponInit = true;

@@ -9,7 +9,7 @@ public class Bullet : CachedTransform
 
     bool canTravel, canShowDecal, explodeOnHit, canExplode, isServer;
     float speed, timeToExplode, radius;
-    Vector3 hitNormal;
+    Vector3 startPosition;
     Vector3 destination;
     Rigidbody rb;
 
@@ -40,8 +40,9 @@ public class Bullet : CachedTransform
         //print($"Bullet {name} Distance: {Vector3.Distance(MyTransform.position, destination)}");
         if (Vector3.Distance(MyTransform.position, destination) <= .5f) OnHit();
 
-        Vector3 direction = Vector3.Normalize(destination - MyTransform.position);
-        MyTransform.Translate(speed * Time.deltaTime * direction, Space.World);
+        MyTransform.position = Vector3.MoveTowards(MyTransform.position, destination, speed * Time.deltaTime);
+        //Vector3 direction = Vector3.Normalize(destination - MyTransform.position);
+        //MyTransform.Translate(speed * Time.deltaTime * direction, Space.World);
     }
 
     public void TravelTo(Vector3 destination)//, Vector3 normal)
@@ -49,6 +50,7 @@ public class Bullet : CachedTransform
         MyTransform.localPosition = Vector3.zero;
         //MyTransform.localRotation = Quaternion.identity;
 
+        startPosition = MyTransform.position;
         this.destination = destination;
         //hitNormal = normal;
         canTravel = true;
@@ -60,7 +62,7 @@ public class Bullet : CachedTransform
         {
             bulletDecal.gameObject.SetActive(true);
             bulletDecal.transform.position = destination;
-            bulletDecal.transform.rotation = Quaternion.LookRotation(Vector3.Normalize(destination - MyTransform.position), Vector3.up);
+            bulletDecal.transform.rotation = Quaternion.LookRotation(Vector3.Normalize(destination - startPosition), Vector3.up);
             bulletDecal.transform.SetParent(null);
         }
 

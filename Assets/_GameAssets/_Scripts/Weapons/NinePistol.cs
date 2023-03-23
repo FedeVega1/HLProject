@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using kcp2k;
 using UnityEngine;
 
 public class NinePistol : CachedTransform, IWeapon
@@ -7,13 +8,16 @@ public class NinePistol : CachedTransform, IWeapon
     [SerializeField] GameObject[] viewModels;
     [SerializeField] Transform virtualBulletPivot, worldBulletPivot, magazinePivot, bulletEffectPivot;
     [SerializeField] Animator[] weaponAnimators;
-    [SerializeField] GameObject pistolMagazine;
+    [SerializeField] Rigidbody pistolMagazine;
+
+    public Quaternion CameraTargetRotation { get; set; }
 
     bool isServer, isDrawn;
     BulletData bulletData;
     WeaponData weaponData;
     GameObject weaponPropPrefab;
     Animator weaponAnim;
+    Quaternion currentTargetRotation;
 
     float randomInspectTime;
     bool lastWalkCheck, lastRunningCheck, lastBullet;
@@ -31,6 +35,7 @@ public class NinePistol : CachedTransform, IWeapon
         gameObject.SetActive(false);
 
         weaponAnim = weaponAnimators[isServer ? 0 : 1];
+        currentTargetRotation = CameraTargetRotation = MyTransform.rotation;
     }
 
     void OnEnable()
@@ -46,6 +51,9 @@ public class NinePistol : CachedTransform, IWeapon
 
     void Update()
     {
+        currentTargetRotation = Quaternion.Slerp(currentTargetRotation, CameraTargetRotation, Time.deltaTime * CameraLerpTime());
+        MyTransform.rotation = currentTargetRotation;
+
         if (weaponAnim == null || Time.time < randomInspectTime) return;
         weaponAnim.SetInteger("RandomIdle", Random.Range(0, 2));
         weaponAnim.SetTrigger("RandomInspect");
@@ -100,8 +108,9 @@ public class NinePistol : CachedTransform, IWeapon
 
     void SpawnMagazine()
     {
-        Rigidbody rb = Instantiate(pistolMagazine, magazinePivot.position, magazinePivot.rotation).GetComponent<Rigidbody>();
-        rb.AddForce(Vector3.down * 10, ForceMode.Impulse);
+        Rigidbody rb = Instantiate(pistolMagazine, magazinePivot.position, magazinePivot.rotation);
+        rb.AddForce(Vector3.down * 2, ForceMode.Impulse);
+        rb.AddTorque(Utilities.RandomVector3(Vector3.one, -1, 1) * 2, ForceMode.Impulse);
     }
 
     public void DrawWeapon()
@@ -140,8 +149,5 @@ public class NinePistol : CachedTransform, IWeapon
         lastRunningCheck = isRunning;
     }
 
-    public void OnCameraMovement(Vector2 axis)
-    {
-
-    }
+    public float CameraLerpTime() => 15;
 }
