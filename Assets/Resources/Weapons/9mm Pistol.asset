@@ -17,10 +17,9 @@ MonoBehaviour:
   propPrefab: {fileID: 6628245465620843539, guid: 633bc1a0f9edf444c8bf3b351421b72c, type: 3}
   bulletData: {fileID: 11400000, guid: 4eadb97707037ad4dacc66138da84899, type: 2}
   maxBulletSpread: 1
-  rateOfFire: 0.5
   weaponType: 1
   weaponAnimsTiming:
-    fire: 0.4
+    fire: 0.25
     reload: 2.167
     holster: 0.5
     draw: 1.208

@@ -56,10 +56,7 @@ public class PlayerInventory : NetworkBehaviour
         if (!isLocalPlayer) return;
 
         if (weaponsInvetoryOnClient != null && currentWeaponIndex < weaponsInvetoryOnClient.Count && weaponsInvetoryOnClient[currentWeaponIndex] != null)
-        {
             weaponsInvetoryOnClient[currentWeaponIndex].CheckPlayerMovement(playerScript.PlayerIsMoving(), playerScript.PlayerIsRunning());
-            weaponsInvetoryOnClient[currentWeaponIndex].CheckCameraMovement(GameModeManager.INS.GetClientCamera().rotation);
-        }
 
         if (Utilities.MouseOverUI()) return;
         if (!DisablePlayerInputs) CheckInputs();
@@ -75,7 +72,7 @@ public class PlayerInventory : NetworkBehaviour
         int size = weaponsToLoad.Length;
         for (int i = 0; i < size; i++)
         {
-            print($"Server: Spawn NetWeapon {weaponsToLoad[i].weaponName} of type {weaponsToLoad[i].weaponType}");
+            Debug.LogFormat("Server: Spawn NetWeapon {0} of type {1}", weaponsToLoad[i].weaponName, weaponsToLoad[i].weaponType);
             GameObject weaponObject = Instantiate(WeaponPrefab, wWeaponPivot);
             NetWeapon spawnedWeapon = weaponObject.GetComponent<NetWeapon>();
 
@@ -90,8 +87,8 @@ public class PlayerInventory : NetworkBehaviour
         currentWeaponIndex = defaultWeaponIndex;
         weaponsInventoryOnServer[currentWeaponIndex].RpcToggleClientWeapon(true);
 
-        print($"Server: Default Weapon {weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponName} of index {currentWeaponIndex}");
-        print($"Finished server PlayerInventory Initialization");
+        Debug.LogFormat("Server: Default Weapon {0} of index {1}", weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponName, currentWeaponIndex);
+        print("Finished server PlayerInventory Initialization");
 
         isServerInitialized = true;
         if (connectionToClient != null) RpcSetupWeaponInventory(connectionToClient, size, defaultWeaponIndex);
@@ -335,9 +332,9 @@ public class PlayerInventory : NetworkBehaviour
     IEnumerator WaitForWeaponSync(Transform weaponToLookAt)
     {
         while (weaponToLookAt.childCount <= 0) yield return new WaitForSeconds(.1f); 
-        IWeapon clientWeapon = weaponToLookAt.GetComponentInChildren<IWeapon>(true);
+        BaseClientWeapon clientWeapon = weaponToLookAt.GetComponentInChildren<BaseClientWeapon>(true);
         if (clientWeapon != null) clientWeapon.DrawWeapon();
-        else Debug.LogError($"Couln't find IWeapon Component or NetWeapon doesn't have a client weapon child!");
+        else Debug.LogError("Couln't find IWeapon Component or NetWeapon doesn't have a client weapon child!");
     }
 
     [Client]
@@ -346,7 +343,7 @@ public class PlayerInventory : NetworkBehaviour
         int debug = 0;
         while (wWeaponPivot.childCount == 0)
         {
-            print($"Player waiting for weaponSync {debug++}");
+            Debug.LogFormat("Player waiting for weaponSync {0}", debug++);
             yield return new WaitForSeconds(.1f);
         }
 

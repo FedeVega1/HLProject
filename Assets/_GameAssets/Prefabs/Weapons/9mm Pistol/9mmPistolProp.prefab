@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6808263947843048467}
   - component: {fileID: 8469245391838938183}
   - component: {fileID: 249763303614972679}
+  - component: {fileID: 3335682898672163793}
   m_Layer: 0
   m_Name: 9mmPistolProp
   m_TagString: Untagged
@@ -32,7 +33,7 @@ Transform:
   m_Children:
   - {fileID: 7869169532571480522}
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &8469245391838938183
 BoxCollider:
@@ -42,9 +43,17 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6628245465620843539}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Size: {x: 0.11938095, y: 0.36831737, z: 0.5488739}
   m_Center: {x: 0.012170792, y: -0.10126865, z: 0.25395966}
 --- !u!54 &249763303614972679
@@ -54,21 +63,45 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6628245465620843539}
-  serializedVersion: 2
+  serializedVersion: 4
   m_Mass: 1
   m_Drag: 0
   m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &3335682898672163793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6628245465620843539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15f1b2f290c14d64ebffe7bf49fd6c04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lifetime: 60
 --- !u!1001 &7691689126915118625
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    serializedVersion: 2
+    serializedVersion: 3
     m_TransformParent: {fileID: 6808263947843048467}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 996bb4af28ac15c4c897dd48e442bd6e, type: 3}
@@ -120,7 +153,9 @@ PrefabInstance:
       value: w_Pistol
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 996bb4af28ac15c4c897dd48e442bd6e, type: 3}
 --- !u!4 &7869169532571480522 stripped
 Transform:

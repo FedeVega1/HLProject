@@ -2,38 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TestGranade : CachedTransform, IWeapon
+public class TestGranade : BaseClientWeapon
 {
-    [SerializeField] GameObject[] viewModels;
-    [SerializeField] Transform virtualBulletPivot, worldBulletPivot;
     [SerializeField] Animator weaponAnim;
 
-    public Quaternion CameraTargetRotation { get; set; }
-
-    bool isServer, isDrawn;
-    BulletData bulletData;
-    GameObject weaponPropPrefab;
-
-    public void Init(bool isServer, WeaponData wData, BulletData data, GameObject propPrefab)
-    {
-        bulletData = data;
-        weaponPropPrefab = propPrefab;
-        ToggleAllViewModels(false);
-
-        viewModels[isServer ? 0 : 1].SetActive(true);
-        this.isServer = isServer;
-        gameObject.SetActive(false);
-    }
-
-    void Update() => MyTransform.rotation = Quaternion.Slerp(MyTransform.rotation, CameraTargetRotation, Time.deltaTime * CameraLerpTime());
-
-    public void ToggleAllViewModels(bool toggle)
-    {
-        int size = viewModels.Length;
-        for (byte i = 0; i < size; i++) viewModels[i].SetActive(toggle);
-    }
-
-    public void Fire(Vector3 destination, bool didHit, bool lastBullet = false)
+    public override void Fire(Vector3 destination, bool didHit, int ammo)
     {
         //if (!isDrawn) return;
         //GameObject bulletObject = Instantiate(bulletData.bulletPrefab, isServer ? worldBulletPivot : virtualBulletPivot);
@@ -44,41 +17,43 @@ public class TestGranade : CachedTransform, IWeapon
         //bullet.MyTransform.parent = null;
     }
 
-    public void AltFire(Vector3 destination, bool didHit)
+    public override void EmptyFire() { }
+
+
+    public override void AltFire(Vector3 destination, bool didHit)
     {
         if (!isDrawn) return;
 
     }
 
-    public void Scope()
+    public override void Scope()
     {
         if (!isDrawn) return;
 
     }
 
-    public void Reload() { }
+    public override void Reload() { }
 
-    public void DrawWeapon()
+    public override void DrawWeapon()
     {
         gameObject.SetActive(true);
         isDrawn = true;
     }
 
-    public void HolsterWeapon()
+    public override void HolsterWeapon()
     {
         gameObject.SetActive(false);
         isDrawn = false;
     }
 
-    public void DropProp()
+    public override void DropProp()
     {
         Instantiate(weaponPropPrefab, MyTransform.position, MyTransform.rotation);
         Destroy(gameObject);
     }
 
-    public Transform GetVirtualPivot() => virtualBulletPivot;
-    public Transform GetWorldPivot() => worldBulletPivot;
+    public override Transform GetVirtualPivot() => virtualBulletPivot;
+    public override Transform GetWorldPivot() => worldBulletPivot;
 
-    public void CheckPlayerMovement(bool isMoving, bool isRunning) { }
-    public float CameraLerpTime() => 15;
+    public override void CheckPlayerMovement(bool isMoving, bool isRunning) { }
 }

@@ -21,7 +21,7 @@ public class NetWeapon : CachedNetTransform
     WeaponData weaponData;
 
     Player owningPlayer;
-    IWeapon clientWeapon;
+    BaseClientWeapon clientWeapon;
     LayerMask weaponLayerMask;
     BulletData bulletData;
     Transform firePivot;
@@ -46,7 +46,7 @@ public class NetWeapon : CachedNetTransform
         bulletsInMag = weaponData.bulletsPerMag;
 
         GameObject weaponObj = Instantiate(weaponData.clientPrefab, MyTransform);
-        IWeapon cWeapon = weaponObj.GetComponent<IWeapon>();
+        BaseClientWeapon cWeapon = weaponObj.GetComponent<BaseClientWeapon>();
         if (cWeapon != null)
         {
             cWeapon.ToggleAllViewModels(false);
@@ -264,7 +264,7 @@ public class NetWeapon : CachedNetTransform
     [ClientRpc(includeOwner = false)]
     public void RpcFireWeapon(Vector3 destination, bool didHit)
     {
-        clientWeapon.Fire(destination, didHit);
+        clientWeapon.Fire(destination, didHit, -1);
     }
 
     [ClientRpc(includeOwner = false)]
@@ -330,7 +330,7 @@ public class NetWeapon : CachedNetTransform
         if (hasAuthority) return;
         StartCoroutine(WaitForServerAndClientInitialization(false, true, () =>
         {
-            clientWeapon = Instantiate(weaponData.clientPrefab, MyTransform).GetComponent<IWeapon>();
+            clientWeapon = Instantiate(weaponData.clientPrefab, MyTransform).GetComponent<BaseClientWeapon>();
             if (clientWeapon != null)
             {
                 clientWeapon.Init(true, weaponData, bulletData, weaponData.propPrefab);

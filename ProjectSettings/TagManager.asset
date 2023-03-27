@@ -15,8 +15,8 @@ TagManager:
   - PlayerHitBoxes
   - SceneObjects
   - Debug
-  - 
-  - 
+  - Player
+  - NoColliderPlayer
   - 
   - 
   - 
