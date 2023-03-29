@@ -85,6 +85,7 @@ public class PlayerInventory : NetworkBehaviour
         }
 
         currentWeaponIndex = defaultWeaponIndex;
+        playerScript.UpdateCurrentWeaponWeight(weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponWeight);
         weaponsInventoryOnServer[currentWeaponIndex].RpcToggleClientWeapon(true);
 
         Debug.LogFormat("Server: Default Weapon {0} of index {1}", weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponName, currentWeaponIndex);
@@ -115,13 +116,18 @@ public class PlayerInventory : NetworkBehaviour
 
         //print($"Down: {Input.GetMouseButtonDown(0)} Up: {Input.GetMouseButtonUp(0)} - Pressed: {Input.GetMouseButton(0)}");
 		
-        if (!Input.GetMouseButtonUp(0) && Input.GetMouseButton(0))        
-		{
-            weaponsInvetoryOnClient[currentWeaponIndex].Fire();
-            UpdateWeaponAmmo();
+        if (!playerScript.PlayerIsRunning())
+        {
+            if (!Input.GetMouseButtonUp(0) && Input.GetMouseButton(0))
+            {
+                weaponsInvetoryOnClient[currentWeaponIndex].Fire();
+                UpdateWeaponAmmo();
+            }
+
+            if (Input.GetMouseButtonDown(1)) weaponsInvetoryOnClient[currentWeaponIndex].ScopeIn();
         }
-		
-        if (Input.GetMouseButton(1)) weaponsInvetoryOnClient[currentWeaponIndex].Scope();
+
+        if (Input.GetMouseButtonUp(1)) weaponsInvetoryOnClient[currentWeaponIndex].ScopeOut();
         if (Input.GetKeyDown(KeyCode.R)) weaponsInvetoryOnClient[currentWeaponIndex].Reload();
     }
 
@@ -218,6 +224,8 @@ public class PlayerInventory : NetworkBehaviour
         RpcChangeWeapon(connectionToClient, weaponIndex, currentWeaponIndex);
         currentWeaponIndex = weaponIndex;
         isSwappingWeapons = false;
+
+        playerScript.UpdateCurrentWeaponWeight(weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponWeight);
     }
 
     [Command(requiresAuthority = false)]

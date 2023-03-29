@@ -13,7 +13,7 @@ public class NetWeapon : CachedNetTransform
 
     public bool IsDroppingWeapons { get; private set; }
 
-    bool clientWeaponInit, isReloading;
+    bool clientWeaponInit, isReloading, onScope;
     int bulletsInMag, mags;
     double fireTime;
     RaycastHit rayHit;
@@ -67,7 +67,7 @@ public class NetWeapon : CachedNetTransform
     [Server]
     void Fire()
     {
-        if (NetworkTime.time < fireTime || isReloading) return;
+        if (owningPlayer.PlayerIsRunning() || NetworkTime.time < fireTime || isReloading) return;
         if (bulletsInMag <= 0) return;
 
         MyTransform.eulerAngles = new Vector3(owningPlayer.GetPlayerCameraXAxis(), MyTransform.eulerAngles.y, MyTransform.eulerAngles.z);
@@ -133,6 +133,8 @@ public class NetWeapon : CachedNetTransform
         }
 
         bulletsInMag--;
+        //if (bulletsInMag == 0) ScopeOut();
+
         Vector3 fallOff = Vector3.down * bulletData.fallOff;
         RpcFireWeapon(weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), false);
 
@@ -151,7 +153,7 @@ public class NetWeapon : CachedNetTransform
         {
             if (Physics.Raycast(weaponRay, out rayHit, distance, weaponLayerMask))
             {
-                print($"Server Fire! Range[{distance}] - HitPoint: {rayHit.point}|{rayHit.collider.name}");
+                Debug.LogFormat("Server Fire! Range[{0}] - HitPoint: {1}|{2}", distance, rayHit.point, rayHit.collider.name);
                 Debug.DrawLine(weaponRay.origin, rayHit.point, Color.yellow, 5);
 
                 lastDistance = distance;
@@ -177,7 +179,8 @@ public class NetWeapon : CachedNetTransform
     [Server]
     void Reload()
     {
-        if (isReloading || bulletsInMag >= weaponData.bulletsPerMag || mags <= 0) return;
+        if (isReloading || onScope || bulletsInMag >= weaponData.bulletsPerMag || mags <= 0) return;
+        owningPlayer.TogglePlayerRunAbility(false);
         isReloading = true;
         RpcReloadWeapon();
         StartCoroutine(ReloadRoutine());
@@ -195,6 +198,22 @@ public class NetWeapon : CachedNetTransform
     {
         yield return new WaitForSeconds(distance / bulletData.initialSpeed);
         hitBoxToHit.GetCharacterScript().TakeDamage(bulletData.damage, DamageType.Bullet);
+    }
+
+    [Server]
+    void ScopeIn()
+    {
+        if (owningPlayer.PlayerIsRunning() || isReloading || onScope) return;
+        owningPlayer.TogglePlayerScopeStatus(true);
+        onScope = true;
+    }
+
+    [Server]
+    void ScopeOut()
+    {
+        if (!onScope) return;
+        owningPlayer.TogglePlayerScopeStatus(false);
+        onScope = false;
     }
 
     #endregion
@@ -231,6 +250,12 @@ public class NetWeapon : CachedNetTransform
         if (!IsDroppingWeapons) return;
         NetworkServer.Destroy(gameObject);
     }
+
+    [Command]
+    public void CmdRequestScopeIn() => ScopeIn();
+
+    [Command]
+    public void CmdRequestScopeOut() => ScopeOut();
 
     #endregion
 
@@ -308,6 +333,7 @@ public class NetWeapon : CachedNetTransform
         bulletsInMag = weaponData.bulletsPerMag;
         mags--;
         isReloading = false;
+        owningPlayer.TogglePlayerRunAbility(true);
     }
 
     [Client]

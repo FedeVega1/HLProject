@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using kcp2k;
 using Mirror;
 using UnityEngine;
 
@@ -14,8 +13,9 @@ public class NinePistol : BaseClientWeapon
 
     Animator weaponAnim;
 
+    bool lastWalkCheck, lastRunningCheck, lastBullet, emptyGun;
     float randomInspectTime, movementSoundTime;
-    bool lastWalkCheck, lastRunningCheck, lastBullet;
+    Coroutine handleInspectionSoundsRoutine;
 
     public override void Init(bool isServer, WeaponData wData, BulletData data, GameObject propPrefab)
     {
@@ -35,16 +35,20 @@ public class NinePistol : BaseClientWeapon
 
         if (lastWalkCheck && Time.time >= movementSoundTime)
         {
+            //int random = Random.Range(0, 101);
+            //AudioClip clipToPlay;
+
             if (lastRunningCheck)
             {
+                //clipToPlay = random <= 50 ? weaponMovSounds[Random.Range(0, weaponMovSounds.Length)] : weaponSprintSounds[Random.Range(0, weaponSprintSounds.Length)];
                 virtualMovementSource.PlayOneShot(weaponSprintSounds[Random.Range(0, weaponSprintSounds.Length)]);
-                movementSoundTime = Time.time + .38f;
-
+                movementSoundTime = Time.time + .4f;
                 return;
             }
 
+            //clipToPlay = random <= 50 ? weaponMovSounds[Random.Range(0, weaponMovSounds.Length)] : weaponWalkSounds[Random.Range(0, weaponWalkSounds.Length)];
             virtualMovementSource.PlayOneShot(weaponWalkSounds[Random.Range(0, weaponWalkSounds.Length)]);
-            movementSoundTime = Time.time + .48f;
+            movementSoundTime = Time.time + .5f;
         }
 
         if (weaponAnim == null || Time.time < randomInspectTime) return;
@@ -68,8 +72,11 @@ public class NinePistol : BaseClientWeapon
         }
 
         bool onLastBullet = ammo == 1;
+        emptyGun = ammo <= 0;
         if (lastBullet != onLastBullet) weaponAnim.SetBool("EmptyGun", onLastBullet);
         lastBullet = onLastBullet;
+
+        if (handleInspectionSoundsRoutine != null) StopCoroutine(handleInspectionSoundsRoutine);
 
         weaponAnim.SetTrigger("Fire");
         weaponAnim.SetInteger("RandomFire", lastBullet ? 4 : Random.Range(0, 4));
@@ -86,6 +93,20 @@ public class NinePistol : BaseClientWeapon
 
         LeanTween.cancel(gameObject);
         LeanTween.delayedCall(weaponData.weaponAnimsTiming.fire, () => weaponAnim.SetBool("IsFiring", false));
+        randomInspectTime = Time.time + Random.Range(20f, 40f);
+    }
+
+    public override void ScopeIn()
+    {
+        base.ScopeIn();
+        weaponAnim.SetBool("OnScope", true);
+    }
+
+    public override void ScopeOut()
+    {
+        base.ScopeOut();
+        weaponAnim.SetBool("OnScope", false);
+        randomInspectTime = Time.time + Random.Range(20f, 40f);
     }
 
     public override void EmptyFire()
@@ -97,15 +118,7 @@ public class NinePistol : BaseClientWeapon
         weaponAnim.SetInteger("RandomFire", 4);
     }
 
-    public override void AltFire(Vector3 destination, bool didHit)
-    {
-        if (!isDrawn) return;
-    }
-
-    public override void Scope()
-    {
-        if (!isDrawn) return;
-    }
+    public override void AltFire(Vector3 destination, bool didHit) { }
 
     public override void Reload() 
     {
@@ -133,7 +146,7 @@ public class NinePistol : BaseClientWeapon
             virtualAudioSource.PlayOneShot(reloadSounds[3]);
         });
 
-        lastBullet = false;
+        lastBullet = emptyGun = false;
         weaponAnim.SetBool("EmptyGun", false);
 
         weaponAnim.SetTrigger("Reload");
@@ -186,22 +199,15 @@ public class NinePistol : BaseClientWeapon
 
     void RandomIdleAnim()
     {
+        if (emptyGun || onScopeAim) return;
         int randomIdle = Random.Range(0, 2);
         weaponAnim.SetInteger("RandomIdle", randomIdle);
         weaponAnim.SetTrigger("InspectIdle");
 
-        if (randomIdle == 1)
-        {
-            LeanTween.delayedCall(.875f, () =>
-            {
-                virtualAudioSource.PlayOneShot(reloadSounds[0]);
-            });
+        if (handleInspectionSoundsRoutine != null)
+            StopCoroutine(handleInspectionSoundsRoutine);
 
-            LeanTween.delayedCall(2.16f, () =>
-            {
-                virtualAudioSource.PlayOneShot(reloadSounds[3]);
-            });
-        }
+        handleInspectionSoundsRoutine = StartCoroutine(HanldeInspectionSound(randomIdle));
 
         randomInspectTime = Time.time + Random.Range(20f, 40f);
     }
@@ -213,13 +219,37 @@ public class NinePistol : BaseClientWeapon
     {
         if (isMoving != lastWalkCheck)
         {
-            if (isMoving) weaponAnim.SetTrigger("Walk");
-            else weaponAnim.SetTrigger("Idle");
+            if (isMoving)
+            {
+                weaponAnim.SetTrigger("Walk");
+                weaponAnim.SetBool("IsWalking", true);
+            }
+            else
+            {
+                weaponAnim.SetTrigger("Idle");
+                weaponAnim.SetBool("IsWalking", false);
+                randomInspectTime = Time.time + Random.Range(20f, 40f);
+            }
         }
 
         if (isRunning != lastRunningCheck) weaponAnim.SetBool("Sprint", isRunning);
 
         lastWalkCheck = isMoving;
         lastRunningCheck = isRunning;
+
+        if (lastRunningCheck && onScopeAim) ScopeOut();
+
+        if ((lastWalkCheck || lastRunningCheck) && handleInspectionSoundsRoutine != null) 
+            StopCoroutine(handleInspectionSoundsRoutine);
+    }
+
+    IEnumerator HanldeInspectionSound(int randomIdle)
+    {
+        if (randomIdle != 1) yield break;
+        yield return new WaitForSeconds(.875f);
+        virtualAudioSource.PlayOneShot(reloadSounds[0]);
+
+        yield return new WaitForSeconds(1.285f); // 2.16f
+        virtualAudioSource.PlayOneShot(reloadSounds[3]);
     }
 }

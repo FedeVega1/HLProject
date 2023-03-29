@@ -13,7 +13,7 @@ public class WeaponData : ScriptableObject
     public string weaponName;
     public GameObject clientPrefab, propPrefab;
     public BulletData bulletData;
-    public float maxBulletSpread;
+    public float maxBulletSpread, weaponWeight;
     public WeaponType weaponType;
     public WeaponAnimationTimings weaponAnimsTiming;
     public int bulletsPerMag, mags;

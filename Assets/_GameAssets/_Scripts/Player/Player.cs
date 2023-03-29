@@ -298,13 +298,13 @@ public class Player : Character
         currentClassIndex = classIndex;
         this.classData = classData;
         movementScript.spectatorMov = false;
-        print($"Server: CurrentClass {classData.className}");
+        Debug.LogFormat("Server: CurrentClass {0}", classData.className);
     }
 
     [Server]
     public float GetPlayerCameraXAxis() => movementScript.CameraXAxis;
 
-
+    [Server]
     public PlayerScoreboardInfo GetPlayerScoreboardInfo(int requesterTeam, bool ignoreTeamFilter = false)
     {
         if (ignoreTeamFilter || requesterTeam == playerTeam)
@@ -315,7 +315,17 @@ public class Player : Character
         return new PlayerScoreboardInfo(playerTeam, playerName, score);
     }
 
+    [Server]
     public void UpdatePlayerScore(int ammount) => score += ammount;
+
+    [Server]
+    public void TogglePlayerScopeStatus(bool toggle) => movementScript.ToggleScopeStatus(toggle);
+
+    [Server]
+    public void UpdateCurrentWeaponWeight(float weight) => movementScript.GetCurrentWeaponWeight(weight);
+
+    [Server]
+    public void TogglePlayerRunAbility(bool toggle) => movementScript.TogglePlayerRunAbility(toggle);
 
     #endregion
 

@@ -12,7 +12,8 @@ public class NullWeapon : BaseClientWeapon
     public override void Fire(Vector3 destination, bool didHit, int ammo) { }
     public override void EmptyFire() { }
     public override void AltFire(Vector3 destination, bool didHit) { }
-    public override void Scope() { }
+    public override void ScopeIn() { }
+    public override void ScopeOut() { }
     public override void Reload() { }
     public override void DrawWeapon() { }
     public override void HolsterWeapon() { }

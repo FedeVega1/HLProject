@@ -2,8 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Mirror;
-using UnityEditor.ShaderGraph.Internal;
-using System.Drawing.Printing;
 
 public abstract class CachedTransform : MonoBehaviour
 {

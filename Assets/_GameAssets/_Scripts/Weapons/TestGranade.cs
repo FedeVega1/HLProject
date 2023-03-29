@@ -26,7 +26,13 @@ public class TestGranade : BaseClientWeapon
 
     }
 
-    public override void Scope()
+    public override void ScopeIn()
+    {
+        if (!isDrawn) return;
+
+    }
+
+    public override void ScopeOut()
     {
         if (!isDrawn) return;
 

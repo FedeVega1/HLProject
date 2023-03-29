@@ -167,12 +167,16 @@ public class TeamManager : NetworkBehaviour
     int SelectUnBalancedTeam()
     {
         int unbalancedTeam = -1, quantityOfPlayers = 9999;
-        for (int i = 0; i < MAXTEAMS; i++)
+
+        if (teamData[0].playersInTeam.Count != teamData[1].playersInTeam.Count)
         {
-            if (teamData[i].playersInTeam.Count < quantityOfPlayers)
+            for (int i = 0; i < MAXTEAMS; i++)
             {
-                unbalancedTeam = i + 1;
-                quantityOfPlayers = teamData[i].playersInTeam.Count;
+                if (teamData[i].playersInTeam.Count < quantityOfPlayers)
+                {
+                    unbalancedTeam = i + 1;
+                    quantityOfPlayers = teamData[i].playersInTeam.Count;
+                }
             }
         }
 

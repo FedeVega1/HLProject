@@ -14,7 +14,7 @@ public class Weapon : CachedTransform
     public int BulletsInMag { get; private set; }
     public int Mags { get; private set; }
 
-    bool isReloading;
+    bool isReloading, onScope;
     RaycastHit rayHit;
 
     BaseClientWeapon clientWeapon;
@@ -87,6 +87,8 @@ public class Weapon : CachedTransform
 
         BulletsInMag--;
         wTime = NetworkTime.time + weaponData.weaponAnimsTiming.fire;
+
+        //if (BulletsInMag == 0) ScopeOut();
         netWeapon.CmdRequestFire();
     }
 
@@ -123,14 +125,25 @@ public class Weapon : CachedTransform
         clientWeapon.AltFire(Vector3.zero, false);
     }
 
-    public void Scope()
+    public void ScopeIn()
     {
-        clientWeapon.Scope();
+        if (isReloading || onScope) return;
+        clientWeapon.ScopeIn();
+        netWeapon.CmdRequestScopeIn();
+        onScope = true;
+    }
+
+    public void ScopeOut()
+    {
+        if (!onScope) return;
+        clientWeapon.ScopeOut();
+        netWeapon.CmdRequestScopeOut();
+        onScope = false;
     }
 
     public void Reload()
     {
-        if (isReloading || BulletsInMag >= weaponData.bulletsPerMag || Mags <= 0) return;
+        if (isReloading || onScope || BulletsInMag >= weaponData.bulletsPerMag || Mags <= 0) return;
         isReloading = true;
         clientWeapon.Reload();
         StartCoroutine(ReloadRoutine());

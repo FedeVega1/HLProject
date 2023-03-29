@@ -22,6 +22,7 @@ public class GameModeManager : NetworkBehaviour
     [SerializeField] Transform clientCamera;
     [SerializeField] float scoreBoardUpdateTime = 2;
     [SerializeField] GameObject dummyPlayerPrefab;
+    [SerializeField] Camera clientVCamera;
 
     public TeamManager TeamManagerInstance => teamManager;
 
@@ -413,4 +414,7 @@ public class GameModeManager : NetworkBehaviour
         OnPlayerConnection(playerObject);
         NetworkServer.Spawn(playerObject);
     }
+
+    [Client]
+    public void SetClientVCameraFOV(float fov) => clientVCamera.fieldOfView = Mathf.Clamp(fov, 40, 120);
 }

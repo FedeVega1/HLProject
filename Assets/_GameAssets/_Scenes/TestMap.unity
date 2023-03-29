@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 6685.3057, g: 8142.079, b: 10647.36, a: 1}
+  m_IndirectSpecularColor: {r: 262.3323, g: 325.0801, b: 430.28424, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -3008,6 +3008,7 @@ MonoBehaviour:
   clientCamera: {fileID: 1896322421}
   scoreBoardUpdateTime: 2
   dummyPlayerPrefab: {fileID: 9207269670975588337, guid: e36ad72cf8383934585fcdd72b0cca96, type: 3}
+  clientVCamera: {fileID: 214959680}
   timeToChangeLevel: 15
 --- !u!4 &1869416524
 Transform:

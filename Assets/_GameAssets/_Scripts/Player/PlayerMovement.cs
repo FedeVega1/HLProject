@@ -9,7 +9,8 @@ public class PlayerMovement : CachedNetTransform
 {
     [System.Flags] enum InputFlag { Empty = 0b0, Crouch = 0b1, Jump = 0b10, Sprint = 0b100 }
 
-    [SerializeField] float maxWalkSpeed, maxCrouchSpeed, crouchAmmount, maxRunSpeed, jumpHeight, horizontalSens, verticalSens, timeBetweenJumps;
+    [SerializeField] float maxWalkSpeed, maxCrouchSpeed, crouchAmmount, maxRunSpeed, jumpHeight, horizontalSens, verticalSens, timeBetweenJumps, maxScopeSpeed;
+    [SerializeField] float maxWeaponWeight;
     [SerializeField] CinemachineVirtualCamera playerVCam;
 
     [SyncVar(hook = nameof(OnFreezePlayerSet))] public bool freezePlayer;
@@ -58,7 +59,10 @@ public class PlayerMovement : CachedNetTransform
 
     public float CameraXAxis => xAxisRotaion;
     public bool PlayerIsMoving => playerMovInput.magnitude > 0;
-    public bool PlayerIsRunning => CheckInput(inputFlags, InputFlag.Sprint);
+    public bool PlayerIsRunning => canRun && CheckInput(inputFlags, InputFlag.Sprint);
+
+    [SyncVar] bool onScope, canRun;
+    [SyncVar] float currentWeaponWeight;
 
     bool jumped;
     InputFlag inputFlags;
@@ -83,6 +87,7 @@ public class PlayerMovement : CachedNetTransform
     {
         startHeight = CharCtrl.height;
         playerSpeed = maxWalkSpeed;
+        canRun = true;
         ToggleCharacterController(false);
     }
 
@@ -178,13 +183,14 @@ public class PlayerMovement : CachedNetTransform
             }
 
             if (velocity.y < 0) velocity.y = -.5f;
-            if (CheckInput(inputFlags, InputFlag.Sprint)) playerSpeed = maxRunSpeed;
+            if (PlayerIsRunning) playerSpeed = maxRunSpeed;
         }
 
+        if (onScope) playerSpeed = maxScopeSpeed;
         velocity = new Vector3(playerMovInput.x, velocity.y, playerMovInput.y);
         velocity = MyTransform.TransformDirection(velocity);
 
-        if (CharCtrl.enabled) CharCtrl.Move(playerSpeed * Time.deltaTime * velocity);
+        if (CharCtrl.enabled) CharCtrl.Move(CalculateSpeedByWeight(playerSpeed) * Time.deltaTime * velocity);
     }
 
     // TODO: Fix spectator camera movement
@@ -205,7 +211,7 @@ public class PlayerMovement : CachedNetTransform
             return;
         }
 
-        if (NetworkTime.time < jumpTimer) return;
+        if (onScope || NetworkTime.time < jumpTimer) return;
         if (CheckInput(inputFlags, InputFlag.Jump) && CharCtrl.isGrounded)
         {
             velocity.y += Mathf.Sqrt(jumpHeight * -2 * Physics.gravity.y);
@@ -253,6 +259,8 @@ public class PlayerMovement : CachedNetTransform
         MyTransform.rotation = Quaternion.AngleAxis(rotationX, Vector3.up);
     }
 
+    float CalculateSpeedByWeight(float maxSpeed) => (1 - (currentWeaponWeight / maxWeaponWeight)) * maxSpeed;
+
     [Server]
     public void ForceMoveCharacter(Vector3 pos, Quaternion rotation)
     {
@@ -265,4 +273,13 @@ public class PlayerMovement : CachedNetTransform
     public void ToggleCharacterController(bool toggle) => CharCtrl.enabled = toggle;
 
     bool CheckInput(InputFlag flag, InputFlag inputToCheck) => (flag & inputToCheck) == inputToCheck;
+
+    [Server]
+    public void ToggleScopeStatus(bool toggle) => onScope = toggle;
+
+    [Server]
+    public void GetCurrentWeaponWeight(float weight) => currentWeaponWeight = weight;
+
+    [Server]
+    public void TogglePlayerRunAbility(bool toggle) => canRun = toggle;
 }
