@@ -15,6 +15,7 @@ public class PlayerInventory : NetworkBehaviour
 
     [SerializeField] Transform wWeaponPivot;
     [SerializeField] GameObject WeaponPrefab;
+    [SerializeField] PlayerClientHands[] clientHands;
 
     [SyncVar] bool isServerInitialized, isSwappingWeapons;
 
@@ -24,6 +25,7 @@ public class PlayerInventory : NetworkBehaviour
     WeaponType currentCyclerType;
     Player playerScript;
     Transform vWeaponPivot;
+    PlayerClientHands currentClassHands;
 
     List<Weapon> weaponsInvetoryOnClient;
     List<int> weaponCyclerList;
@@ -65,7 +67,7 @@ public class PlayerInventory : NetworkBehaviour
     #region Server
 
     [Server]
-    public void SetupWeaponInventory(WeaponData[] weaponsToLoad, int defaultWeaponIndex)
+    public void SetupWeaponInventory(ClientHandType handType, WeaponData[] weaponsToLoad, int defaultWeaponIndex)
     {
         weaponsInventoryOnServer.Clear();
 
@@ -92,7 +94,7 @@ public class PlayerInventory : NetworkBehaviour
         print("Finished server PlayerInventory Initialization");
 
         isServerInitialized = true;
-        if (connectionToClient != null) RpcSetupWeaponInventory(connectionToClient, size, defaultWeaponIndex);
+        if (connectionToClient != null) RpcSetupWeaponInventory(connectionToClient, size, defaultWeaponIndex, (int) handType);
     }
 
     [Server]
@@ -245,6 +247,7 @@ public class PlayerInventory : NetworkBehaviour
     {
         weaponsInvetoryOnClient[oldIndex].ToggleWeapon(false);
         weaponsInvetoryOnClient[weaponIndex].ToggleWeapon(true);
+        currentClassHands.GetWeaponHandBones(weaponsInvetoryOnClient[weaponIndex].WeaponRootBone, weaponsInvetoryOnClient[weaponIndex].ClientWeaponTransform);
         currentWeaponIndex = weaponIndex;
         isSwappingWeapons = false;
 
@@ -257,7 +260,7 @@ public class PlayerInventory : NetworkBehaviour
     {
         if (!NetworkClient.spawned.ContainsKey(weaponID))
         {
-            Debug.LogError($"Weapon with Network ID: {weaponID} not found");
+            Debug.LogErrorFormat("Weapon with Network ID: {0} not found", weaponID);
             return;
         }
 
@@ -276,13 +279,13 @@ public class PlayerInventory : NetworkBehaviour
         }
         else
         {
-            Debug.LogError($"Found weapon with Network ID {weaponID}, but it does not have a NetWeapon Component!");
+            Debug.LogErrorFormat("Found weapon with Network ID {0}, but it does not have a NetWeapon Component!", weaponID);
         }
     }
 
 
     [TargetRpc]
-    void RpcSetupWeaponInventory(NetworkConnection target, int weaponsToSpawn, int defaultWeaponIndex)
+    void RpcSetupWeaponInventory(NetworkConnection target, int weaponsToSpawn, int defaultWeaponIndex, int clientHandType)
     {
         print("Player: Setup Weapon Inventory");
         weaponsInvetoryOnClient.Clear();
@@ -303,19 +306,27 @@ public class PlayerInventory : NetworkBehaviour
 
                     spawnedWeapon.Init(netWeapon.GetWeaponData(), netWeapon);
                     spawnedWeapon.OnFinishedReload += UpdateWeaponAmmo;
-                    print($"Client: Spawn weapon {netWeapon.GetWeaponData().weaponName} of type {netWeapon.GetWeaponData().weaponType}");
+                    Debug.LogFormat("Client: Spawn weapon {0} of type {1}", netWeapon.GetWeaponData().weaponName, netWeapon.GetWeaponData().weaponType);
                     weaponsInvetoryOnClient.Add(spawnedWeapon);
                 }
             }
 
+            if (currentClassHands != null) Destroy(currentClassHands);
+            currentClassHands = Instantiate(clientHands[clientHandType]);
+            currentClassHands.MyTransform.SetParent(vWeaponPivot);
+            currentClassHands.MyTransform.localPosition = Vector3.zero;
+            currentClassHands.MyTransform.localRotation = Quaternion.identity;
+
             currentWeaponIndex = defaultWeaponIndex;
             weaponsInvetoryOnClient[currentWeaponIndex].ToggleWeapon(true);
+
+            currentClassHands.GetWeaponHandBones(weaponsInvetoryOnClient[currentWeaponIndex].WeaponRootBone, weaponsInvetoryOnClient[currentWeaponIndex].ClientWeaponTransform);
 
             UpdateCurrenWeaponName();
             UpdateWeaponAmmo();
 
-            print($"Client: Default Weapon index {currentWeaponIndex}");
-            print($"Finished client PlayerInventory Initialization");
+            Debug.LogFormat("Client: Default Weapon index {0}", currentWeaponIndex);
+            print("Finished client PlayerInventory Initialization");
         }));
     }
 

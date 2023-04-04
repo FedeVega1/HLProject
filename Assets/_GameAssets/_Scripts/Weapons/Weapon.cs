@@ -10,6 +10,9 @@ public class Weapon : CachedTransform
 {
     public WeaponType WType => weaponData.weaponType;
 
+    public Transform WeaponRootBone => clientWeapon.WeaponRootBone;
+    public Transform ClientWeaponTransform => clientWeapon.MyTransform;
+
     double fireTime, switchingTime, reloadTime, wTime;
     public int BulletsInMag { get; private set; }
     public int Mags { get; private set; }

@@ -247,6 +247,8 @@ MonoBehaviour:
   syncInterval: 0.1
   wWeaponPivot: {fileID: 7595591337169747506}
   WeaponPrefab: {fileID: 3785819744807672695, guid: 6722d7d0484e2e149950b8cb45d87cb5, type: 3}
+  clientHands:
+  - {fileID: 2940246277640167469, guid: a79f15ba17dc429468cfc51cf348d012, type: 3}
 --- !u!114 &-7027478099048125744
 MonoBehaviour:
   m_ObjectHideFlags: 0

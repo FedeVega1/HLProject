@@ -7,12 +7,14 @@ public abstract class BaseClientWeapon : CachedTransform
     protected enum ActiveViewModel { World, Virtual }
 
     [SerializeField] protected GameObject[] viewModels;
-    [SerializeField] protected Transform virtualBulletPivot, worldBulletPivot;
+    [SerializeField] protected Transform virtualBulletPivot, worldBulletPivot, weaponRootBone;
     [SerializeField] protected float weaponSwayAmmount = 0.02f, weaponSwaySmooth = 5, zoomInSpeed, zoomOutSpeed;
     [SerializeField] protected AudioSource virtualAudioSource, worldAudioSource, virtualMovementSource;
     [SerializeField] protected AudioClip[] weaponWalkSounds, weaponSprintSounds, weaponMovSounds;
     [SerializeField] protected Vector3 aimPosition;
     [SerializeField] protected Quaternion aimRotation;
+
+    public Transform WeaponRootBone => weaponRootBone;
 
     protected bool isServer, isDrawn, enableWeaponSway, onScopeAim;
     protected ActiveViewModel currentActiveViewModel;

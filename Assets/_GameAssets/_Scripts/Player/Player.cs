@@ -250,8 +250,8 @@ public class Player : Character
         movementScript.ForceMoveCharacter(spawnPosition, spawnRotation);
         movementScript.freezePlayer = false;
         //movementScript.RpcToggleFreezePlayer(connectionToClient, false);
-        print($"Server: Setup weapon inventory for {playerName} player - ClassName: {classData.className}");
-        inventory.SetupWeaponInventory(classData.classWeapons, 0);
+        Debug.LogFormat("Server: Setup weapon inventory for {0} player - ClassName: {1}", playerName, classData.className);
+        inventory.SetupWeaponInventory(classData.classVHands, classData.classWeapons, 0);
         RpcPlayerSpawns();
     }
 
