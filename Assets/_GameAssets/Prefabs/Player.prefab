@@ -249,6 +249,9 @@ MonoBehaviour:
   WeaponPrefab: {fileID: 3785819744807672695, guid: 6722d7d0484e2e149950b8cb45d87cb5, type: 3}
   clientHands:
   - {fileID: 2940246277640167469, guid: a79f15ba17dc429468cfc51cf348d012, type: 3}
+  - {fileID: 7410330849781817291, guid: 8fb28d542224948418e26ebf0f61f164, type: 3}
+  - {fileID: 3929229339084435722, guid: 37422f641ed2f334493db83ccf3c92ff, type: 3}
+  - {fileID: 158691460105760928, guid: 741f5b9d830d10648b09dc86b1fa3e74, type: 3}
 --- !u!114 &-7027478099048125744
 MonoBehaviour:
   m_ObjectHideFlags: 0

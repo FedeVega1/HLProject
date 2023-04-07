@@ -13,7 +13,8 @@ public class NinePistol : BaseClientWeapon
 
     Animator weaponAnim;
 
-    bool lastWalkCheck, lastRunningCheck, lastBullet, emptyGun;
+    int delayTweenID = -1;
+    bool lastWalkCheck, lastRunningCheck, lastBullet, emptyGun, isFiring;
     float randomInspectTime, movementSoundTime;
     Coroutine handleInspectionSoundsRoutine;
 
@@ -89,10 +90,13 @@ public class NinePistol : BaseClientWeapon
         Invoke(nameof(SpawnCasing), .04f);
 
         weaponAnim.ResetTrigger("Walk");
+        weaponAnim.ResetTrigger("Idle");
+        weaponAnim.SetBool("IsWalking", false);
         weaponAnim.SetBool("IsFiring", true);
+        isFiring = true;
 
-        LeanTween.cancel(gameObject);
-        LeanTween.delayedCall(weaponData.weaponAnimsTiming.fire, () => weaponAnim.SetBool("IsFiring", false));
+        if (delayTweenID != -1) LeanTween.cancel(delayTweenID);
+        delayTweenID = LeanTween.delayedCall(weaponData.weaponAnimsTiming.fire + .2f, () => { weaponAnim.SetBool("IsFiring", false); isFiring = false; }).uniqueId;
         randomInspectTime = Time.time + Random.Range(20f, 40f);
     }
 
@@ -217,6 +221,7 @@ public class NinePistol : BaseClientWeapon
 
     public override void CheckPlayerMovement(bool isMoving, bool isRunning)
     {
+        if (isFiring) return;
         if (isMoving != lastWalkCheck)
         {
             if (isMoving)

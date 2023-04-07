@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1920
     height: 997
   m_ShowMode: 4
-  m_Title: Console
+  m_Title: Scene
   m_RootView: {fileID: 2}
   m_MinSize: {x: 875, y: 350}
   m_MaxSize: {x: 10000, y: 10000}
@@ -119,7 +119,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 150}
   m_MaxSize: {x: 24288, y: 24288}
   vertical: 0
-  controlID: 126
+  controlID: 181
 --- !u!114 &6
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -144,7 +144,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 150}
   m_MaxSize: {x: 16192, y: 24288}
   vertical: 1
-  controlID: 31
+  controlID: 80
 --- !u!114 &7
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -169,7 +169,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 0
-  controlID: 32
+  controlID: 81
 --- !u!114 &8
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -198,7 +198,7 @@ MonoBehaviour:
   - {fileID: 17}
   - {fileID: 18}
   m_Selected: 0
-  m_LastSelected: 3
+  m_LastSelected: 1
 --- !u!114 &9
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -223,7 +223,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 100}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 33
+  controlID: 82
 --- !u!114 &10
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -243,8 +243,8 @@ MonoBehaviour:
     y: 0
     width: 296
     height: 333
-  m_MinSize: {x: 202, y: 221}
-  m_MaxSize: {x: 4002, y: 4021}
+  m_MinSize: {x: 200, y: 200}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 19}
   m_Panes:
   - {fileID: 19}
@@ -322,8 +322,8 @@ MonoBehaviour:
     y: 0
     width: 539
     height: 947
-  m_MinSize: {x: 276, y: 71}
-  m_MaxSize: {x: 4001, y: 4021}
+  m_MinSize: {x: 275, y: 50}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 23}
   m_Panes:
   - {fileID: 23}
@@ -845,9 +845,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 4.291664, y: 1.3967513, z: -57.62758}
+    m_Target: {x: -30.611526, y: -3.0654144, z: 1.0313225}
     speed: 2
-    m_Value: {x: 4.291664, y: 1.3967513, z: -57.62758}
+    m_Value: {x: -30.611526, y: -3.0654144, z: 1.0313225}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -893,13 +893,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: 0.010021162, y: 0.89512205, z: -0.02014364, w: 0.44531557}
+    m_Target: {x: -0.044428695, y: 0.37832567, z: -0.01812557, w: -0.9244771}
     speed: 2
-    m_Value: {x: 0.010020884, y: 0.8950972, z: -0.02014308, w: 0.4453032}
+    m_Value: {x: -0.04445382, y: 0.37692145, z: -0.018058088, w: -0.9250017}
   m_Size:
-    m_Target: 0.029572748
+    m_Target: 28.164454
     speed: 2
-    m_Value: 0.029572748
+    m_Value: 28.164454
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -998,14 +998,14 @@ MonoBehaviour:
     - {fileID: -2067209888093207008, guid: 23e17ec7fe5652b42806b92ca54f8b38, type: 2}
     - {fileID: -4253388983084633217, guid: 23e17ec7fe5652b42806b92ca54f8b38, type: 2}
     m_ValueSerializationHelper:
-    - e00: 1.4613262
+    - e00: 1.4008098
       e01: 0
       e02: 0
-      e03: -607.0819
+      e03: -457.5217
       e10: 0
-      e11: 1.4613262
+      e11: 1.4008098
       e12: 0
-      e13: 349.89014
+      e13: 349.44916
       e20: 0
       e21: 0
       e22: 1
@@ -1014,14 +1014,14 @@ MonoBehaviour:
       e31: 0
       e32: 0
       e33: 1
-    - e00: 1.8440347
+    - e00: 1.1890247
       e01: 0
       e02: 0
-      e03: -576.8333
+      e03: -301.18048
       e10: 0
-      e11: 1.8440347
+      e11: 1.1890247
       e12: 0
-      e13: -178.51285
+      e13: 123.44468
       e20: 0
       e21: 0
       e22: 1
@@ -1030,14 +1030,14 @@ MonoBehaviour:
       e31: 0
       e32: 0
       e33: 1
-    - e00: 1.5335076
+    - e00: 0.92057574
       e01: 0
       e02: 0
-      e03: -758.2883
+      e03: -257.76123
       e10: 0
-      e11: 1.5335076
+      e11: 0.92057574
       e12: 0
-      e13: 336.21088
+      e13: 327.76398
       e20: 0
       e21: 0
       e22: 1
@@ -1101,9 +1101,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 28750000
+      m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 666bffff6a6bffff6e6bffff726bffff766bffff7a6bffff7e6bffff826bffff986bffff9e6bffff0674ffffb894ffffc094ffffc494ffffd494ffffd894ffffdc94ffffe094ffffe494ffffe894fffffe94ffff0495ffff6c9dffff54c7ffffe8faffff0a8a00001a8a00004c9000005c900000
+      m_ExpandedIDs: 3ad9ffff3ed9ffff42d9ffff46d9ffff4ad9ffff4ed9ffff52d9ffff56d9ffff5ad9ffff64d9ffff6ad9ffffa8daffffbcdaffffc6daffffcadafffff6dafffffcdaffffd2e1ffff74f1fffff283000002840000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1174,7 +1174,7 @@ MonoBehaviour:
     m_SkipHidden: 1
     m_SearchArea: 1
     m_Folders:
-    - Assets/_GameAssets/Prefabs/Weapons
+    - Assets/_GameAssets/Prefabs/Weapons/9mm Pistol
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -1189,7 +1189,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 84c40000
     m_LastClickedID: 50308
-    m_ExpandedIDs: 00000000e6750000e8750000ea750000ec750000ee750000f0750000f2750000f4750000f6750000f8750000fa750000fc750000fe75000000760000027600000476000006760000087600000a7600000c7600000e76000010760000127600001476000016760000187600001a7600001c7600001e7600002076000022760000247600002676000028760000
+    m_ExpandedIDs: 00000000d42d0000c0810000c2810000c4810000c6810000c8810000ca810000cc810000ce810000d0810000d2810000d4810000d6810000d8810000da810000dc810000de810000e0810000e2810000e4810000e6810000e8810000ea810000ec810000ee810000f0810000f2810000f4810000f6810000f8810000fa810000fc810000fe810000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1214,24 +1214,24 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_AssetTreeState:
-    scrollPos: {x: 0, y: 944}
+    scrollPos: {x: 0, y: 1304}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: ffffffff00000000e6750000e8750000ea750000ec750000ee750000f0750000f2750000f4750000f6750000f8750000fa750000fc750000fe75000000760000027600000476000006760000087600000a7600000c7600000e76000010760000127600001476000016760000187600001a7600001c7600001e7600002076000022760000247600002676000028760000
+    m_ExpandedIDs: ffffffff00000000d42d0000c0810000c2810000c4810000c6810000c8810000ca810000cc810000ce810000d0810000d2810000d4810000d6810000d8810000da810000dc810000de810000e0810000e2810000e4810000e6810000e8810000ea810000ec810000ee810000f0810000f2810000f4810000f6810000f8810000fa810000fc810000fe810000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: 
-      m_OriginalName: 
+      m_Name: 9mmPistol
+      m_OriginalName: 9mmPistol
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 0
+      m_UserData: 27480
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
-      m_OriginalEventType: 11
+      m_OriginalEventType: 0
       m_IsRenamingFilename: 1
       m_ClientGUIView: {fileID: 11}
     m_SearchString: 
@@ -1381,7 +1381,7 @@ MonoBehaviour:
   m_ObjectsLockedBeforeSerialization: []
   m_InstanceIDsLockedBeforeSerialization: 
   m_PreviewResizer:
-    m_CachedPref: 388
+    m_CachedPref: -669
     m_ControlHash: -371814159
     m_PrefName: Preview_InspectorPreview
   m_LastInspectedObjectInstanceID: -1

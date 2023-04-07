@@ -15,6 +15,7 @@ MonoBehaviour:
   className: Test
   classSprite: {fileID: 21300000, guid: 9f427259b83344b48997593c7df9b1bc, type: 3}
   teamSpecific: 1
+  classVHands: 3
   classWeapons:
   - {fileID: 11400000, guid: 86407aa0a0f00034b90e85dc6c1f109c, type: 2}
   - {fileID: 11400000, guid: d5486f3c38a945441973d816979a3302, type: 2}
