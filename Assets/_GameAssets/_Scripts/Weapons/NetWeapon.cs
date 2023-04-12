@@ -25,6 +25,7 @@ public class NetWeapon : CachedNetTransform
     LayerMask weaponLayerMask;
     BulletData bulletData;
     Transform firePivot;
+    Collider[] raycastShootlastCollider;
 
     public override void OnStartClient()
     {
@@ -41,6 +42,8 @@ public class NetWeapon : CachedNetTransform
 
         bulletData = data.bulletData;
         owningPlayer = owner;
+
+        raycastShootlastCollider = new Collider[10];
 
         mags = weaponData.mags;
         bulletsInMag = weaponData.bulletsPerMag;
@@ -88,7 +91,7 @@ public class NetWeapon : CachedNetTransform
                 break;
         }
 
-        fireTime = NetworkTime.time + weaponData.weaponAnimsTiming.fire;
+        fireTime = NetworkTime.time + weaponData.weaponAnimsTiming.fireMaxDelay;
     }
 
     [Server]
@@ -119,13 +122,16 @@ public class NetWeapon : CachedNetTransform
 
             if (fallOffCheck)
             {
-                HitBox hitBox = rayHit.transform.GetComponent<HitBox>();
-                if (hitBox != null)
-                {
-                    StartCoroutine(ApplyDistanceToDamage(hitBox, rayHit.distance));
-                    Debug.DrawLine(weaponRay.origin, hitPos, Color.green, 5);
-                    return;
-                }
+                StartCoroutine(ApplyDistanceToDamage(hitPos, rayHit.distance));
+                Debug.DrawLine(weaponRay.origin, hitPos, Color.green, 5);
+
+                //HitBox hitBox = rayHit.transform.GetComponent<HitBox>();
+                //if (hitBox != null)
+                //{
+                //    StartCoroutine(ApplyDistanceToDamage(hitBox, rayHit.distance));
+                //    Debug.DrawLine(weaponRay.origin, hitPos, Color.green, 5);
+                //    return;
+                //}
             }
 
             if (rayHit.collider != null) Debug.LogFormat("Server Fire! Range[{0}] - HitPoint: {1}|{2}", bulletData.maxTravelDistance, rayHit.point, rayHit.collider.name);
@@ -194,10 +200,19 @@ public class NetWeapon : CachedNetTransform
     }
 
     [Server]
-    IEnumerator ApplyDistanceToDamage(HitBox hitBoxToHit, float distance)
+    IEnumerator ApplyDistanceToDamage(Vector3 hitOrigin, float distance)
     {
-        yield return new WaitForSeconds(distance / bulletData.initialSpeed);
-        hitBoxToHit.GetCharacterScript().TakeDamage(bulletData.damage, DamageType.Bullet);
+        yield return new WaitForSeconds((distance / bulletData.initialSpeed) + weaponData.weaponAnimsTiming.initFire);
+        int quantity = Physics.OverlapSphereNonAlloc(hitOrigin, .1f, raycastShootlastCollider, weaponLayerMask);
+
+        for (int i = 0; i < quantity; i++)
+        {
+            HitBox hitBoxToHit = raycastShootlastCollider[i].GetComponent<HitBox>();
+            if (hitBoxToHit == null) continue;
+
+            hitBoxToHit.GetCharacterScript().TakeDamage(bulletData.damage, DamageType.Bullet);
+            yield break;
+        }
     }
 
     [Server]

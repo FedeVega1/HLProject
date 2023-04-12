@@ -64,7 +64,7 @@ public class Weapon : CachedTransform
         if (BulletsInMag <= 0)
         {
             clientWeapon.EmptyFire();
-            wTime = NetworkTime.time + weaponData.weaponAnimsTiming.fire;
+            wTime = NetworkTime.time + weaponData.weaponAnimsTiming.fireMaxDelay;
             return;
         }
 
@@ -89,7 +89,7 @@ public class Weapon : CachedTransform
         }
 
         BulletsInMag--;
-        wTime = NetworkTime.time + weaponData.weaponAnimsTiming.fire;
+        wTime = NetworkTime.time + weaponData.weaponAnimsTiming.fireMaxDelay;
 
         //if (BulletsInMag == 0) ScopeOut();
         netWeapon.CmdRequestFire();

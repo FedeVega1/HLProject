@@ -6,10 +6,10 @@ public class WeaponData : ScriptableObject
     [System.Serializable]
     public struct WeaponAnimationTimings
     {
-        public float fire, reload, holster, draw;
+        public float initFire, fireMaxDelay, reload, holster, draw;
         public float zoomInSpeed, zoomOutSpeed;
     }
-
+    
     public string weaponName;
     public GameObject clientPrefab, propPrefab;
     public BulletData bulletData;

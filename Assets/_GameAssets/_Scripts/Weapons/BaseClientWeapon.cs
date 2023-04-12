@@ -62,7 +62,20 @@ public abstract class BaseClientWeapon : CachedTransform
         //MyTransform.rotation = currentTargetRotation;
     }
 
-    public abstract void Fire(Vector3 destination, bool didHit, int ammo);
+    public virtual void Fire(Vector3 destination, bool didHit, int ammo)
+    {
+        if (!isDrawn || doingScopeAnim) return;
+        LeanTween.delayedCall(weaponData.weaponAnimsTiming.initFire, () => 
+        {
+            GameObject bulletObject = Instantiate(bulletData.bulletPrefab, isServer ? worldBulletPivot : virtualBulletPivot);
+            Bullet bullet = bulletObject.GetComponent<Bullet>();
+
+            bullet.Init(bulletData.initialSpeed, didHit);
+            bullet.TravelTo(destination);
+            bullet.MyTransform.parent = null;
+        });
+    }
+
     public abstract void EmptyFire();
 
     public abstract void AltFire(Vector3 destination, bool didHit);
@@ -107,8 +120,17 @@ public abstract class BaseClientWeapon : CachedTransform
 
     public abstract void Reload();
 
-    public abstract void HolsterWeapon();
-    public abstract void DrawWeapon();
+    public virtual void HolsterWeapon()
+    {
+        isDrawn = false;
+        LeanTween.delayedCall(weaponData.weaponAnimsTiming.holster, () => gameObject.SetActive(false));
+    }
+
+    public virtual void DrawWeapon()
+    {
+        gameObject.SetActive(true);
+        LeanTween.delayedCall(weaponData.weaponAnimsTiming.draw, () => isDrawn = true);
+    }
 
     public virtual void ToggleAllViewModels(bool toggle)
     {
@@ -116,10 +138,14 @@ public abstract class BaseClientWeapon : CachedTransform
         for (byte i = 0; i < size; i++) viewModels[i].SetActive(toggle);
     }
 
-    public abstract void DropProp();
+    public virtual void DropProp()
+    {
+        Instantiate(weaponPropPrefab, MyTransform.position, MyTransform.rotation);
+        Destroy(gameObject);
+    }
 
-    public virtual Transform GetVirtualPivot() => MyTransform;
-    public virtual Transform GetWorldPivot() => MyTransform;
+    public virtual Transform GetVirtualPivot() => virtualBulletPivot;
+    public virtual Transform GetWorldPivot() => worldBulletPivot;
 
     public abstract void CheckPlayerMovement(bool isMoving, bool isRunning);
 }

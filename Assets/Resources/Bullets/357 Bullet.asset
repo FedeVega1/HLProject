@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1174933ccb941f147b63b7ed36c160c4, type: 3}
+  m_Name: 357 Bullet
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: 1596550173281179572, guid: 02e398d583b606f40907e594cbbce54c, type: 3}
+  type: 0
+  damageType: 2
+  initialSpeed: 440
+  damage: 40
+  maxTravelDistance: 25
+  radius: 0
+  timeToExplode: 0
+  fallOff: 0.005

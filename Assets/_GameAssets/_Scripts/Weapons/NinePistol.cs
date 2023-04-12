@@ -59,12 +59,7 @@ public class NinePistol : BaseClientWeapon
     public override void Fire(Vector3 destination, bool didHit, int ammo)
     {
         if (!isDrawn || doingScopeAnim) return;
-        GameObject bulletObject = Instantiate(bulletData.bulletPrefab, isServer ? worldBulletPivot : virtualBulletPivot);
-        Bullet bullet = bulletObject.GetComponent<Bullet>();
-
-        bullet.Init(bulletData.initialSpeed, didHit);
-        bullet.TravelTo(destination);
-        bullet.MyTransform.parent = null;
+        base.Fire(destination, didHit, ammo);
 
         if (currentActiveViewModel == ActiveViewModel.World)
         {
@@ -96,7 +91,7 @@ public class NinePistol : BaseClientWeapon
         isFiring = true;
 
         if (delayTweenID != -1) LeanTween.cancel(delayTweenID);
-        delayTweenID = LeanTween.delayedCall(weaponData.weaponAnimsTiming.fire + .2f, () => { weaponAnim.SetBool("IsFiring", false); isFiring = false; }).uniqueId;
+        delayTweenID = LeanTween.delayedCall(weaponData.weaponAnimsTiming.fireMaxDelay + .2f, () => { weaponAnim.SetBool("IsFiring", false); isFiring = false; }).uniqueId;
         randomInspectTime = Time.time + Random.Range(20f, 40f);
     }
 
@@ -176,9 +171,8 @@ public class NinePistol : BaseClientWeapon
 
     public override void DrawWeapon()
     {
-        gameObject.SetActive(true);
+        base.DrawWeapon();
         weaponAnim.SetTrigger("Draw");
-        LeanTween.delayedCall(weaponData.weaponAnimsTiming.draw, () => isDrawn = true);
 
         virtualAudioSource.PlayOneShot(deploySound);
 
@@ -191,14 +185,8 @@ public class NinePistol : BaseClientWeapon
 
     public override void HolsterWeapon()
     {
+        base.HolsterWeapon();
         weaponAnim.SetTrigger("Holster");
-        isDrawn = false;
-        LeanTween.delayedCall(weaponData.weaponAnimsTiming.holster, () => gameObject.SetActive(false));
-    }
-    public override void DropProp()
-    {
-        Instantiate(weaponPropPrefab, MyTransform.position, MyTransform.rotation);
-        Destroy(gameObject);
     }
 
     void RandomIdleAnim()
@@ -215,9 +203,6 @@ public class NinePistol : BaseClientWeapon
 
         randomInspectTime = Time.time + Random.Range(20f, 40f);
     }
-
-    public override Transform GetVirtualPivot() => virtualBulletPivot;
-    public override Transform GetWorldPivot() => worldBulletPivot;
 
     public override void CheckPlayerMovement(bool isMoving, bool isRunning)
     {

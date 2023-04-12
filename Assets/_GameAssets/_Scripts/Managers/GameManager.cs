@@ -34,32 +34,32 @@ public class VideoOptions
         }
     }
 
-    int _EnableFullscreen = -1;
-    public bool EnableFullScreen
+    int _FullScreenMode = -1;
+    public FullScreenMode CurrentFullScreenMode
     {
         get
         {
-            if (_EnableFullscreen == -1)
+            if (_FullScreenMode == -1)
             {
                 if (PlayerPrefs.HasKey("EnableFullscreen"))
                 {
-                    _EnableFullscreen = PlayerPrefs.GetInt("EnableFullscreen");
+                    _FullScreenMode = PlayerPrefs.GetInt("EnableFullscreen");
                 }
                 else
                 {
-                    _EnableFullscreen = 1;
-                    PlayerPrefs.SetInt("EnableFullscreen", _EnableFullscreen);
+                    _FullScreenMode = 1;
+                    PlayerPrefs.SetInt("EnableFullscreen", _FullScreenMode);
                 }
             }
 
-            return _EnableFullscreen == 1;
+            return (FullScreenMode) _FullScreenMode;
         }
 
         set
         {
-            _EnableFullscreen = value ? 1 : 0;
-            PlayerPrefs.SetInt("EnableFullscreen", _EnableFullscreen);
-            Screen.fullScreen = value;
+            _FullScreenMode = (int) value;
+            PlayerPrefs.SetInt("EnableFullscreen", _FullScreenMode);
+            Screen.fullScreenMode = value;
         }
     }
 
@@ -90,7 +90,37 @@ public class VideoOptions
             PlayerPrefs.SetInt("CurrentResolution", _CurrentResolution);
 
             Resolution newRes = GetResolutionByIndex(_CurrentResolution);
-            Screen.SetResolution(newRes.width, newRes.height, EnableFullScreen, newRes.refreshRate);
+            Screen.SetResolution(newRes.width, newRes.height, CurrentFullScreenMode, newRes.refreshRateRatio);
+        }
+    }
+
+    int _CurrentQualityPreset = -1;
+    public int CurrentQualityPreset
+    {
+        get
+        {
+            if (_CurrentQualityPreset == -1)
+            {
+                if (PlayerPrefs.HasKey("CurrentQualityPreset"))
+                {
+                    _CurrentQualityPreset = PlayerPrefs.GetInt("CurrentQualityPreset");
+                }
+                else
+                {
+                    _CurrentQualityPreset = QualitySettings.GetQualityLevel();
+                    PlayerPrefs.SetInt("CurrentQualityPreset", _CurrentQualityPreset);
+                }
+            }
+
+            return _CurrentQualityPreset;
+        }
+
+        set
+        {
+            _CurrentQualityPreset = value;
+            PlayerPrefs.SetInt("CurrentQualityPreset", _CurrentQualityPreset);
+
+            QualitySettings.SetQualityLevel(_CurrentQualityPreset, true);
         }
     }
 
@@ -102,7 +132,7 @@ public class VideoOptions
 
         for (int i = 0; i < size; i++)
         {
-            if (resArray[i].width == res.width && resArray[i].height == res.height && resArray[i].refreshRate == res.refreshRate)
+            if (resArray[i].width == res.width && resArray[i].height == res.height && resArray[i].refreshRateRatio.value == res.refreshRateRatio.value)
                 return i;
         }
 

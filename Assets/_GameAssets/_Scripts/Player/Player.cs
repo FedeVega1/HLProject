@@ -104,6 +104,12 @@ public class Player : Character
         if (Input.GetKeyDown(KeyCode.Delete)) GameModeManager.INS.KillPlayer(this);
         if (Input.GetKeyDown(KeyCode.F1)) GameModeManager.INS.EndMatch();
 
+        //if (!PlayerCanvasScript.IsScoreboardMenuOpen && !PlayerCanvasScript.IsScoreboardMenuOpen && !PlayerCanvasScript.IsScoreboardMenuOpen && Input.GetKeyDown(KeyCode.Escape))
+        //{
+        //    movementScript.FreezeInputs = !movementScript.FreezeInputs;
+        //    inventory.DisablePlayerInputs = !inventory.DisablePlayerInputs;
+        //}
+
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             if (PlayerCanvasScript.IsClassSelectionMenuOpen || PlayerCanvasScript.IsTeamSelectionMenuOpen) return;
