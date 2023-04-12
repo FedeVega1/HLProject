@@ -2,7 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.AddressableAssets;
 using Mirror;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class VideoOptions
 {
@@ -148,7 +150,6 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] NetManager netManager;
     [SerializeField] UILoadingScreen loadingScreen;
-    [SerializeField] GameObject[] mainMenuBackgrounds;
 
     string _PlayerName = "";
     public string PlayerName 
@@ -178,9 +179,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public VideoOptions videoOptions { get; private set; }
+    public VideoOptions VideoOptions { get; private set; }
 
     bool returningtoMainMenu;
+    AsyncOperationHandle<IList<GameObject>> backgroundsLoadHandle;
 
     void Awake()
     {
@@ -197,15 +199,32 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         SceneManager.sceneLoaded += (_, __) => OnLoadedScene();
 
-        videoOptions = new VideoOptions();
+        VideoOptions = new VideoOptions();
     }
 
-    void Start() => InitMainMenu();
+    void Start() => LoadAssets();
+
+    void OnDestroy()
+    {
+        Addressables.Release(backgroundsLoadHandle);
+    }
+
+    void LoadAssets()
+    {
+        backgroundsLoadHandle = Addressables.LoadAssetsAsync<GameObject>("MainMenuBackgrounds", asset => Instantiate(asset));
+        backgroundsLoadHandle.Completed += OnBackgroundLoaded;
+    }
+
+    void OnBackgroundLoaded(AsyncOperationHandle<IList<GameObject>> operation)
+    {
+        if (operation.Status == AsyncOperationStatus.Failed)
+            Debug.LogErrorFormat("Couldn't load MainMenu backgrounds: {0}", operation.OperationException);
+    }
 
     void InitMainMenu()
     {
-        if (videoOptions.EnableMainMenuBackgrounds) 
-            Instantiate(mainMenuBackgrounds[Random.Range(0, mainMenuBackgrounds.Length)]);
+        if (VideoOptions.EnableMainMenuBackgrounds) 
+            Instantiate(backgroundsLoadHandle.Result[Random.Range(0, backgroundsLoadHandle.Result.Count)]);
     }
 
     public void QuitGame() => Application.Quit();

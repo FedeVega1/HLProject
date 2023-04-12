@@ -11,4 +11,5 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_GameAssets/_Scenes/TestMap.unity
     guid: 63baa1c4d178adf4e8b302eab63f72df
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: b4e7124a6bbb03a419fff99ad3958f7a, type: 2}

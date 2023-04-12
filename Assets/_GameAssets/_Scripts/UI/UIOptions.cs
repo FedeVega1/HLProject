@@ -21,10 +21,10 @@ public class UIOptions : CachedRectTransform
         qualityPresetDropdown.ClearOptions();
         qualityPresetDropdown.AddOptions(presetStrings);
 
-        backgroundToggle.isOn = GameManager.INS.videoOptions.EnableMainMenuBackgrounds;
-        fullscreenToggle.isOn = GameManager.INS.videoOptions.CurrentFullScreenMode == FullScreenMode.FullScreenWindow;
-        resolutionDropdown.value = GameManager.INS.videoOptions.CurrentResolution;
-        qualityPresetDropdown.value = GameManager.INS.videoOptions.CurrentQualityPreset;
+        backgroundToggle.isOn = GameManager.INS.VideoOptions.EnableMainMenuBackgrounds;
+        fullscreenToggle.isOn = GameManager.INS.VideoOptions.CurrentFullScreenMode == FullScreenMode.FullScreenWindow;
+        resolutionDropdown.value = GameManager.INS.VideoOptions.CurrentResolution;
+        qualityPresetDropdown.value = GameManager.INS.VideoOptions.CurrentQualityPreset;
     }
 
     public void Toggle(bool toggle)
@@ -34,22 +34,22 @@ public class UIOptions : CachedRectTransform
 
     public void OnBackgroundToggle()
     {
-        GameManager.INS.videoOptions.EnableMainMenuBackgrounds = backgroundToggle.isOn;
+        GameManager.INS.VideoOptions.EnableMainMenuBackgrounds = backgroundToggle.isOn;
     }
 
     public void OnFullscreenToggle()
     {
-        GameManager.INS.videoOptions.CurrentFullScreenMode = fullscreenToggle.isOn ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed;
+        GameManager.INS.VideoOptions.CurrentFullScreenMode = fullscreenToggle.isOn ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed;
     }
 
     public void OnResolutionDropdownValue()
     {
-        GameManager.INS.videoOptions.CurrentResolution = resolutionDropdown.value;
+        GameManager.INS.VideoOptions.CurrentResolution = resolutionDropdown.value;
     }
 
     public void OnQualityPresetDropdownValue()
     {
-        GameManager.INS.videoOptions.CurrentQualityPreset = qualityPresetDropdown.value;
+        GameManager.INS.VideoOptions.CurrentQualityPreset = qualityPresetDropdown.value;
     }
 
     void GetResolutionStrings(ref List<string> resStrings)

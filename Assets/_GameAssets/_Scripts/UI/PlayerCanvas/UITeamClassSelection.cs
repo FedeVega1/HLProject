@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Mirror;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.AddressableAssets;
 
 public class UITeamClassSelection : MonoBehaviour
 {
@@ -20,7 +22,7 @@ public class UITeamClassSelection : MonoBehaviour
     }
 
     [SerializeField] CanvasGroup classSelectionCanvasGroup;
-    [SerializeField] GameObject classButtonsPrefab;
+    //[SerializeField] GameObject classButtonsPrefab;
     [SerializeField] Transform buttonsHolder;
     [SerializeField] Button spawnButton;
     [SerializeField] TMP_Text lblRespawnTime;
@@ -31,6 +33,25 @@ public class UITeamClassSelection : MonoBehaviour
     bool onRespawn;
     double respawnTime;
     Player playerScript;
+
+    AsyncOperationHandle<GameObject> btnClassSelectionHandle;
+
+    void Awake()
+    {
+        btnClassSelectionHandle = Addressables.LoadAssetAsync<GameObject>("UIPrefabs/btnClassSelection");
+        btnClassSelectionHandle.Completed += OnbtnClassSelectionHandleCompleted;
+    }
+
+    void OnbtnClassSelectionHandleCompleted(AsyncOperationHandle<GameObject> operation)
+    {
+        if (operation.Status == AsyncOperationStatus.Failed)
+            Debug.LogErrorFormat("Couldn't load classButton Prefab: {0}", operation.OperationException);
+    }
+
+    void OnDestroy()
+    {
+        Addressables.Release(btnClassSelectionHandle);
+    }
 
     void Update()
     {
@@ -85,7 +106,7 @@ public class UITeamClassSelection : MonoBehaviour
         size = teamClassData.Count;
         for (int i = 0; i < size; i++)
         {
-            UIClassSelectionButton classButton = Instantiate(classButtonsPrefab, buttonsHolder).GetComponent<UIClassSelectionButton>();
+            UIClassSelectionButton classButton = Instantiate(btnClassSelectionHandle.Result, buttonsHolder).GetComponent<UIClassSelectionButton>();
             classButton.Init(teamClassData[i].data, teamClassData[i].index, canvasScript.SelectClass);
 
             if (classButton != null) spawnedButtons.Add(classButton);
