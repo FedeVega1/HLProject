@@ -13,7 +13,7 @@ public class Weapon : CachedTransform
     public Transform WeaponRootBone => clientWeapon.WeaponRootBone;
     public Transform ClientWeaponTransform => clientWeapon.MyTransform;
 
-    double fireTime, switchingTime, reloadTime, wTime;
+    double wTime, scopeTime;
     public int BulletsInMag { get; private set; }
     public int Mags { get; private set; }
 
@@ -60,7 +60,7 @@ public class Weapon : CachedTransform
 
     public void Fire()
     {
-        if (NetworkTime.time < wTime || isReloading) return;
+        if (NetworkTime.time < wTime || NetworkTime.time < scopeTime || isReloading) return;
         if (BulletsInMag <= 0)
         {
             clientWeapon.EmptyFire();
@@ -134,6 +134,7 @@ public class Weapon : CachedTransform
         clientWeapon.ScopeIn();
         netWeapon.CmdRequestScopeIn();
         onScope = true;
+        scopeTime = NetworkTime.time + weaponData.weaponAnimsTiming.zoomInSpeed;
     }
 
     public void ScopeOut()
@@ -142,6 +143,7 @@ public class Weapon : CachedTransform
         clientWeapon.ScopeOut();
         netWeapon.CmdRequestScopeOut();
         onScope = false;
+        scopeTime = NetworkTime.time + weaponData.weaponAnimsTiming.zoomOutSpeed;
     }
 
     public void Reload()

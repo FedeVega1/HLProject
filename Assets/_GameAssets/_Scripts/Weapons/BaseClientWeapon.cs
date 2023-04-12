@@ -8,7 +8,7 @@ public abstract class BaseClientWeapon : CachedTransform
 
     [SerializeField] protected GameObject[] viewModels;
     [SerializeField] protected Transform virtualBulletPivot, worldBulletPivot, weaponRootBone;
-    [SerializeField] protected float weaponSwayAmmount = 0.02f, weaponSwaySmooth = 5, zoomInSpeed, zoomOutSpeed;
+    [SerializeField] protected float weaponSwayAmmount = 0.02f, weaponSwaySmooth = 5;
     [SerializeField] protected AudioSource virtualAudioSource, worldAudioSource, virtualMovementSource;
     [SerializeField] protected AudioClip[] weaponWalkSounds, weaponSprintSounds, weaponMovSounds;
     [SerializeField] protected Vector3 aimPosition;
@@ -16,7 +16,7 @@ public abstract class BaseClientWeapon : CachedTransform
 
     public Transform WeaponRootBone => weaponRootBone;
 
-    protected bool isServer, isDrawn, enableWeaponSway, onScopeAim;
+    protected bool isServer, isDrawn, enableWeaponSway, onScopeAim, doingScopeAnim;
     protected ActiveViewModel currentActiveViewModel;
     protected int scopeID = -1;
     protected Vector3 defaultWeaponPos;
@@ -77,12 +77,13 @@ public abstract class BaseClientWeapon : CachedTransform
         Quaternion currentRot = MyTransform.localRotation;
 
         if (scopeID != -1) LeanTween.cancel(scopeID);
-        scopeID = LeanTween.value(0, 1, zoomInSpeed).setOnUpdate((float x) =>
+        doingScopeAnim = true;
+        scopeID = LeanTween.value(0, 1, weaponData.weaponAnimsTiming.zoomInSpeed).setOnUpdate((float x) =>
         {
             GameModeManager.INS.SetClientVCameraFOV(Mathf.Lerp(90, 60, x));
             MyTransform.localPosition = Vector3.Lerp(currentPos, aimPosition, x);
             MyTransform.localRotation = Quaternion.Lerp(currentRot, aimRotation, x);
-        }).setOnComplete(() => scopeID = -1).uniqueId;
+        }).setOnComplete(() => { scopeID = -1; doingScopeAnim = false; }).uniqueId;
     }
 
     public virtual void ScopeOut()
@@ -95,12 +96,13 @@ public abstract class BaseClientWeapon : CachedTransform
         Quaternion currentRot = MyTransform.localRotation;
 
         if (scopeID != -1) LeanTween.cancel(scopeID);
-        scopeID = LeanTween.value(0, 1, zoomOutSpeed).setOnUpdate((float x) =>
+        doingScopeAnim = true;
+        scopeID = LeanTween.value(0, 1, weaponData.weaponAnimsTiming.zoomOutSpeed).setOnUpdate((float x) =>
         {
             GameModeManager.INS.SetClientVCameraFOV(Mathf.Lerp(60, 90, x));
             MyTransform.localPosition = Vector3.Lerp(currentPos, defaultWeaponPos, x);
             MyTransform.localRotation = Quaternion.Lerp(currentRot, defaultWeaponRotation, x);
-        }).setOnComplete(() => scopeID = -1).uniqueId;
+        }).setOnComplete(() => { scopeID = -1; doingScopeAnim = false; }).uniqueId;
     }
 
     public abstract void Reload();

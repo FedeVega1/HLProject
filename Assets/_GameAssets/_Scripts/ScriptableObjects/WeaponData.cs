@@ -6,8 +6,8 @@ public class WeaponData : ScriptableObject
     [System.Serializable]
     public struct WeaponAnimationTimings
     {
-        public float fire, reload;
-        public float holster, draw;
+        public float fire, reload, holster, draw;
+        public float zoomInSpeed, zoomOutSpeed;
     }
 
     public string weaponName;

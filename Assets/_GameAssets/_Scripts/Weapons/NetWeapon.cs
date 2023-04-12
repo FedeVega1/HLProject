@@ -15,7 +15,7 @@ public class NetWeapon : CachedNetTransform
 
     bool clientWeaponInit, isReloading, onScope;
     int bulletsInMag, mags;
-    double fireTime;
+    double fireTime, scopeTime;
     RaycastHit rayHit;
 
     WeaponData weaponData;
@@ -67,7 +67,7 @@ public class NetWeapon : CachedNetTransform
     [Server]
     void Fire()
     {
-        if (owningPlayer.PlayerIsRunning() || NetworkTime.time < fireTime || isReloading) return;
+        if (owningPlayer.PlayerIsRunning() || NetworkTime.time < fireTime || NetworkTime.time < scopeTime || isReloading) return;
         if (bulletsInMag <= 0) return;
 
         MyTransform.eulerAngles = new Vector3(owningPlayer.GetPlayerCameraXAxis(), MyTransform.eulerAngles.y, MyTransform.eulerAngles.z);
@@ -206,6 +206,7 @@ public class NetWeapon : CachedNetTransform
         if (owningPlayer.PlayerIsRunning() || isReloading || onScope) return;
         owningPlayer.TogglePlayerScopeStatus(true);
         onScope = true;
+        scopeTime = NetworkTime.time + weaponData.weaponAnimsTiming.zoomInSpeed;
     }
 
     [Server]
@@ -214,6 +215,7 @@ public class NetWeapon : CachedNetTransform
         if (!onScope) return;
         owningPlayer.TogglePlayerScopeStatus(false);
         onScope = false;
+        scopeTime = NetworkTime.time + weaponData.weaponAnimsTiming.zoomOutSpeed;
     }
 
     #endregion

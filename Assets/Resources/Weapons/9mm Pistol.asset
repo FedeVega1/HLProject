@@ -24,5 +24,7 @@ MonoBehaviour:
     reload: 2.167
     holster: 0.5
     draw: 1.208
+    zoomInSpeed: 0.25
+    zoomOutSpeed: 0.25
   bulletsPerMag: 18
   mags: 8

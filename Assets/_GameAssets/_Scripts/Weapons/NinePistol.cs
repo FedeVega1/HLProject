@@ -58,7 +58,7 @@ public class NinePistol : BaseClientWeapon
 
     public override void Fire(Vector3 destination, bool didHit, int ammo)
     {
-        if (!isDrawn) return;
+        if (!isDrawn || doingScopeAnim) return;
         GameObject bulletObject = Instantiate(bulletData.bulletPrefab, isServer ? worldBulletPivot : virtualBulletPivot);
         Bullet bullet = bulletObject.GetComponent<Bullet>();
 
