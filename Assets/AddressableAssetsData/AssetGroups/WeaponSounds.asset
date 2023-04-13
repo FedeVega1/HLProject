@@ -1,0 +1,350 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: WeaponSounds
+  m_EditorClassIdentifier: 
+  m_GroupName: WeaponSounds
+  m_Data:
+    m_SerializedData: []
+  m_GUID: ff5d3f003a89ea4479987e541ba1f333
+  m_SerializeEntries:
+  - m_GUID: d3b6ded7f03c2f2458f60658f0a54f6a
+    m_Address: 357_deploy
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/357
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3b720348e235c164bb511046b73433a3
+    m_Address: 357_fire1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/357
+    - FireSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ad837da8d02a70e4e91024b43ff2a6ec
+    m_Address: 357_fire2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/357
+    - FireSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f2b18a70b6179ab41b3fb25a9a5dbfa4
+    m_Address: 357_fire3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/357
+    - FireSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 94efdab40b93e914885fc912dc7e833a
+    m_Address: 357_hammerpull
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/357
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 69579882630cf084f9ec3f34109b91da
+    m_Address: 357_hammerrelease
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/357
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 457ae309dbec2744d8d7e899f16652e2
+    m_Address: 357_reload1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/357
+    - ReloadSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e79fffe5d0d5bd94abb0c5bd80520eca
+    m_Address: 357_reload2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/357
+    - ReloadSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 455fac9dd80bb4e4288ff0203da51cfc
+    m_Address: 357_reload3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/357
+    - ReloadSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2c693b27ac80ec4489cca3b3b910958e
+    m_Address: 357_reload4
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/357
+    - ReloadSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0033f836eba5b9d41959bb18167c1cbe
+    m_Address: 357_reload_dual
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/357
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 96e97789df72fe14e8ad8fd7efcbbc78
+    m_Address: 357_spin1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/357
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: edf44f0a59ec4d04593cb794a72b5d5e
+    m_Address: 357_spin2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/357
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 717571fc4405e4740a144c1eafb37ebe
+    m_Address: npc_pistol_fire1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/PistolWorld
+    - FireSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a6cc1a03089a3be41a2615bc8a1f462c
+    m_Address: npc_pistol_fire2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/PistolWorld
+    - FireSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 10e1a1bd6f15bdd4291d9fa08cedbfd0
+    m_Address: npc_pistol_fire3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/PistolWorld
+    - FireSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7f03716ce7a6b134f9676466ffa651f9
+    m_Address: npc_pistol_reload1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/PistolWorld
+    - ReloadSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f789eb5d44253ed418619867ed7016fe
+    m_Address: pistol_clipin
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Pistol
+    - ReloadSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d2549e22854059d4e9ff524b7b4f97ee
+    m_Address: pistol_clipout
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Pistol
+    - ReloadSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8fdd2461d2e48604fa208758a4bb1628
+    m_Address: pistol_deploy
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Pistol
+    - ReloadSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ad190332a61810f48a21e0594042b6c4
+    m_Address: pistol_empty
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Pistol
+    - ReloadSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c680335be548eb64fafe006e24068364
+    m_Address: pistol_slidepull
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Pistol
+    - ReloadSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 68a0eade4a07d5b4692d7db3f481ba14
+    m_Address: pistol_sliderelease
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Pistol
+    - ReloadSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5672d3faf308b7748b12de218e52cd6d
+    m_Address: player_pistol_fire1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Pistol
+    - FireSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d18398ddd5717b84fa2aeb2376b48702
+    m_Address: player_pistol_fire2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Pistol
+    - FireSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4f828fe62ff23464a91e3b588faf6de2
+    m_Address: player_pistol_fire3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Pistol
+    - FireSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ede6d314f199100458e6150b8af29768
+    m_Address: weapon_movement1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 08449d7429131714e9222ff793baac14
+    m_Address: weapon_movement2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 41234ea7ba27f5a4286cceb1d1876934
+    m_Address: weapon_movement3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e0da2bcabb299eb419dec083ffcda745
+    m_Address: weapon_movement4
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e19f620a9c01f5a47a26cf9e44228962
+    m_Address: weapon_movement5
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3283007960f633e4d9373ca065e90a77
+    m_Address: weapon_movement6
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0ce50e0e1a716c64cac1ed15c28932a4
+    m_Address: weapon_movement_sprint1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Sprint
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 289b7b7aba930d44cb89fcdecacb1e53
+    m_Address: weapon_movement_sprint2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Sprint
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6a2da730941be194cb492a19e3467e92
+    m_Address: weapon_movement_sprint3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Sprint
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 35e4251cd5b2f10459421d9b869b9085
+    m_Address: weapon_movement_sprint4
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Sprint
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c43a73ab320160f4fab75b72c4cd023f
+    m_Address: weapon_movement_sprint5
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Sprint
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 42122949f11aaaa43a89422f585993da
+    m_Address: weapon_movement_sprint6
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Sprint
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aac40e768d6534c4a8ce4110e004d968
+    m_Address: weapon_movement_sprint7
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Sprint
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e62403f1fd862494d98088430f1e8a98
+    m_Address: weapon_movement_sprint8
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Sprint
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cebf0f8c20a1c3b46b3947b9501d56ed
+    m_Address: weapon_movement_sprint9
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Sprint
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a264c8b5b2779924e8e869652d5aa69d
+    m_Address: weapon_movement_walk1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Walk
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: de1f0593881171f4189773c41c577cc8
+    m_Address: weapon_movement_walk2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Walk
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2398f888b1e4d9942a4110d4a7c1703c
+    m_Address: weapon_movement_walk3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Walk
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7f056017a99fdd4408bdc1f422ff7129
+    m_Address: weapon_movement_walk4
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Walk
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 392de8d0c7d52ed41821ef504d813a06
+    m_Address: weapon_movement_walk5
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Walk
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 86213a72537e654468edb764a91914ca
+    m_Address: weapon_movement_walk6
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Walk
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 621fa003f0303ce479aaec940698c52a
+    m_Address: weapon_movement_walk7
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Walk
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9a8b2dde9638c764fa33cfaeced1dc07
+    m_Address: weapon_movement_walk8
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Walk
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c9c4d2b795870e946a234871b9d3277d
+    m_Address: weapon_movement_walk9
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Movement/Walk
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ddc88e42a2d47c746b515c28ef648e32
+    m_Address: lowammo
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 3cf91d3a9f4e16f4dbcc0b305a57378e, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 2f56b378dc829174b92eae2b539bab96, type: 2}
+    - {fileID: 11400000, guid: 2b219d6d87768084fb719617d01aa569, type: 2}

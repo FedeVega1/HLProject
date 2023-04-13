@@ -211,14 +211,19 @@ public class GameManager : MonoBehaviour
 
     void LoadAssets()
     {
-        backgroundsLoadHandle = Addressables.LoadAssetsAsync<GameObject>("MainMenuBackgrounds", asset => Instantiate(asset));
+        backgroundsLoadHandle = Addressables.LoadAssetsAsync<GameObject>("MainMenuBackgrounds", null);
         backgroundsLoadHandle.Completed += OnBackgroundLoaded;
     }
 
     void OnBackgroundLoaded(AsyncOperationHandle<IList<GameObject>> operation)
     {
         if (operation.Status == AsyncOperationStatus.Failed)
+        {
             Debug.LogErrorFormat("Couldn't load MainMenu backgrounds: {0}", operation.OperationException);
+            return;
+        }
+
+        InitMainMenu();
     }
 
     void InitMainMenu()

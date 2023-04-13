@@ -88,38 +88,9 @@ MonoBehaviour:
   weaponRootBone: {fileID: 8680511904948920510}
   weaponSwayAmmount: 5
   weaponSwaySmooth: 3
-  zoomInSpeed: 0.25
-  zoomOutSpeed: 0.25
   virtualAudioSource: {fileID: 6523634801324490449}
   worldAudioSource: {fileID: 626600926696584494}
   virtualMovementSource: {fileID: 1949032672733815839}
-  weaponWalkSounds:
-  - {fileID: 8300000, guid: a264c8b5b2779924e8e869652d5aa69d, type: 3}
-  - {fileID: 8300000, guid: de1f0593881171f4189773c41c577cc8, type: 3}
-  - {fileID: 8300000, guid: 2398f888b1e4d9942a4110d4a7c1703c, type: 3}
-  - {fileID: 8300000, guid: 7f056017a99fdd4408bdc1f422ff7129, type: 3}
-  - {fileID: 8300000, guid: 392de8d0c7d52ed41821ef504d813a06, type: 3}
-  - {fileID: 8300000, guid: 86213a72537e654468edb764a91914ca, type: 3}
-  - {fileID: 8300000, guid: 621fa003f0303ce479aaec940698c52a, type: 3}
-  - {fileID: 8300000, guid: 9a8b2dde9638c764fa33cfaeced1dc07, type: 3}
-  - {fileID: 8300000, guid: c9c4d2b795870e946a234871b9d3277d, type: 3}
-  weaponSprintSounds:
-  - {fileID: 8300000, guid: 0ce50e0e1a716c64cac1ed15c28932a4, type: 3}
-  - {fileID: 8300000, guid: 289b7b7aba930d44cb89fcdecacb1e53, type: 3}
-  - {fileID: 8300000, guid: 6a2da730941be194cb492a19e3467e92, type: 3}
-  - {fileID: 8300000, guid: 35e4251cd5b2f10459421d9b869b9085, type: 3}
-  - {fileID: 8300000, guid: c43a73ab320160f4fab75b72c4cd023f, type: 3}
-  - {fileID: 8300000, guid: 42122949f11aaaa43a89422f585993da, type: 3}
-  - {fileID: 8300000, guid: aac40e768d6534c4a8ce4110e004d968, type: 3}
-  - {fileID: 8300000, guid: e62403f1fd862494d98088430f1e8a98, type: 3}
-  - {fileID: 8300000, guid: cebf0f8c20a1c3b46b3947b9501d56ed, type: 3}
-  weaponMovSounds:
-  - {fileID: 8300000, guid: ede6d314f199100458e6150b8af29768, type: 3}
-  - {fileID: 8300000, guid: 08449d7429131714e9222ff793baac14, type: 3}
-  - {fileID: 8300000, guid: 41234ea7ba27f5a4286cceb1d1876934, type: 3}
-  - {fileID: 8300000, guid: e0da2bcabb299eb419dec083ffcda745, type: 3}
-  - {fileID: 8300000, guid: e19f620a9c01f5a47a26cf9e44228962, type: 3}
-  - {fileID: 8300000, guid: 3283007960f633e4d9373ca065e90a77, type: 3}
   aimPosition: {x: -0.365, y: 0.15, z: 0}
   aimRotation: {x: 0.01857152, y: -0.02538705, z: 0.04314138, w: -0.9985737}
   magazinePivot: {fileID: 6503009243056472925}
@@ -129,23 +100,27 @@ MonoBehaviour:
   - {fileID: 8261258384982796249}
   pistolMagazinePrefab: {fileID: 6514280180475614642, guid: b98ddb602e2120c41ba9837b29243c79, type: 3}
   pistolBulletCasingPrefab: {fileID: 170406477161654109, guid: 1560892d3cfacef4bbf8d6fe3f8f2c28, type: 3}
-  virtualShootSounds:
-  - {fileID: 8300000, guid: 5672d3faf308b7748b12de218e52cd6d, type: 3}
-  - {fileID: 8300000, guid: d18398ddd5717b84fa2aeb2376b48702, type: 3}
-  - {fileID: 8300000, guid: 4f828fe62ff23464a91e3b588faf6de2, type: 3}
-  worldShootSounds:
-  - {fileID: 8300000, guid: 717571fc4405e4740a144c1eafb37ebe, type: 3}
-  - {fileID: 8300000, guid: a6cc1a03089a3be41a2615bc8a1f462c, type: 3}
-  - {fileID: 8300000, guid: 10e1a1bd6f15bdd4291d9fa08cedbfd0, type: 3}
   reloadSounds:
-  - {fileID: 8300000, guid: c680335be548eb64fafe006e24068364, type: 3}
-  - {fileID: 8300000, guid: d2549e22854059d4e9ff524b7b4f97ee, type: 3}
-  - {fileID: 8300000, guid: f789eb5d44253ed418619867ed7016fe, type: 3}
-  - {fileID: 8300000, guid: 68a0eade4a07d5b4692d7db3f481ba14, type: 3}
-  - {fileID: 8300000, guid: 7f03716ce7a6b134f9676466ffa651f9, type: 3}
-  emptySound: {fileID: 8300000, guid: ad190332a61810f48a21e0594042b6c4, type: 3}
-  deploySound: {fileID: 8300000, guid: 8fdd2461d2e48604fa208758a4bb1628, type: 3}
-  lowAmmoSound: {fileID: 8300000, guid: ddc88e42a2d47c746b515c28ef648e32, type: 3}
+  - m_AssetGUID: c680335be548eb64fafe006e24068364
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: d2549e22854059d4e9ff524b7b4f97ee
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: f789eb5d44253ed418619867ed7016fe
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 68a0eade4a07d5b4692d7db3f481ba14
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 7f03716ce7a6b134f9676466ffa651f9
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
 --- !u!1 &2555092655139688845
 GameObject:
   m_ObjectHideFlags: 0

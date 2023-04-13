@@ -2,14 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class NinePistol : BaseClientWeapon
 {
     [SerializeField] Transform magazinePivot, bulletEffectPivot;
     [SerializeField] Animator[] weaponAnimators;
     [SerializeField] Rigidbody pistolMagazinePrefab, pistolBulletCasingPrefab;
-    [SerializeField] AudioClip[] virtualShootSounds, worldShootSounds, reloadSounds;
-    [SerializeField] AudioClip emptySound, deploySound, lowAmmoSound;
+    [SerializeField] List<AssetReference> reloadSounds;
 
     Animator weaponAnim;
 
@@ -17,6 +18,50 @@ public class NinePistol : BaseClientWeapon
     bool lastWalkCheck, lastRunningCheck, lastBullet, emptyGun, isFiring;
     float randomInspectTime, movementSoundTime;
     Coroutine handleInspectionSoundsRoutine;
+
+    AsyncOperationHandle<IList<AudioClip>> virtualShootSoundsHandle, worldShootSoundsHandle, reloadSoundsHandle;
+    AsyncOperationHandle<AudioClip> emptySoundHandle, deploySoundHandle, lowAmmoSoundHandle;
+
+    protected override void LoadAssets()
+    {
+        base.LoadAssets();
+
+        virtualShootSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "WeaponSounds/Pistol", "FireSound" }, null, Addressables.MergeMode.Intersection);
+        virtualShootSoundsHandle.Completed += OnWeaponSoundsComplete;
+
+        worldShootSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "WeaponSounds/PistolWorld", "FireSound" }, null, Addressables.MergeMode.Intersection);
+        worldShootSoundsHandle.Completed += OnWeaponSoundsComplete;
+
+        reloadSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(reloadSounds, null, Addressables.MergeMode.Union);
+        reloadSoundsHandle.Completed += OnWeaponSoundsComplete;
+
+        emptySoundHandle = Addressables.LoadAssetAsync<AudioClip>("pistol_empty");
+        emptySoundHandle.Completed += OnWeaponSoundComplete;
+
+        deploySoundHandle = Addressables.LoadAssetAsync<AudioClip>("pistol_deploy");
+        deploySoundHandle.Completed += OnWeaponSoundComplete;
+
+        lowAmmoSoundHandle = Addressables.LoadAssetAsync<AudioClip>("lowammo");
+        lowAmmoSoundHandle.Completed += OnWeaponSoundComplete;
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+
+        Addressables.Release(virtualShootSoundsHandle);
+        Addressables.Release(worldShootSoundsHandle);
+        Addressables.Release(reloadSoundsHandle);
+        Addressables.Release(emptySoundHandle);
+        Addressables.Release(deploySoundHandle);
+        Addressables.Release(lowAmmoSoundHandle);
+    }
+
+    void OnWeaponSoundComplete(AsyncOperationHandle<AudioClip> operation)
+    {
+        if (operation.Status == AsyncOperationStatus.Failed)
+            Debug.LogErrorFormat("Couldn't load Weapon Sound: {0}", operation.OperationException);
+    }
 
     public override void Init(bool isServer, WeaponData wData, BulletData data, GameObject propPrefab)
     {
@@ -42,13 +87,13 @@ public class NinePistol : BaseClientWeapon
             if (lastRunningCheck)
             {
                 //clipToPlay = random <= 50 ? weaponMovSounds[Random.Range(0, weaponMovSounds.Length)] : weaponSprintSounds[Random.Range(0, weaponSprintSounds.Length)];
-                virtualMovementSource.PlayOneShot(weaponSprintSounds[Random.Range(0, weaponSprintSounds.Length)]);
+                virtualMovementSource.PlayOneShot(weaponSprintSoundsHandle.Result[Random.Range(0, weaponSprintSoundsHandle.Result.Count)]);
                 movementSoundTime = Time.time + .4f;
                 return;
             }
 
             //clipToPlay = random <= 50 ? weaponMovSounds[Random.Range(0, weaponMovSounds.Length)] : weaponWalkSounds[Random.Range(0, weaponWalkSounds.Length)];
-            virtualMovementSource.PlayOneShot(weaponWalkSounds[Random.Range(0, weaponWalkSounds.Length)]);
+            virtualMovementSource.PlayOneShot(weaponWalkSoundsHandle.Result[Random.Range(0, weaponWalkSoundsHandle.Result.Count)]);
             movementSoundTime = Time.time + .5f;
         }
 
@@ -63,7 +108,7 @@ public class NinePistol : BaseClientWeapon
 
         if (currentActiveViewModel == ActiveViewModel.World)
         {
-            worldAudioSource.PlayOneShot(worldShootSounds[Random.Range(0, worldShootSounds.Length)]);
+            worldAudioSource.PlayOneShot(worldShootSoundsHandle.Result[Random.Range(0, worldShootSoundsHandle.Result.Count)]);
             return;
         }
 
@@ -77,10 +122,10 @@ public class NinePistol : BaseClientWeapon
         weaponAnim.SetTrigger("Fire");
         weaponAnim.SetInteger("RandomFire", lastBullet ? 4 : Random.Range(0, 4));
 
-        virtualAudioSource.PlayOneShot(virtualShootSounds[Random.Range(0, virtualShootSounds.Length)]);
+        virtualAudioSource.PlayOneShot(virtualShootSoundsHandle.Result[Random.Range(0, virtualShootSoundsHandle.Result.Count)]);
 
         if (ammo < 5)
-            virtualAudioSource.PlayOneShot(lowAmmoSound);
+            virtualAudioSource.PlayOneShot(lowAmmoSoundHandle.Result);
 
         Invoke(nameof(SpawnCasing), .04f);
 
@@ -111,7 +156,7 @@ public class NinePistol : BaseClientWeapon
     public override void EmptyFire()
     {
         if (!isDrawn) return;
-        virtualAudioSource.PlayOneShot(emptySound);
+        virtualAudioSource.PlayOneShot(emptySoundHandle.Result);
 
         weaponAnim.SetTrigger("Fire");
         weaponAnim.SetInteger("RandomFire", 4);
@@ -124,25 +169,25 @@ public class NinePistol : BaseClientWeapon
         LeanTween.delayedCall(.67f, SpawnMagazine);
         if (currentActiveViewModel == ActiveViewModel.World)
         {
-            worldAudioSource.PlayOneShot(reloadSounds[4]);
+            worldAudioSource.PlayOneShot(reloadSoundsHandle.Result[4]);
             return;
         }
 
-        virtualAudioSource.PlayOneShot(reloadSounds[0]);
+        virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[0]);
 
         LeanTween.delayedCall(.375f, () =>
         {
-            virtualAudioSource.PlayOneShot(reloadSounds[1]);
+            virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[1]);
         });
 
         LeanTween.delayedCall(1, () =>
         {
-            virtualAudioSource.PlayOneShot(reloadSounds[2]);
+            virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[2]);
         });
 
         LeanTween.delayedCall(1.54f, () =>
         {
-            virtualAudioSource.PlayOneShot(reloadSounds[3]);
+            virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[3]);
         });
 
         lastBullet = emptyGun = false;
@@ -174,12 +219,12 @@ public class NinePistol : BaseClientWeapon
         base.DrawWeapon();
         weaponAnim.SetTrigger("Draw");
 
-        virtualAudioSource.PlayOneShot(deploySound);
+        virtualAudioSource.PlayOneShot(deploySoundHandle.Result);
 
         if (lastBullet) return;
         LeanTween.delayedCall(.58f, () =>
         {
-            virtualAudioSource.PlayOneShot(reloadSounds[3]);
+            virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[3]);
         });
     }
 
@@ -237,9 +282,9 @@ public class NinePistol : BaseClientWeapon
     {
         if (randomIdle != 1) yield break;
         yield return new WaitForSeconds(.875f);
-        virtualAudioSource.PlayOneShot(reloadSounds[0]);
+        virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[0]);
 
         yield return new WaitForSeconds(1.285f); // 2.16f
-        virtualAudioSource.PlayOneShot(reloadSounds[3]);
+        virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[3]);
     }
 }

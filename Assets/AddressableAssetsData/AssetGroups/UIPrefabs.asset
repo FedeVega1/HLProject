@@ -18,7 +18,7 @@ MonoBehaviour:
   m_GUID: 1e47929d279ff724eab76cbf2ee375b6
   m_SerializeEntries:
   - m_GUID: 2aba35681d1ed6f4ba1bfcfe1a131d18
-    m_Address: Assets/_GameAssets/Prefabs/Backgrounds/BackgroundEnviroment.prefab
+    m_Address: BackgroundEnviroment
     m_ReadOnly: 0
     m_SerializedLabels:
     - MainMenuBackgrounds
@@ -30,6 +30,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e35ef93b60d91354d86270be32279a49
     m_Address: UIPrefabs/TeamPlayerInfo
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9325dfb170a97dd48931fcf4c43e9c0a
+    m_Address: UIPrefabs/PlayerCanvas
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

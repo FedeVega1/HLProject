@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.AddressableAssets;
 
 [RequireComponent(typeof(Player))]
 public class PlayerInventory : NetworkBehaviour
@@ -14,7 +16,6 @@ public class PlayerInventory : NetworkBehaviour
     };
 
     [SerializeField] Transform wWeaponPivot;
-    [SerializeField] GameObject WeaponPrefab;
     [SerializeField] PlayerClientHands[] clientHands;
 
     [SyncVar] bool isServerInitialized, isSwappingWeapons;
@@ -26,12 +27,31 @@ public class PlayerInventory : NetworkBehaviour
     Player playerScript;
     Transform vWeaponPivot;
     PlayerClientHands currentClassHands;
+    AsyncOperationHandle<GameObject> weaponPrefabHandle;
 
     List<Weapon> weaponsInvetoryOnClient;
     List<int> weaponCyclerList;
     List<NetWeapon> weaponsInventoryOnServer;
 
     void Awake() => playerScript = GetComponent<Player>();
+
+    void LoadAsset()
+    {
+        weaponPrefabHandle = Addressables.LoadAssetAsync<GameObject>("Weapon_Server");
+        weaponPrefabHandle.Completed += OnWeaponPrefabHandleComplete;
+    }
+
+    void OnWeaponPrefabHandleComplete(AsyncOperationHandle<GameObject> operation)
+    {
+        if (operation.Status == AsyncOperationStatus.Failed)
+            Debug.LogErrorFormat("Couldn't load weapon prefab: {0}", operation.OperationException);
+    }
+
+    void OnDestroy()
+    {
+        if (isServer)
+            Addressables.Release(weaponPrefabHandle);
+    }
 
     public override void OnStartClient()
     {
@@ -41,6 +61,7 @@ public class PlayerInventory : NetworkBehaviour
 
     public override void OnStartServer()
     {
+        LoadAsset();
         playerScript.OnPlayerDead += OnPlayerDies;
     }
 
@@ -75,7 +96,7 @@ public class PlayerInventory : NetworkBehaviour
         for (int i = 0; i < size; i++)
         {
             Debug.LogFormat("Server: Spawn NetWeapon {0} of type {1}", weaponsToLoad[i].weaponName, weaponsToLoad[i].weaponType);
-            GameObject weaponObject = Instantiate(WeaponPrefab, wWeaponPivot);
+            GameObject weaponObject = Instantiate(weaponPrefabHandle.Result, wWeaponPivot);
             NetWeapon spawnedWeapon = weaponObject.GetComponent<NetWeapon>();
 
             if (connectionToClient != null) NetworkServer.Spawn(weaponObject, gameObject);

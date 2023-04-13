@@ -1,38 +1,72 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class RevolverWeapon : BaseClientWeapon
 {
     [SerializeField] Animator weaponAnim;
+    [SerializeField] List<AssetReference> reloadSounds;
 
     bool lastWalkCheck, lastRunningCheck, isFiring;
     int delayTweenID = -1;
     float randomInspectTime, movementSoundTime;
     Coroutine handleInspectionSoundsRoutine;
 
+    AsyncOperationHandle<IList<AudioClip>> virtualShootSoundsHandle, reloadSoundsHandle;
+    AsyncOperationHandle<AudioClip> deploySoundHandle, lowAmmoSoundHandle;
+
+    protected override void LoadAssets()
+    {
+        base.LoadAssets();
+
+        virtualShootSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "WeaponSounds/357", "FireSound" }, null, Addressables.MergeMode.Intersection);
+        virtualShootSoundsHandle.Completed += OnWeaponSoundsComplete;
+
+        //reloadSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(reloadSounds, null, Addressables.MergeMode.Union);
+        //reloadSoundsHandle.Completed += OnWeaponSoundsComplete;
+
+        deploySoundHandle = Addressables.LoadAssetAsync<AudioClip>("357_deploy");
+        deploySoundHandle.Completed += OnWeaponSoundComplete;
+
+        lowAmmoSoundHandle = Addressables.LoadAssetAsync<AudioClip>("lowammo");
+        lowAmmoSoundHandle.Completed += OnWeaponSoundComplete;
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+
+        Addressables.Release(virtualShootSoundsHandle);
+        Addressables.Release(reloadSoundsHandle);
+        Addressables.Release(deploySoundHandle);
+        Addressables.Release(lowAmmoSoundHandle);
+    }
+
+    void OnWeaponSoundComplete(AsyncOperationHandle<AudioClip> operation)
+    {
+        if (operation.Status == AsyncOperationStatus.Failed)
+            Debug.LogErrorFormat("Couldn't load Weapon Sound: {0}", operation.OperationException);
+    }
+
     protected override void Update()
     {
         if (!isDrawn) return;
         base.Update();
 
-        //if (lastWalkCheck && Time.time >= movementSoundTime)
-        //{
-        //    //int random = Random.Range(0, 101);
-        //    //AudioClip clipToPlay;
+        if (lastWalkCheck && Time.time >= movementSoundTime)
+        {
+            if (lastRunningCheck)
+            {
+                virtualMovementSource.PlayOneShot(weaponSprintSoundsHandle.Result[Random.Range(0, weaponSprintSoundsHandle.Result.Count)]);
+                movementSoundTime = Time.time + .4f;
+                return;
+            }
 
-        //    if (lastRunningCheck)
-        //    {
-        //        //clipToPlay = random <= 50 ? weaponMovSounds[Random.Range(0, weaponMovSounds.Length)] : weaponSprintSounds[Random.Range(0, weaponSprintSounds.Length)];
-        //        virtualMovementSource.PlayOneShot(weaponSprintSounds[Random.Range(0, weaponSprintSounds.Length)]);
-        //        movementSoundTime = Time.time + .4f;
-        //        return;
-        //    }
-
-        //    //clipToPlay = random <= 50 ? weaponMovSounds[Random.Range(0, weaponMovSounds.Length)] : weaponWalkSounds[Random.Range(0, weaponWalkSounds.Length)];
-        //    virtualMovementSource.PlayOneShot(weaponWalkSounds[Random.Range(0, weaponWalkSounds.Length)]);
-        //    movementSoundTime = Time.time + .5f;
-        //}
+            virtualMovementSource.PlayOneShot(weaponWalkSoundsHandle.Result[Random.Range(0, weaponWalkSoundsHandle.Result.Count)]);
+            movementSoundTime = Time.time + .5f;
+        }
 
         if (weaponAnim == null || Time.time < randomInspectTime) return;
         RandomIdleAnim();
@@ -63,6 +97,8 @@ public class RevolverWeapon : BaseClientWeapon
         base.Fire(destination, didHit, ammo);
 
         weaponAnim.SetTrigger("Fire");
+
+        virtualAudioSource.PlayOneShot(virtualShootSoundsHandle.Result[Random.Range(0, virtualShootSoundsHandle.Result.Count)]);
 
         weaponAnim.ResetTrigger("Walk");
         weaponAnim.ResetTrigger("Idle");
@@ -111,6 +147,7 @@ public class RevolverWeapon : BaseClientWeapon
     {
         base.DrawWeapon();
         weaponAnim.SetTrigger("Draw");
+        virtualAudioSource.PlayOneShot(deploySoundHandle.Result);
     }
 
     public override void HolsterWeapon()

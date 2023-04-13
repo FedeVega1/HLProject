@@ -1,16 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public abstract class BaseClientWeapon : CachedTransform
 {
+    protected static AsyncOperationHandle<IList<AudioClip>> weaponWalkSoundsHandle, weaponSprintSoundsHandle, weaponMovSoundsHandle;
+
     protected enum ActiveViewModel { World, Virtual }
 
     [SerializeField] protected GameObject[] viewModels;
     [SerializeField] protected Transform virtualBulletPivot, worldBulletPivot, weaponRootBone;
     [SerializeField] protected float weaponSwayAmmount = 0.02f, weaponSwaySmooth = 5;
     [SerializeField] protected AudioSource virtualAudioSource, worldAudioSource, virtualMovementSource;
-    [SerializeField] protected AudioClip[] weaponWalkSounds, weaponSprintSounds, weaponMovSounds;
+    //[SerializeField] protected AudioClip[] weaponWalkSounds, weaponSprintSounds, weaponMovSounds;
     [SerializeField] protected Vector3 aimPosition;
     [SerializeField] protected Quaternion aimRotation;
 
@@ -27,6 +31,11 @@ public abstract class BaseClientWeapon : CachedTransform
     protected BulletData bulletData;
     protected WeaponData weaponData;
 
+    void Awake()
+    {
+        LoadAssets();
+    }
+
     public virtual void Init(bool isServer, WeaponData wData, BulletData data, GameObject propPrefab)
     {
         bulletData = data;
@@ -40,6 +49,40 @@ public abstract class BaseClientWeapon : CachedTransform
 
         this.isServer = isServer;
         gameObject.SetActive(false);
+    }
+
+    protected virtual void LoadAssets()
+    {
+        if (!weaponWalkSoundsHandle.IsValid())
+        {
+            weaponWalkSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>("WeaponSounds/Movement/Walk", null);
+            weaponWalkSoundsHandle.Completed += OnWeaponSoundsComplete;
+        }
+
+        if (!weaponSprintSoundsHandle.IsValid())
+        {
+            weaponSprintSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>("WeaponSounds/Movement/Sprint", null);
+            weaponSprintSoundsHandle.Completed += OnWeaponSoundsComplete;
+        }
+
+        if (!weaponMovSoundsHandle.IsValid())
+        {
+            weaponMovSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>("WeaponSounds/Movement", null);
+            weaponMovSoundsHandle.Completed += OnWeaponSoundsComplete;
+        }
+    }
+
+    protected void OnWeaponSoundsComplete(AsyncOperationHandle<IList<AudioClip>> operation)
+    {
+        if (operation.Status == AsyncOperationStatus.Failed)
+            Debug.LogErrorFormat("Couldn't load Weapon Sounds: {0}", operation.OperationException);
+    }
+
+    protected virtual void OnDestroy()
+    {
+        if (weaponWalkSoundsHandle.IsValid()) Addressables.Release(weaponWalkSoundsHandle);
+        if (weaponWalkSoundsHandle.IsValid()) Addressables.Release(weaponSprintSoundsHandle);
+        if (weaponWalkSoundsHandle.IsValid()) Addressables.Release(weaponMovSoundsHandle);
     }
 
     protected virtual void Start()

@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: 1e47929d279ff724eab76cbf2ee375b6
   m_currentHash:
     serializedVersion: 2
-    Hash: d5e50f8f4daa605c66c2c1c53c5704cc
+    Hash: 9b81e5c4629a77efeeddd201eb9ffe87
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 0
   m_BundleLocalCatalog: 0
@@ -38,7 +38,7 @@ MonoBehaviour:
     m_Id: 
   m_RemoteCatalogLoadPath:
     m_Id: 
-  m_ContentStateBuildPathProfileVariableName: 
+  m_ContentStateBuildPathProfileVariableName: <default settings path>
   m_CustomContentStateBuildPath: 
   m_ContentStateBuildPath: 
   m_BuildAddressablesWithPlayerBuild: 0
@@ -46,6 +46,8 @@ MonoBehaviour:
   m_GroupAssets:
   - {fileID: 11400000, guid: d59c900e4647f81499063b76226c69d6, type: 2}
   - {fileID: 11400000, guid: be2e6302247d2cf449463a2977ffea20, type: 2}
+  - {fileID: 11400000, guid: e7a309c9fb89faf4fa066291e4b696d0, type: 2}
+  - {fileID: 11400000, guid: a6d53e32f51b010458845ca23808a7ca, type: 2}
   m_BuildSettings:
     m_CompileScriptsInVirtualMode: 0
     m_CleanupStreamingAssetsAfterBuilds: 1
@@ -86,8 +88,15 @@ MonoBehaviour:
     m_ProfileVersion: 1
   m_LabelTable:
     m_LabelNames:
-    - default
     - MainMenuBackgrounds
+    - WeaponSounds/357
+    - ReloadSound
+    - FireSound
+    - WeaponSounds/Pistol
+    - WeaponSounds/Movement/Walk
+    - WeaponSounds/Movement
+    - WeaponSounds/Movement/Sprint
+    - WeaponSounds/PistolWorld
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: 504e4fa150fd28444925efc6824fe786, type: 2}
