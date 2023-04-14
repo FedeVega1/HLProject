@@ -20,7 +20,7 @@ public class NinePistol : BaseClientWeapon
     Coroutine handleInspectionSoundsRoutine;
 
     AsyncOperationHandle<IList<AudioClip>> virtualShootSoundsHandle, worldShootSoundsHandle, reloadSoundsHandle;
-    AsyncOperationHandle<AudioClip> emptySoundHandle, deploySoundHandle, lowAmmoSoundHandle;
+    AsyncOperationHandle<AudioClip> emptySoundHandle, lowAmmoSoundHandle, zoomInSoundHandle, zoomOutSoundHandle;
 
     protected override void LoadAssets()
     {
@@ -35,11 +35,14 @@ public class NinePistol : BaseClientWeapon
         reloadSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(reloadSounds, null, Addressables.MergeMode.Union);
         reloadSoundsHandle.Completed += OnWeaponSoundsComplete;
 
+        zoomInSoundHandle = Addressables.LoadAssetAsync<AudioClip>("ironsights_in");
+        zoomInSoundHandle.Completed += OnWeaponSoundComplete;
+
+        zoomOutSoundHandle = Addressables.LoadAssetAsync<AudioClip>("ironsights_out");
+        zoomOutSoundHandle.Completed += OnWeaponSoundComplete;
+
         emptySoundHandle = Addressables.LoadAssetAsync<AudioClip>("pistol_empty");
         emptySoundHandle.Completed += OnWeaponSoundComplete;
-
-        deploySoundHandle = Addressables.LoadAssetAsync<AudioClip>("pistol_deploy");
-        deploySoundHandle.Completed += OnWeaponSoundComplete;
 
         lowAmmoSoundHandle = Addressables.LoadAssetAsync<AudioClip>("lowammo");
         lowAmmoSoundHandle.Completed += OnWeaponSoundComplete;
@@ -53,7 +56,6 @@ public class NinePistol : BaseClientWeapon
         Addressables.Release(worldShootSoundsHandle);
         Addressables.Release(reloadSoundsHandle);
         Addressables.Release(emptySoundHandle);
-        Addressables.Release(deploySoundHandle);
         Addressables.Release(lowAmmoSoundHandle);
     }
 
@@ -144,12 +146,14 @@ public class NinePistol : BaseClientWeapon
     {
         base.ScopeIn();
         weaponAnim.SetBool("OnScope", true);
+        virtualAudioSource.PlayOneShot(zoomInSoundHandle.Result);
     }
 
     public override void ScopeOut()
     {
         base.ScopeOut();
         weaponAnim.SetBool("OnScope", false);
+        virtualAudioSource.PlayOneShot(zoomOutSoundHandle.Result);
         randomInspectTime = Time.time + Random.Range(20f, 40f);
     }
 
@@ -175,20 +179,9 @@ public class NinePistol : BaseClientWeapon
 
         virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[0]);
 
-        LeanTween.delayedCall(.375f, () =>
-        {
-            virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[1]);
-        });
-
-        LeanTween.delayedCall(1, () =>
-        {
-            virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[2]);
-        });
-
-        LeanTween.delayedCall(1.54f, () =>
-        {
-            virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[3]);
-        });
+        LeanTween.delayedCall(.375f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[1]));
+        LeanTween.delayedCall(1, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[2]));
+        LeanTween.delayedCall(1.54f, () =>virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[3]));
 
         lastBullet = emptyGun = false;
         weaponAnim.SetBool("EmptyGun", false);
@@ -210,7 +203,11 @@ public class NinePistol : BaseClientWeapon
     void SpawnCasing()
     {
         Rigidbody rb = Instantiate(pistolBulletCasingPrefab, bulletEffectPivot.position, bulletEffectPivot.rotation);
-        rb.AddForce(Vector3.Cross(-MyTransform.forward, MyTransform.up * Random.Range(.1f, .5f)) * 18, ForceMode.Impulse);
+        //Vector3 cross = Vector3.Cross(-MyTransform.forward, MyTransform.up * Random.Range(.5f, 1f));
+        float y = Random.Range(.5f, .65f);
+        Vector3 cross = Vector3.Normalize(new Vector3(1 - y, y, 0));
+        Debug.DrawRay(bulletEffectPivot.position, cross, Color.red, 2);
+        rb.AddForce(cross * 6, ForceMode.Impulse);
         rb.AddTorque(Utilities.RandomVector3(Vector3.one, -1, 1) * 25);
     }
 
@@ -219,7 +216,7 @@ public class NinePistol : BaseClientWeapon
         base.DrawWeapon();
         weaponAnim.SetTrigger("Draw");
 
-        virtualAudioSource.PlayOneShot(deploySoundHandle.Result);
+        virtualAudioSource.PlayOneShot(deploySound);
 
         if (lastBullet) return;
         LeanTween.delayedCall(.58f, () =>

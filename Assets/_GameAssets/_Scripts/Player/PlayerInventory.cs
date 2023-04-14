@@ -27,6 +27,7 @@ public class PlayerInventory : NetworkBehaviour
     Player playerScript;
     Transform vWeaponPivot;
     PlayerClientHands currentClassHands;
+
     AsyncOperationHandle<GameObject> weaponPrefabHandle;
 
     List<Weapon> weaponsInvetoryOnClient;
@@ -49,8 +50,7 @@ public class PlayerInventory : NetworkBehaviour
 
     void OnDestroy()
     {
-        if (isServer)
-            Addressables.Release(weaponPrefabHandle);
+        Addressables.Release(weaponPrefabHandle);
     }
 
     public override void OnStartClient()

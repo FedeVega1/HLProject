@@ -17,12 +17,6 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: ff5d3f003a89ea4479987e541ba1f333
   m_SerializeEntries:
-  - m_GUID: d3b6ded7f03c2f2458f60658f0a54f6a
-    m_Address: 357_deploy
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - WeaponSounds/357
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3b720348e235c164bb511046b73433a3
     m_Address: 357_fire1
     m_ReadOnly: 0
@@ -139,13 +133,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d2549e22854059d4e9ff524b7b4f97ee
     m_Address: pistol_clipout
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - WeaponSounds/Pistol
-    - ReloadSound
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8fdd2461d2e48604fa208758a4bb1628
-    m_Address: pistol_deploy
     m_ReadOnly: 0
     m_SerializedLabels:
     - WeaponSounds/Pistol
@@ -339,6 +326,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ddc88e42a2d47c746b515c28ef648e32
     m_Address: lowammo
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 64ca54193215cc8409dfb31cf33af251
+    m_Address: ironsights_in
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d1c0609efb24ce64ea1b08a28b0f61f5
+    m_Address: ironsights_out
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

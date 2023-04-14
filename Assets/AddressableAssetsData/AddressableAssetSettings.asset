@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: 1e47929d279ff724eab76cbf2ee375b6
   m_currentHash:
     serializedVersion: 2
-    Hash: 9b81e5c4629a77efeeddd201eb9ffe87
+    Hash: b971c61e419842803dffb53834e072de
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 0
   m_BundleLocalCatalog: 0
@@ -97,6 +97,7 @@ MonoBehaviour:
     - WeaponSounds/Movement
     - WeaponSounds/Movement/Sprint
     - WeaponSounds/PistolWorld
+    - TeamClasses
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: 504e4fa150fd28444925efc6824fe786, type: 2}

@@ -91,6 +91,7 @@ MonoBehaviour:
   virtualAudioSource: {fileID: 6523634801324490449}
   worldAudioSource: {fileID: 626600926696584494}
   virtualMovementSource: {fileID: 1949032672733815839}
+  deploySound: {fileID: 8300000, guid: 8fdd2461d2e48604fa208758a4bb1628, type: 3}
   aimPosition: {x: -0.365, y: 0.15, z: 0}
   aimRotation: {x: 0.01857152, y: -0.02538705, z: 0.04314138, w: -0.9985737}
   magazinePivot: {fileID: 6503009243056472925}

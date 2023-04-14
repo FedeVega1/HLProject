@@ -772,8 +772,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   netManager: {fileID: 1035443923}
   loadingScreen: {fileID: 234449512}
-  mainMenuBackgrounds:
-  - {fileID: 6622201705489070060, guid: 2aba35681d1ed6f4ba1bfcfe1a131d18, type: 3}
 --- !u!4 &1705009110
 Transform:
   m_ObjectHideFlags: 0

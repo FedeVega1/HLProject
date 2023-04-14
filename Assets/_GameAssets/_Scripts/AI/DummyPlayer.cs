@@ -27,10 +27,10 @@ public class DummyPlayer : Player
 
     int GetClassForSelectedTeam()
     {
-        TeamClassData[] classDataArray = GameModeManager.INS.GetClassData();
+        IList<TeamClassData> classDataArray = GameModeManager.INS.GetClassData();
         List<int> filteredClassData = new List<int>();
         
-        int size = classDataArray.Length;
+        int size = classDataArray.Count;
         for (int i = 0; i < size; i++)
         {
             if (classDataArray[i].teamSpecific == playerTeam)

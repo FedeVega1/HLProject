@@ -14,7 +14,7 @@ public abstract class BaseClientWeapon : CachedTransform
     [SerializeField] protected Transform virtualBulletPivot, worldBulletPivot, weaponRootBone;
     [SerializeField] protected float weaponSwayAmmount = 0.02f, weaponSwaySmooth = 5;
     [SerializeField] protected AudioSource virtualAudioSource, worldAudioSource, virtualMovementSource;
-    //[SerializeField] protected AudioClip[] weaponWalkSounds, weaponSprintSounds, weaponMovSounds;
+    [SerializeField] protected AudioClip deploySound;
     [SerializeField] protected Vector3 aimPosition;
     [SerializeField] protected Quaternion aimRotation;
 

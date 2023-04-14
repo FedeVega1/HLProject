@@ -7,15 +7,17 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 public class RevolverWeapon : BaseClientWeapon
 {
     [SerializeField] Animator weaponAnim;
-    [SerializeField] List<AssetReference> reloadSounds;
+    [SerializeField] List<AssetReference> reloadSounds, inspectionSounds;
+    [SerializeField] Transform bulletCasingPivot;
+    [SerializeField] Rigidbody bulletCasingPrefab;
 
     bool lastWalkCheck, lastRunningCheck, isFiring;
     int delayTweenID = -1;
     float randomInspectTime, movementSoundTime;
     Coroutine handleInspectionSoundsRoutine;
 
-    AsyncOperationHandle<IList<AudioClip>> virtualShootSoundsHandle, reloadSoundsHandle;
-    AsyncOperationHandle<AudioClip> deploySoundHandle, lowAmmoSoundHandle;
+    AsyncOperationHandle<IList<AudioClip>> virtualShootSoundsHandle, reloadSoundsHandle, inspectionSoundsHandle;
+    AsyncOperationHandle<AudioClip> lowAmmoSoundHandle, zoomInSoundHandle, zoomOutSoundHandle;
 
     protected override void LoadAssets()
     {
@@ -24,14 +26,20 @@ public class RevolverWeapon : BaseClientWeapon
         virtualShootSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "WeaponSounds/357", "FireSound" }, null, Addressables.MergeMode.Intersection);
         virtualShootSoundsHandle.Completed += OnWeaponSoundsComplete;
 
-        //reloadSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(reloadSounds, null, Addressables.MergeMode.Union);
-        //reloadSoundsHandle.Completed += OnWeaponSoundsComplete;
-
-        deploySoundHandle = Addressables.LoadAssetAsync<AudioClip>("357_deploy");
-        deploySoundHandle.Completed += OnWeaponSoundComplete;
+        reloadSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(reloadSounds, null, Addressables.MergeMode.Union);
+        reloadSoundsHandle.Completed += OnWeaponSoundsComplete;
 
         lowAmmoSoundHandle = Addressables.LoadAssetAsync<AudioClip>("lowammo");
         lowAmmoSoundHandle.Completed += OnWeaponSoundComplete;
+
+        zoomInSoundHandle = Addressables.LoadAssetAsync<AudioClip>("ironsights_in");
+        zoomInSoundHandle.Completed += OnWeaponSoundComplete;
+
+        zoomOutSoundHandle = Addressables.LoadAssetAsync<AudioClip>("ironsights_out");
+        zoomOutSoundHandle.Completed += OnWeaponSoundComplete;
+
+        inspectionSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(inspectionSounds, null, Addressables.MergeMode.Union);
+        inspectionSoundsHandle.Completed += OnWeaponSoundsComplete;
     }
 
     protected override void OnDestroy()
@@ -40,8 +48,8 @@ public class RevolverWeapon : BaseClientWeapon
 
         Addressables.Release(virtualShootSoundsHandle);
         Addressables.Release(reloadSoundsHandle);
-        Addressables.Release(deploySoundHandle);
         Addressables.Release(lowAmmoSoundHandle);
+        Addressables.Release(inspectionSoundsHandle);
     }
 
     void OnWeaponSoundComplete(AsyncOperationHandle<AudioClip> operation)
@@ -87,7 +95,7 @@ public class RevolverWeapon : BaseClientWeapon
         if (handleInspectionSoundsRoutine != null)
             StopCoroutine(handleInspectionSoundsRoutine);
 
-        //handleInspectionSoundsRoutine = StartCoroutine(HanldeInspectionSound(randomIdle));
+        handleInspectionSoundsRoutine = StartCoroutine(HanldeInspectionSound(randomIdle));
         randomInspectTime = Time.time + Random.Range(20f, 40f);
     }
 
@@ -98,7 +106,7 @@ public class RevolverWeapon : BaseClientWeapon
 
         weaponAnim.SetTrigger("Fire");
 
-        virtualAudioSource.PlayOneShot(virtualShootSoundsHandle.Result[Random.Range(0, virtualShootSoundsHandle.Result.Count)]);
+        LeanTween.delayedCall(weaponData.weaponAnimsTiming.initFire, () => virtualAudioSource.PlayOneShot(virtualShootSoundsHandle.Result[Random.Range(0, virtualShootSoundsHandle.Result.Count)]));
 
         weaponAnim.ResetTrigger("Walk");
         weaponAnim.ResetTrigger("Idle");
@@ -123,12 +131,14 @@ public class RevolverWeapon : BaseClientWeapon
     {
         base.ScopeIn();
         weaponAnim.SetBool("OnScope", true);
+        virtualAudioSource.PlayOneShot(zoomInSoundHandle.Result);
     }
 
     public override void ScopeOut()
     {
         base.ScopeOut();
         weaponAnim.SetBool("OnScope", false);
+        virtualAudioSource.PlayOneShot(zoomOutSoundHandle.Result);
         randomInspectTime = Time.time + Random.Range(20f, 40f);
     }
 
@@ -139,6 +149,18 @@ public class RevolverWeapon : BaseClientWeapon
         weaponAnim.SetTrigger("Reload");
         weaponAnim.SetBool("IsReloading", true);
 
+        LeanTween.delayedCall(.54f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[0]));
+        LeanTween.delayedCall(1.67f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[1]));
+
+        LeanTween.delayedCall(1.75f, () =>
+        {
+            virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[2]);
+            SpawnBullets();
+        });
+
+        LeanTween.delayedCall(3.58f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[3]));
+        LeanTween.delayedCall(4.41f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[4]));
+
         LeanTween.cancel(gameObject);
         LeanTween.delayedCall(weaponData.weaponAnimsTiming.reload, () => weaponAnim.SetBool("IsReloading", false));
     }
@@ -147,7 +169,7 @@ public class RevolverWeapon : BaseClientWeapon
     {
         base.DrawWeapon();
         weaponAnim.SetTrigger("Draw");
-        virtualAudioSource.PlayOneShot(deploySoundHandle.Result);
+        LeanTween.delayedCall(.5f, () => virtualAudioSource.PlayOneShot(deploySound));
     }
 
     public override void HolsterWeapon()
@@ -181,17 +203,34 @@ public class RevolverWeapon : BaseClientWeapon
 
         if (lastRunningCheck && onScopeAim) ScopeOut();
 
-        //if ((lastWalkCheck || lastRunningCheck) && handleInspectionSoundsRoutine != null)
-        //    StopCoroutine(handleInspectionSoundsRoutine);
+        if ((lastWalkCheck || lastRunningCheck) && handleInspectionSoundsRoutine != null)
+            StopCoroutine(handleInspectionSoundsRoutine);
     }
 
-    //IEnumerator HanldeInspectionSound(int randomIdle)
-    //{
-    //    if (randomIdle != 1) yield break;
-    //    yield return new WaitForSeconds(.875f);
-    //    virtualAudioSource.PlayOneShot(reloadSounds[0]);
+    IEnumerator HanldeInspectionSound(int randomIdle)
+    {
+        if (randomIdle == 1)
+        {
+            yield return new WaitForSeconds(.65f);
+            virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[0]);
+            yield break;
+        }
 
-    //    yield return new WaitForSeconds(1.285f); // 2.16f
-    //    virtualAudioSource.PlayOneShot(reloadSounds[3]);
-    //}
+        yield return new WaitForSeconds(.96f);
+        virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[1]);
+
+        yield return new WaitForSeconds(1.14f);
+        virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[2]);
+    }
+
+    void SpawnBullets()
+    {
+        for (int i = 0; i < weaponData.bulletsPerMag; i++)
+        {
+            Quaternion angle = Quaternion.AngleAxis((360f / (float) -weaponData.bulletsPerMag) * i, Vector3.forward);
+            Rigidbody bullet = Instantiate(bulletCasingPrefab, bulletCasingPivot.position + (angle * bulletCasingPivot.up * .05f), bulletCasingPivot.rotation);
+            bullet.AddForce(bullet.transform.forward * 2, ForceMode.Impulse);
+            bullet.AddTorque(bullet.transform.forward * 15, ForceMode.Impulse);
+        }
+    }
 }

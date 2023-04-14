@@ -22,6 +22,42 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2276e4e05f057b34bb3dec07b72aa052
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/Citizen.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 56d7769bcd9327043b703d10a20cb125
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/MetrocopPistol.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 62b72e179fb3eed4b9bffba84e74276f
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/MetrocopSMG.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ff113f457cf492c4ca24310a05493e34
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/Squad Leader Rebel.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c6ca5680f875df64ebbc4aeeb801ec8b
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/TestClassCombines.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 38e93fc520f842e469ac455949b190e2
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/TestClassRebels.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 3cf91d3a9f4e16f4dbcc0b305a57378e, type: 2}
   m_SchemaSet:

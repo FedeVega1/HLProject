@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using Mirror;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.AddressableAssets;
 
 public class GameModeManager : NetworkBehaviour
 {
@@ -31,10 +33,11 @@ public class GameModeManager : NetworkBehaviour
     bool matchEnded, enableScoreboardUpdate;
     double scoreBoardUpdateTimer;
     GameModeData currentGameModeData;
-    TeamClassData[] classData;
+    //TeamClassData[] classData;
     List<Player> connectedPlayers;
     List<PlayerTimer> playerTimerQueue;
     int currentDisconnPlayerIndex, currentConnPlayerIndex;
+    AsyncOperationHandle<IList<TeamClassData>> classDataHandle;
 
     public System.Action<int> OnMatchEnded;
 
@@ -46,7 +49,15 @@ public class GameModeManager : NetworkBehaviour
 
     void Start()
     {
-        classData = Resources.LoadAll<TeamClassData>("TeamClasses");
+        //classData = Resources.LoadAll<TeamClassData>("TeamClasses");
+        classDataHandle = Addressables.LoadAssetsAsync<TeamClassData>("TeamClasses", null);
+        classDataHandle.Completed += OnClassDataHandleCompleted;
+    }
+
+    void OnClassDataHandleCompleted(AsyncOperationHandle<IList<TeamClassData>> operation)
+    {
+        if (operation.Status == AsyncOperationStatus.Failed)
+            Debug.LogErrorFormat("Couldn't load TeamClasses scriptables: {0}", operation.OperationException);
     }
 
     void Update()
@@ -311,30 +322,30 @@ public class GameModeManager : NetworkBehaviour
     [Server]
     public void PlayerChangeClass(Player playerScript, int classIndex)
     {
-        if (classIndex < 0 || classIndex >= classData.Length)
+        if (classIndex < 0 || classIndex >= classDataHandle.Result.Count)
         {
             Debug.LogError("Class index out of bounds!");
             if (playerScript.connectionToClient != null) playerScript.RpcClassSelectionError(playerScript.connectionToClient, 0x00);
             return;
         }
 
-        if (classData[classIndex].teamSpecific != 0)
+        if (classDataHandle.Result[classIndex].teamSpecific != 0)
         {
-            if (classData[classIndex].teamSpecific != playerScript.GetPlayerTeam())
+            if (classDataHandle.Result[classIndex].teamSpecific != playerScript.GetPlayerTeam())
             {
-                Debug.LogError($"{playerScript.GetPlayerName()} tried to use {classData[classIndex].className} from {TeamManager.FactionNames[classData[classIndex].teamSpecific - 1]}");
+                Debug.LogError($"{playerScript.GetPlayerName()} tried to use {classDataHandle.Result[classIndex].className} from {TeamManager.FactionNames[classDataHandle.Result[classIndex].teamSpecific - 1]}");
                 if (playerScript.connectionToClient != null) playerScript.RpcClassSelectionError(playerScript.connectionToClient, 0x01);
                 return;
             }
         }
 
-        playerScript.SetPlayerClass(classData[classIndex], classIndex);
+        playerScript.SetPlayerClass(classDataHandle.Result[classIndex], classIndex);
         if (playerScript.connectionToClient != null) playerScript.RpcClassSelectionSuccess(playerScript.connectionToClient, classIndex);
     }
 
     public Transform GetSpectatePointByIndex(int index) => spectatorPoints[index];
 
-    public TeamClassData[] GetClassData() => classData;
+    public IList<TeamClassData> GetClassData() => classDataHandle.Result;
     public Transform GetClientCamera() => clientCamera;
 
     public int GetPlayerIndex(Player playerScript)
@@ -370,10 +381,10 @@ public class GameModeManager : NetworkBehaviour
 
     public Sprite[] GetClassesSprites()
     {
-        int size = classData.Length;
+        int size = classDataHandle.Result.Count;
         Sprite[] classesSprites = new Sprite[size];
         for (int i = 0; i < size; i++)
-            classesSprites[i] = classData[i].classSprite;
+            classesSprites[i] = classDataHandle.Result[i].classSprite;
         
         return classesSprites;
     }

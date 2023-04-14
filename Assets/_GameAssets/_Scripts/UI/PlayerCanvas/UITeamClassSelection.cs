@@ -75,7 +75,7 @@ public class UITeamClassSelection : MonoBehaviour
         lblRespawnTime.text = $"You can respawn in: {System.Math.Round(time, 0)}";
     }
 
-    public void Init(PlayerCanvas canvasScript, TeamClassData[] classData, int playerTeam, ref Player player)
+    public void Init(PlayerCanvas canvasScript, IList<TeamClassData> classData, int playerTeam, ref Player player)
     {
         playerScript = player;
 
@@ -94,7 +94,7 @@ public class UITeamClassSelection : MonoBehaviour
         }
 
         List<ButtonClassData> teamClassData = new List<ButtonClassData>();
-        size = classData.Length;
+        size = classData.Count;
         for (int i = 0; i < size; i++)
         {
             if (classData[i].teamSpecific != 0 && classData[i].teamSpecific != playerTeam)
