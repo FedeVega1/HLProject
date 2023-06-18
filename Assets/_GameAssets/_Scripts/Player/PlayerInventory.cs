@@ -20,8 +20,19 @@ public class PlayerInventory : NetworkBehaviour
 
     [SyncVar] bool isServerInitialized, isSwappingWeapons;
 
-    public bool DisablePlayerInputs { get; set; }
+    bool _DisablePlayerInputs;
+    public bool DisablePlayerInputs 
+    {
+        get => _DisablePlayerInputs;
 
+        set
+        {
+            _DisablePlayerInputs = value;
+            if (weaponsInvetoryOnClient != null && weaponsInvetoryOnClient.Count > 0 && currentWeaponIndex != -1) 
+                weaponsInvetoryOnClient[currentWeaponIndex].ToggleWeaponSway(!_DisablePlayerInputs);
+        }
+    }
+    
     int currentWeaponIndex, currentCyclerIndex;
     WeaponType currentCyclerType;
     Player playerScript;

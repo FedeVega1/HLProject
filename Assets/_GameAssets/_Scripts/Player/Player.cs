@@ -110,6 +110,13 @@ public class Player : Character
         //    inventory.DisablePlayerInputs = !inventory.DisablePlayerInputs;
         //}
 
+        if (Input.GetKeyDown(KeyCode.F2))
+        {
+            movementScript.FreezeInputs = !movementScript.FreezeInputs;
+            inventory.DisablePlayerInputs = !inventory.DisablePlayerInputs;
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             if (PlayerCanvasScript.IsClassSelectionMenuOpen || PlayerCanvasScript.IsTeamSelectionMenuOpen) return;

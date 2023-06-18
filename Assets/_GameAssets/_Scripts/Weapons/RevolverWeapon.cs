@@ -106,7 +106,11 @@ public class RevolverWeapon : BaseClientWeapon
 
         weaponAnim.SetTrigger("Fire");
 
-        LeanTween.delayedCall(weaponData.weaponAnimsTiming.initFire, () => virtualAudioSource.PlayOneShot(virtualShootSoundsHandle.Result[Random.Range(0, virtualShootSoundsHandle.Result.Count)]));
+        LeanTween.delayedCall(weaponData.weaponAnimsTiming.initFire, () =>
+        {
+            virtualAudioSource.pitch = Random.Range(.85f, .95f);
+            virtualAudioSource.PlayOneShot(virtualShootSoundsHandle.Result[Random.Range(0, virtualShootSoundsHandle.Result.Count)]);
+        });
 
         weaponAnim.ResetTrigger("Walk");
         weaponAnim.ResetTrigger("Idle");
@@ -131,6 +135,7 @@ public class RevolverWeapon : BaseClientWeapon
     {
         base.ScopeIn();
         weaponAnim.SetBool("OnScope", true);
+        virtualAudioSource.pitch = 1;
         virtualAudioSource.PlayOneShot(zoomInSoundHandle.Result);
     }
 
@@ -138,6 +143,7 @@ public class RevolverWeapon : BaseClientWeapon
     {
         base.ScopeOut();
         weaponAnim.SetBool("OnScope", false);
+        virtualAudioSource.pitch = 1;
         virtualAudioSource.PlayOneShot(zoomOutSoundHandle.Result);
         randomInspectTime = Time.time + Random.Range(20f, 40f);
     }
@@ -154,6 +160,7 @@ public class RevolverWeapon : BaseClientWeapon
 
         LeanTween.delayedCall(1.75f, () =>
         {
+            virtualAudioSource.pitch = 1;
             virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[2]);
             SpawnBullets();
         });
@@ -169,6 +176,7 @@ public class RevolverWeapon : BaseClientWeapon
     {
         base.DrawWeapon();
         weaponAnim.SetTrigger("Draw");
+        virtualAudioSource.pitch = 1;
         LeanTween.delayedCall(.5f, () => virtualAudioSource.PlayOneShot(deploySound));
     }
 
@@ -212,11 +220,13 @@ public class RevolverWeapon : BaseClientWeapon
         if (randomIdle == 1)
         {
             yield return new WaitForSeconds(.65f);
+            virtualAudioSource.pitch = 1;
             virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[0]);
             yield break;
         }
 
         yield return new WaitForSeconds(.96f);
+        virtualAudioSource.pitch = 1;
         virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[1]);
 
         yield return new WaitForSeconds(1.14f);

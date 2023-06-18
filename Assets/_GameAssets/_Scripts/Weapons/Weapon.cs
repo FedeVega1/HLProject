@@ -178,6 +178,8 @@ public class Weapon : CachedTransform
         }
     }
 
+    public void ToggleWeaponSway(bool toggle) => clientWeapon.ToggleWeaponSway(toggle);
+
     public void DropWeapon() => clientWeapon.DropProp();
 
     public WeaponData GetWeaponData() => weaponData;

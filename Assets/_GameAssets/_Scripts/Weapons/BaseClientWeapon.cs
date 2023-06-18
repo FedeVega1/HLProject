@@ -191,4 +191,14 @@ public abstract class BaseClientWeapon : CachedTransform
     public virtual Transform GetWorldPivot() => worldBulletPivot;
 
     public abstract void CheckPlayerMovement(bool isMoving, bool isRunning);
+
+    public void ToggleWeaponSway(bool toggle) => enableWeaponSway = toggle;
+
+#if UNITY_EDITOR
+    void OnDrawGizmosSelected()
+    {
+        if (virtualBulletPivot == null) return;
+        Debug.DrawRay(virtualBulletPivot.position, virtualBulletPivot.forward, Color.red, Time.deltaTime);
+    }
+#endif
 }
