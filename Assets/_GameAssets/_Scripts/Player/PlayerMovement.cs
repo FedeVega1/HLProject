@@ -27,12 +27,12 @@ public class PlayerMovement : CachedNetTransform
 
             if (value)
             {
-                PovComponent.m_VerticalAxis.m_MaxSpeed = 0;
+                //PovComponent.m_VerticalAxis.m_MaxSpeed = 0;
                 CmdSendPlayerInputs(Vector2.zero, Vector2.zero, 0x00);
             }
             else
             {
-                PovComponent.m_VerticalAxis.m_MaxSpeed = 300;
+                //PovComponent.m_VerticalAxis.m_MaxSpeed = 300;
             }
         }
     }
@@ -47,7 +47,7 @@ public class PlayerMovement : CachedNetTransform
         }
     }
 
-    CinemachinePOV _PovComponent;
+    /*CinemachinePOV _PovComponent;
     CinemachinePOV PovComponent
     {
         get
@@ -55,9 +55,9 @@ public class PlayerMovement : CachedNetTransform
             if (isLocalPlayer && _PovComponent == null) _PovComponent = playerVCam.GetCinemachineComponent<CinemachinePOV>();
             return _PovComponent;
         }
-    }
+    }*/
 
-    public float CameraXAxis => xAxisRotaion;
+    public float CameraXAxis => cameraRotInput.x;
     public bool PlayerIsMoving => playerMovInput.magnitude > 0;
     public bool PlayerIsRunning => canRun && CheckInput(inputFlags, InputFlag.Sprint);
 
@@ -66,14 +66,14 @@ public class PlayerMovement : CachedNetTransform
 
     bool jumped;
     InputFlag inputFlags;
-    float startHeight, playerSpeed, cameraRotInput, lastCameraRotInput, xAxisRotaion;
+    float startHeight, playerSpeed;//, xAxisRotaion;
     double jumpTimer;
-    Vector2 playerMovInput, lastPlayerMovInput;
+    Vector2 playerMovInput, lastPlayerMovInput, cameraRotInput, lastCameraRotInput;
     Vector3 velocity;
 
     void OnFreezePlayerSet(bool oldValue, bool newValue)
     {
-        if (isLocalPlayer) PovComponent.m_VerticalAxis.m_MaxSpeed = newValue ? 0 : 300;
+        //if (isLocalPlayer) PovComponent.m_VerticalAxis.m_MaxSpeed = newValue ? 0 : 300;
         ToggleCharacterController(!newValue);
     }
 
@@ -108,7 +108,7 @@ public class PlayerMovement : CachedNetTransform
     {
         if (FreezeInputs) return;
         playerMovInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        cameraRotInput = Input.GetAxis("Mouse X");
+        cameraRotInput = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
 
         bool newInput = lastPlayerMovInput != playerMovInput || lastCameraRotInput != cameraRotInput;
 
@@ -145,7 +145,7 @@ public class PlayerMovement : CachedNetTransform
             newInput = true;
         }
 
-        if (newInput) CmdSendPlayerInputs(playerMovInput, new Vector2(cameraRotInput, Input.GetAxis("Mouse Y")), inputFlags);
+        if (newInput) CmdSendPlayerInputs(playerMovInput, cameraRotInput, inputFlags);
         lastCameraRotInput = cameraRotInput;
         lastPlayerMovInput = playerMovInput;
     }
@@ -158,8 +158,8 @@ public class PlayerMovement : CachedNetTransform
         rotAxis.x = Mathf.Clamp(rotAxis.x, -1, 1);
 
         playerMovInput = movAxis;
-        cameraRotInput = rotAxis.x;
-        xAxisRotaion = Mathf.Clamp(rotAxis.y, -70, 70);
+        cameraRotInput = rotAxis;
+        //xAxisRotaion = Mathf.Clamp(rotAxis.y, -70, 70);
         inputFlags = _inputFlags;
     }
 
@@ -255,8 +255,11 @@ public class PlayerMovement : CachedNetTransform
 
     void Rotate()
     {
-        float rotationX = MyTransform.localEulerAngles.y + cameraRotInput * horizontalSens * Time.deltaTime;
+        float rotationX = MyTransform.localEulerAngles.y + cameraRotInput.y * horizontalSens * Time.deltaTime;
         MyTransform.rotation = Quaternion.AngleAxis(rotationX, Vector3.up);
+
+        float rotationY = MyTransform.localEulerAngles.x + cameraRotInput.x * verticalSens * Time.deltaTime;
+        MyTransform.rotation = Quaternion.AngleAxis(-rotationY, Vector3.up);
     }
 
     float CalculateSpeedByWeight(float maxSpeed) => (1 - (currentWeaponWeight / maxWeaponWeight)) * maxSpeed;
