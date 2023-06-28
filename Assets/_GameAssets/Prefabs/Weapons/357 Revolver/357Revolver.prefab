@@ -243,14 +243,18 @@ MonoBehaviour:
   virtualBulletPivot: {fileID: 8809737677887407518}
   worldBulletPivot: {fileID: 3625289432993993882}
   weaponRootBone: {fileID: 7026316561251724555}
-  weaponSwayAmmount: 5
   weaponSwaySmooth: 3
+  weaponSwayAmmount: {x: 5, y: 5, z: 10}
   virtualAudioSource: {fileID: 7163051407822047239}
   worldAudioSource: {fileID: 7557137511624030071}
   virtualMovementSource: {fileID: 2726389727841616961}
   deploySound: {fileID: 8300000, guid: d3b6ded7f03c2f2458f60658f0a54f6a, type: 3}
   aimPosition: {x: -0.34, y: 0.03, z: -0.07}
   aimRotation: {x: -0.017449746, y: -0.00030458733, z: 0.0174498, w: -0.9996954}
+  meleeHitPoint: {fileID: 0}
+  meleeHitBox:
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 0, y: 0, z: 0}
   weaponAnim: {fileID: 2141567596152882556}
   reloadSounds:
   - m_AssetGUID: 96e97789df72fe14e8ad8fd7efcbbc78

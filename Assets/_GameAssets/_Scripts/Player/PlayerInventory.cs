@@ -337,7 +337,7 @@ public class PlayerInventory : NetworkBehaviour
                     spawnedWeapon.MyTransform.localPosition = Vector3.zero;
                     spawnedWeapon.MyTransform.localRotation = Quaternion.identity;
 
-                    spawnedWeapon.Init(netWeapon.GetWeaponData(), netWeapon);
+                    spawnedWeapon.Init(netWeapon.GetWeaponData(), netWeapon, playerScript);
                     spawnedWeapon.OnFinishedReload += UpdateWeaponAmmo;
                     Debug.LogFormat("Client: Spawn weapon {0} of type {1}", netWeapon.GetWeaponData().weaponName, netWeapon.GetWeaponData().weaponType);
                     weaponsInvetoryOnClient.Add(spawnedWeapon);

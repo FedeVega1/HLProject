@@ -12,7 +12,8 @@ public abstract class BaseClientWeapon : CachedTransform
 
     [SerializeField] protected GameObject[] viewModels;
     [SerializeField] protected Transform virtualBulletPivot, worldBulletPivot, weaponRootBone;
-    [SerializeField] protected float weaponSwayAmmount = 0.02f, weaponSwaySmooth = 5;
+    [SerializeField] protected float weaponSwaySmooth = 5;
+    [SerializeField] protected Vector3 weaponSwayAmmount;
     [SerializeField] protected AudioSource virtualAudioSource, worldAudioSource, virtualMovementSource;
     [SerializeField] protected AudioClip deploySound;
     [SerializeField] protected Vector3 aimPosition;
@@ -26,7 +27,7 @@ public abstract class BaseClientWeapon : CachedTransform
     protected ActiveViewModel currentActiveViewModel;
     protected int scopeID = -1;
     protected Vector3 defaultWeaponPos;
-    protected Vector2 swayFactor;
+    protected Vector3 swayFactor;
     protected Quaternion defaultWeaponRotation, lastCameraRotation;
 
     protected GameObject weaponPropPrefab;
@@ -98,13 +99,12 @@ public abstract class BaseClientWeapon : CachedTransform
     {
         if (!isDrawn || !enableWeaponSway) return;
 
-        swayFactor.x = Input.GetAxis("Mouse Y") * weaponSwayAmmount;
-        swayFactor.y = -Input.GetAxis("Mouse X") * weaponSwayAmmount;
+        swayFactor.x = Input.GetAxis("Mouse Y") * weaponSwayAmmount.x;
+        swayFactor.y = -Input.GetAxis("Mouse X") * weaponSwayAmmount.y;
+        swayFactor.z = -Input.GetAxis("Mouse X") * weaponSwayAmmount.z;
 
-        Quaternion sway = Quaternion.Euler(defaultWeaponRotation.x + swayFactor.x, defaultWeaponRotation.y + swayFactor.y, 0);
+        Quaternion sway = Quaternion.Euler(defaultWeaponRotation.x + swayFactor.x, defaultWeaponRotation.y + swayFactor.y, defaultWeaponRotation.z + swayFactor.z);
         MyTransform.localRotation = Quaternion.Slerp(MyTransform.localRotation, sway, Time.deltaTime * weaponSwaySmooth);
-        //currentTargetRotation = Quaternion.Slerp(currentTargetRotation, cameraTargetRotation, Time.deltaTime * CameraLerpTime());
-        //MyTransform.rotation = currentTargetRotation;
     }
 
     public virtual void Fire(Vector3 destination, bool didHit, int ammo)
@@ -120,6 +120,8 @@ public abstract class BaseClientWeapon : CachedTransform
             bullet.MyTransform.parent = null;
         });
     }
+
+    public virtual void MeleeSwing(bool didHit, bool killHit) { }
 
     public abstract void EmptyFire();
 

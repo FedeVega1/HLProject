@@ -13,6 +13,7 @@ public class PlayerMovement : CachedNetTransform
     [SerializeField] float maxWeaponWeight;
     [SerializeField] Vector2 cameraYLimits;
     [SerializeField] CinemachineVirtualCamera playerVCam;
+    [SerializeField] Transform fakeCameraPivot;
 
     [SyncVar(hook = nameof(OnFreezePlayerSet))] public bool freezePlayer;
     [SyncVar(hook = nameof(OnSpectatorMovSet))] public bool spectatorMov;
@@ -48,16 +49,6 @@ public class PlayerMovement : CachedNetTransform
         }
     }
 
-    /*CinemachinePOV _PovComponent;
-    CinemachinePOV PovComponent
-    {
-        get
-        {
-            if (isLocalPlayer && _PovComponent == null) _PovComponent = playerVCam.GetCinemachineComponent<CinemachinePOV>();
-            return _PovComponent;
-        }
-    }*/
-
     public float CameraXAxis => cameraRotInput.x;
     public bool PlayerIsMoving => playerMovInput.magnitude > 0;
     public bool PlayerIsRunning => canRun && CheckInput(inputFlags, InputFlag.Sprint);
@@ -67,14 +58,13 @@ public class PlayerMovement : CachedNetTransform
 
     bool jumped;
     InputFlag inputFlags;
-    float startHeight, playerSpeed, yAxisRotation;//, xAxisRotaion;
+    float startHeight, playerSpeed, yAxisRotation;
     double jumpTimer;
     Vector2 playerMovInput, lastPlayerMovInput, cameraRotInput, lastCameraRotInput;
     Vector3 velocity;
 
     void OnFreezePlayerSet(bool oldValue, bool newValue)
     {
-        //if (isLocalPlayer) PovComponent.m_VerticalAxis.m_MaxSpeed = newValue ? 0 : 300;
         ToggleCharacterController(!newValue);
     }
 
@@ -273,6 +263,11 @@ public class PlayerMovement : CachedNetTransform
     {
         float rotationX = MyTransform.localEulerAngles.y + cameraRotInput.x * horizontalSens * Time.deltaTime;
         MyTransform.rotation = Quaternion.AngleAxis(rotationX, Vector3.up);
+
+        yAxisRotation += cameraRotInput.y * verticalSens * Time.deltaTime;
+        yAxisRotation = Mathf.Clamp(yAxisRotation, cameraYLimits.x, cameraYLimits.y);
+
+        fakeCameraPivot.localEulerAngles = new Vector3(-yAxisRotation, 0, 0);
     }
 
     float CalculateSpeedByWeight(float maxSpeed) => (1 - (currentWeaponWeight / maxWeaponWeight)) * maxSpeed;

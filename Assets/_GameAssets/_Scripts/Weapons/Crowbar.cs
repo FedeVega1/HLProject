@@ -14,17 +14,20 @@ public class Crowbar : BaseClientWeapon
     float randomInspectTime, movementSoundTime;
     Coroutine handleInspectionSoundsRoutine;
 
-    AsyncOperationHandle<IList<AudioClip>> virtualSwingSoundsHandle, inspectionSoundsHandle;
+    AsyncOperationHandle<IList<AudioClip>> virtualSwingSoundsHandle, inspectionSoundsHandle, virtualHitSoundsHandle;
 
     protected override void LoadAssets()
     {
         base.LoadAssets();
 
-        virtualSwingSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "WeaponSounds/357", "FireSound" }, null, Addressables.MergeMode.Intersection);
+        virtualSwingSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "WeaponSounds/Crowbar", "SwingSound" }, null, Addressables.MergeMode.Intersection);
         virtualSwingSoundsHandle.Completed += OnWeaponSoundsComplete;
 
-        inspectionSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(inspectionSounds, null, Addressables.MergeMode.Union);
-        inspectionSoundsHandle.Completed += OnWeaponSoundsComplete;
+        virtualHitSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "WeaponSounds/Crowbar", "FireSound" }, null, Addressables.MergeMode.Intersection);
+        virtualSwingSoundsHandle.Completed += OnWeaponSoundsComplete;
+
+        /*inspectionSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(inspectionSounds, null, Addressables.MergeMode.Union);
+        inspectionSoundsHandle.Completed += OnWeaponSoundsComplete;*/
     }
 
     protected override void OnDestroy()
@@ -38,7 +41,7 @@ public class Crowbar : BaseClientWeapon
         if (!isDrawn) return;
         base.Update();
 
-        /*if (lastWalkCheck && Time.time >= movementSoundTime)
+        if (lastWalkCheck && Time.time >= movementSoundTime)
         {
             if (lastRunningCheck)
             {
@@ -52,7 +55,7 @@ public class Crowbar : BaseClientWeapon
         }
 
         if (weaponAnim == null || Time.time < randomInspectTime) return;
-        RandomIdleAnim();*/
+        RandomIdleAnim();
     }
 
     void OnEnable()
@@ -63,28 +66,33 @@ public class Crowbar : BaseClientWeapon
     void RandomIdleAnim()
     {
         if (onScopeAim) return;
-        int randomIdle = Random.Range(0, 2);
-        weaponAnim.SetInteger("RandomIdle", randomIdle);
+        //int randomIdle = Random.Range(0, 2);
+        //weaponAnim.SetInteger("RandomIdle", randomIdle);
         weaponAnim.SetTrigger("InspectIdle");
 
         if (handleInspectionSoundsRoutine != null)
             StopCoroutine(handleInspectionSoundsRoutine);
 
-        handleInspectionSoundsRoutine = StartCoroutine(HanldeInspectionSound(randomIdle));
+        handleInspectionSoundsRoutine = StartCoroutine(HanldeInspectionSound());
         randomInspectTime = Time.time + Random.Range(20f, 40f);
     }
 
-    public override void Fire(Vector3 destination, bool didHit, int ammo)
+    public override void MeleeSwing(bool didHit, bool killHit)
     {
-        if (!isDrawn || doingScopeAnim) return;
-        base.Fire(destination, didHit, ammo);
+        if (!isDrawn) return;
 
         weaponAnim.SetTrigger("Fire");
+        int randomFire = didHit ? (killHit ? 3 : Random.Range(0, 3)) : Random.Range(4, 6);
+        weaponAnim.SetInteger("RandomFire", randomFire);
 
         LeanTween.delayedCall(weaponData.weaponAnimsTiming.initFire, () =>
         {
             virtualAudioSource.pitch = Random.Range(.85f, .95f);
-            virtualAudioSource.PlayOneShot(virtualSwingSoundsHandle.Result[Random.Range(0, virtualSwingSoundsHandle.Result.Count)]);
+            AudioClip soundToPlay;
+
+            if (!didHit) soundToPlay = virtualSwingSoundsHandle.Result[Random.Range(0, virtualSwingSoundsHandle.Result.Count)];
+            else soundToPlay = virtualHitSoundsHandle.Result[Random.Range(0, virtualHitSoundsHandle.Result.Count)];
+            virtualAudioSource.PlayOneShot(soundToPlay);
         });
 
         weaponAnim.ResetTrigger("Walk");
@@ -98,28 +106,18 @@ public class Crowbar : BaseClientWeapon
         randomInspectTime = Time.time + Random.Range(20f, 40f);
     }
 
-    public override void EmptyFire()
-    {
-        if (!isDrawn) return;
-        //virtualAudioSource.PlayOneShot(emptySound);
-        //weaponAnim.SetTrigger("Fire");
-    }
-
-
+    public override void EmptyFire() { }
     public override void ScopeIn() { }
-
     public override void ScopeOut() { }
-
     public override void AltFire(Vector3 destination, bool didHit) { }
-
     public override void Reload() { }
 
     public override void DrawWeapon()
     {
         base.DrawWeapon();
         weaponAnim.SetTrigger("Draw");
-        /*virtualAudioSource.pitch = 1;
-        LeanTween.delayedCall(.5f, () => virtualAudioSource.PlayOneShot(deploySound));*/
+        virtualAudioSource.pitch = 1;
+        LeanTween.delayedCall(0, () => virtualAudioSource.PlayOneShot(deploySound));
     }
 
     public override void HolsterWeapon()
@@ -153,25 +151,25 @@ public class Crowbar : BaseClientWeapon
 
         if (lastRunningCheck && onScopeAim) ScopeOut();
 
-        /*if ((lastWalkCheck || lastRunningCheck) && handleInspectionSoundsRoutine != null)
-            StopCoroutine(handleInspectionSoundsRoutine);*/
+        if ((lastWalkCheck || lastRunningCheck) && handleInspectionSoundsRoutine != null)
+            StopCoroutine(handleInspectionSoundsRoutine);
     }
 
-    IEnumerator HanldeInspectionSound(int randomIdle)
+    IEnumerator HanldeInspectionSound()//int randomIdle)
     {
-        if (randomIdle == 1)
+        /*if (randomIdle == 1)
         {
             yield return new WaitForSeconds(.65f);
             virtualAudioSource.pitch = 1;
             virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[0]);
             yield break;
-        }
+        }*/
 
         yield return new WaitForSeconds(.96f);
-        virtualAudioSource.pitch = 1;
+        /*virtualAudioSource.pitch = 1;
         virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[1]);
 
         yield return new WaitForSeconds(1.14f);
-        virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[2]);
+        virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[2]);*/
     }
 }

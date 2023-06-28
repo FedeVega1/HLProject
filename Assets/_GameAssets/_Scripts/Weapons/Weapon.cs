@@ -22,22 +22,26 @@ public class Weapon : CachedTransform
     bool isReloading, onScope;
     RaycastHit rayHit;
 
+    Player owningPlayer;
     BaseClientWeapon clientWeapon;
     LayerMask weaponLayerMask;
     WeaponData weaponData;
     BulletData bulletData;
     Transform firePivot;
     NetWeapon netWeapon;
+    Collider[] meleeCollider;
 
     public System.Action OnFinishedReload;
 
     void Start()
     {
         weaponLayerMask = LayerMask.GetMask("PlayerHitBoxes", "SceneObjects");
+        meleeCollider = new Collider[10];
     }
 
-    public void Init(WeaponData data, NetWeapon serverSideWeapon)
+    public void Init(WeaponData data, NetWeapon serverSideWeapon, Player player)
     {
+        owningPlayer = player;
         weaponData = data;
         bulletData = data.bulletData;
         netWeapon = serverSideWeapon;
@@ -66,7 +70,7 @@ public class Weapon : CachedTransform
 
         if (IsMelee)
         {
-            netWeapon.CmdRequestFire();
+            HandleMeleeSwing();
             return;
         }
 
@@ -102,6 +106,35 @@ public class Weapon : CachedTransform
 
         //if (BulletsInMag == 0) ScopeOut();
         netWeapon.CmdRequestFire();
+    }
+
+    void HandleMeleeSwing()
+    {
+        int quantity = Physics.OverlapBoxNonAlloc(firePivot.position, new Vector3(.5f, 1, .5f), meleeCollider, firePivot.rotation, weaponLayerMask);
+
+        bool killHit = false;
+        for (int i = 0; i < quantity; i++)
+        {
+            HitBox hitBox = meleeCollider[i].GetComponent<HitBox>();
+            if (hitBox == null) continue;
+            if (hitBox.GetCharacterScript().MyTransform != owningPlayer.MyTransform)
+            {
+                if (hitBox.GetCharacterScript().IsDead)
+                {
+                    killHit = true;
+                    break;
+                }
+
+                continue;
+            }
+
+            quantity--;
+        }
+
+        bool hit = quantity > 0;
+        clientWeapon.MeleeSwing(hit, killHit);
+        netWeapon.CmdRequestFire();
+        wTime = NetworkTime.time + weaponData.weaponAnimsTiming.fireMaxDelay;
     }
 
     bool CheckBulletFallOff(ref Ray weaponRay, ref RaycastHit rayHit, out float distance)

@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
-using UnityEngine.Experimental.AI;
 
 public class NetWeapon : CachedNetTransform
 {
@@ -356,14 +355,24 @@ public class NetWeapon : CachedNetTransform
         float hitboxTime = 0;
         while (hitboxTime < weaponData.weaponAnimsTiming.meleeHitboxOut)
         {
-            int quantity = Physics.OverlapBoxNonAlloc(firePivot.position + firePivot.forward * .5f, new Vector3(.5f, .5f, .5f), raycastShootlastCollider, firePivot.rotation, weaponLayerMask);
+            int quantity = Physics.OverlapBoxNonAlloc(firePivot.position, new Vector3(.5f, 1, .5f), raycastShootlastCollider, firePivot.rotation, weaponLayerMask);
+            /*GameObject test = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            test.GetComponent<Collider>().enabled = false;
+            test.transform.SetPositionAndRotation(firePivot.position, firePivot.rotation);
+            test.transform.localScale = new Vector3(.5f, 1, .5f);*/
 
             for (int i = 0; i < quantity; i++)
             {
                 HitBox hitBoxToHit = raycastShootlastCollider[i].GetComponent<HitBox>();
-                if (hitBoxToHit != null) continue;
+                if (hitBoxToHit == null || hitBoxToHit.GetCharacterScript().MyTransform == owningPlayer.MyTransform) continue;
 
                 hitBoxToHit.GetCharacterScript().TakeDamage(weaponData.meleeDamage, DamageType.Base);
+                meleeRoutine = null;
+                yield break;
+            }
+
+            if (quantity > 0)
+            {
                 meleeRoutine = null;
                 yield break;
             }

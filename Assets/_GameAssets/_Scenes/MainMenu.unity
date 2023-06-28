@@ -362,7 +362,7 @@ MonoBehaviour:
   dontDestroyOnLoad: 1
   runInBackground: 1
   autoStartServerBuild: 1
-  serverTickRate: 60
+  serverTickRate: 30
   offlineScene: Assets/_GameAssets/_Scenes/MainMenu.unity
   onlineScene: Assets/_GameAssets/_Scenes/TestMap.unity
   transport: {fileID: 1035443919}
@@ -1166,14 +1166,30 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2667064074613660186, guid: e7f8c864b3e4f424f88cd1a94a35b4de, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4404593440053645011, guid: e7f8c864b3e4f424f88cd1a94a35b4de, type: 3}
       propertyPath: m_Name
       value: MainMenuCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 5727283318111373196, guid: e7f8c864b3e4f424f88cd1a94a35b4de, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6054059754885343316, guid: e7f8c864b3e4f424f88cd1a94a35b4de, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6976938594019667577, guid: e7f8c864b3e4f424f88cd1a94a35b4de, type: 3}
       propertyPath: mainMenuCamera
       value: 
       objectReference: {fileID: 1562498522}
+    - target: {fileID: 7444990568193118314, guid: e7f8c864b3e4f424f88cd1a94a35b4de, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
