@@ -35,7 +35,7 @@ namespace HLProject
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            Addressables.Release(inspectionSoundsHandle);
+            //Addressables.Release(inspectionSoundsHandle);
         }
 
         protected override void Update()

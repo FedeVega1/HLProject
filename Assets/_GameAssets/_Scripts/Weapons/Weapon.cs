@@ -21,7 +21,7 @@ namespace HLProject
 
         bool IsMelee => weaponData.weaponType == WeaponType.Melee;
 
-        bool isReloading, onScope;
+        bool isReloading, onScope, weaponDrawn;
         RaycastHit rayHit;
 
         Player owningPlayer;
@@ -68,7 +68,7 @@ namespace HLProject
 
         public void Fire()
         {
-            if (NetworkTime.time < wTime || NetworkTime.time < scopeTime || isReloading) return;
+            if (NetworkTime.time < wTime || NetworkTime.time < scopeTime || isReloading || !weaponDrawn) return;
 
             if (IsMelee)
             {
@@ -208,18 +208,20 @@ namespace HLProject
             OnFinishedReload?.Invoke();
         }
 
-        public void ToggleWeapon(bool toggle)
+        public double ToggleWeapon(bool toggle)
         {
+            weaponDrawn = toggle;
+
             if (toggle)
             {
                 clientWeapon.DrawWeapon();
                 wTime = NetworkTime.time + weaponData.weaponAnimsTiming.draw;
+                return weaponData.weaponAnimsTiming.draw;
             }
-            else
-            {
-                clientWeapon.HolsterWeapon();
-                wTime = NetworkTime.time + weaponData.weaponAnimsTiming.draw;
-            }
+
+            clientWeapon.HolsterWeapon();
+            wTime = NetworkTime.time + weaponData.weaponAnimsTiming.holster;
+            return weaponData.weaponAnimsTiming.holster;
         }
 
         public void ToggleWeaponSway(bool toggle) => clientWeapon.ToggleWeaponSway(toggle);

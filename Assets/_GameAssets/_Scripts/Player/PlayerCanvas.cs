@@ -64,6 +64,7 @@ namespace HLProject
         {
             ResetHUD();
             woundedScreen.PlayerIsWounded(woundTime);
+            ToggleCursor(true);
         }
 
         void ResetHUD()

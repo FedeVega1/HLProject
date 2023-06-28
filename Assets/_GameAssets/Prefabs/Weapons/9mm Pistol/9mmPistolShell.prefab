@@ -111,19 +111,58 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   randomSoundsToPlay:
-  - {fileID: 8300000, guid: 771a09153580a6a4aa95a422699d3072, type: 3}
-  - {fileID: 8300000, guid: c7b9e598e676675429a935e74150caed, type: 3}
-  - {fileID: 8300000, guid: b98e98353a905a74bab92cc85c8fe8dc, type: 3}
-  - {fileID: 8300000, guid: 0857f1b85b3a4c34083920437ae51fa2, type: 3}
-  - {fileID: 8300000, guid: 2a9ce354728942e4fb7b2b4e34b82cf4, type: 3}
-  - {fileID: 8300000, guid: d2ba6c82f49563b4d88d871963d9bddf, type: 3}
-  - {fileID: 8300000, guid: 69e77cd497793f94cab9cac897f3874f, type: 3}
-  - {fileID: 8300000, guid: d58e26f68818f764b834e3569da5a0b5, type: 3}
-  - {fileID: 8300000, guid: ec92d83b42c8ba14bbd52b2b3474cc00, type: 3}
-  - {fileID: 8300000, guid: 0dae0c0b346f5fa4b9edb7aad44160f6, type: 3}
-  - {fileID: 8300000, guid: ad1c3c3b6dbbd4e4890d07f26e231ab0, type: 3}
-  - {fileID: 8300000, guid: 30a2151ffa69ee44d8a87cdbb01066fc, type: 3}
-  - {fileID: 8300000, guid: a0bedec08ba69824bb99629e66c9f280, type: 3}
+  - m_AssetGUID: 771a09153580a6a4aa95a422699d3072
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: c7b9e598e676675429a935e74150caed
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: b98e98353a905a74bab92cc85c8fe8dc
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 0857f1b85b3a4c34083920437ae51fa2
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 2a9ce354728942e4fb7b2b4e34b82cf4
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: d2ba6c82f49563b4d88d871963d9bddf
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 69e77cd497793f94cab9cac897f3874f
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: d58e26f68818f764b834e3569da5a0b5
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: ec92d83b42c8ba14bbd52b2b3474cc00
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 0dae0c0b346f5fa4b9edb7aad44160f6
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: ad1c3c3b6dbbd4e4890d07f26e231ab0
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 30a2151ffa69ee44d8a87cdbb01066fc
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: a0bedec08ba69824bb99629e66c9f280
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
 --- !u!82 &622745939738007546
 AudioSource:
   m_ObjectHideFlags: 0

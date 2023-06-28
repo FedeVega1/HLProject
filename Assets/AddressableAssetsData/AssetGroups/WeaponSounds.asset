@@ -339,6 +339,221 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 493d975abf89ea54faeccda36628483e
+    m_Address: crowbar_deploy
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Crowbar
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b1e92fd5a0f4efc42ae7f0c77be36deb
+    m_Address: crowbar_impact1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Crowbar
+    - FireSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b4f9d2c6a40f2854ebbe30edf4f76b6c
+    m_Address: crowbar_impact2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Crowbar
+    - FireSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b727f6d64bf88ff4d8db0e7021b78e8b
+    m_Address: crowbar_swing1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Crowbar
+    - SwingSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8b031b7805bd50a45855037ed90801b4
+    m_Address: crowbar_swing2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Crowbar
+    - SwingSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c0ceda9f05cd7cb4693273a4e374f215
+    m_Address: crowbar_swing3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Crowbar
+    - SwingSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 24dea604cafec0049b363a5441687765
+    m_Address: ar2_shell1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9a60316ea4865124ab73f92f41f434be
+    m_Address: ar2_shell2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 241738525257ca6439d1695b1c891f0f
+    m_Address: ar2_shell3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d2bfbe325503c4b419e61bcfc855fb30
+    m_Address: ar2_shell4
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 15fb5c2eef6b8714abe925a08f8e7d10
+    m_Address: ar2_shell5
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ef9e9385d55ff2840ac22cb882e6548d
+    m_Address: ar2_shell6
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cc4cc28e66e894241afb2bb6a45bad61
+    m_Address: ar2_shell7
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b246693c60fab524e93b5036c90194c5
+    m_Address: ar2_shell8
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 16ae08ae53de2fe4f90856bc55c3356e
+    m_Address: ar2_shell9
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 49d2a43d2675f164f95637eb75e0d5b6
+    m_Address: ar2_shell10
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 771a09153580a6a4aa95a422699d3072
+    m_Address: pl_shell1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c7b9e598e676675429a935e74150caed
+    m_Address: pl_shell2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b98e98353a905a74bab92cc85c8fe8dc
+    m_Address: pl_shell3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0857f1b85b3a4c34083920437ae51fa2
+    m_Address: pl_shell4
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2a9ce354728942e4fb7b2b4e34b82cf4
+    m_Address: pl_shell5
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d2ba6c82f49563b4d88d871963d9bddf
+    m_Address: pl_shell6
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 69e77cd497793f94cab9cac897f3874f
+    m_Address: pl_shell7
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d58e26f68818f764b834e3569da5a0b5
+    m_Address: pl_shell8
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ec92d83b42c8ba14bbd52b2b3474cc00
+    m_Address: pl_shell9
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0dae0c0b346f5fa4b9edb7aad44160f6
+    m_Address: pl_shell10
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ad1c3c3b6dbbd4e4890d07f26e231ab0
+    m_Address: pl_shell11
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 30a2151ffa69ee44d8a87cdbb01066fc
+    m_Address: pl_shell12
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a0bedec08ba69824bb99629e66c9f280
+    m_Address: pl_shell13
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1fe2ce63e3afda84ca83985eee9a1efa
+    m_Address: shotgun_shell1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c8b2994793c68f74c99c141da945dd42
+    m_Address: shotgun_shell2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3e3af8097f1419f4abaf9209278e82a1
+    m_Address: shotgun_shell3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 12a5dae9fe055a44c944efa7fc121caa
+    m_Address: shotgun_shell4
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5f1700c6d82bf794dae367e2b39d4fab
+    m_Address: shotgun_shell5
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9a00c03cc011817489c215ce78b4b2cd
+    m_Address: shotgun_shell6
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ShellSound
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 3cf91d3a9f4e16f4dbcc0b305a57378e, type: 2}
   m_SchemaSet:

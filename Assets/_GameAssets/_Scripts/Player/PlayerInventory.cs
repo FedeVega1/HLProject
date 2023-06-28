@@ -40,6 +40,7 @@ namespace HLProject
         Player playerScript;
         Transform vWeaponPivot;
         PlayerClientHands currentClassHands;
+        Coroutine swapWeaponRoutine;
 
         AsyncOperationHandle<GameObject> weaponPrefabHandle;
 
@@ -280,14 +281,8 @@ namespace HLProject
         [TargetRpc]
         public void RpcChangeWeapon(NetworkConnection target, int weaponIndex, int oldIndex)
         {
-            weaponsInvetoryOnClient[oldIndex].ToggleWeapon(false);
-            weaponsInvetoryOnClient[weaponIndex].ToggleWeapon(true);
-            currentClassHands.GetWeaponHandBones(weaponsInvetoryOnClient[weaponIndex].WeaponRootBone, weaponsInvetoryOnClient[weaponIndex].ClientWeaponTransform);
-            currentWeaponIndex = weaponIndex;
-            isSwappingWeapons = false;
-
-            UpdateCurrenWeaponName();
-            UpdateWeaponAmmo();
+            if (swapWeaponRoutine != null) StopCoroutine(swapWeaponRoutine);
+            swapWeaponRoutine = StartCoroutine(ChangeWeaponRoutine(weaponIndex, oldIndex));
         }
 
         [ClientRpc]
@@ -376,6 +371,7 @@ namespace HLProject
             }
 
             weaponsInvetoryOnClient.Clear();
+            if (currentClassHands != null) Destroy(currentClassHands);
         }
 
         #endregion
@@ -402,6 +398,22 @@ namespace HLProject
             }
 
             OnWeaponSync?.Invoke();
+        }
+
+        [Client]
+        IEnumerator ChangeWeaponRoutine(int weaponIndex, int oldIndex)
+        {
+            float timeToWait = (float) weaponsInvetoryOnClient[oldIndex].ToggleWeapon(false);
+            yield return new WaitForSeconds(timeToWait);
+
+            weaponsInvetoryOnClient[weaponIndex].ToggleWeapon(true);
+
+            currentClassHands.GetWeaponHandBones(weaponsInvetoryOnClient[weaponIndex].WeaponRootBone, weaponsInvetoryOnClient[weaponIndex].ClientWeaponTransform);
+            currentWeaponIndex = weaponIndex;
+            isSwappingWeapons = false;
+
+            UpdateCurrenWeaponName();
+            UpdateWeaponAmmo();
         }
 
         #endregion
