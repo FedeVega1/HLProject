@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
+using UnityEngine.Experimental.AI;
 
 public class NetWeapon : CachedNetTransform
 {
@@ -12,6 +13,8 @@ public class NetWeapon : CachedNetTransform
     [SyncVar] bool serverInitialized;
 
     public bool IsDroppingWeapons { get; private set; }
+
+    bool IsMelee => weaponData.weaponType == WeaponType.Melee;
 
     bool clientWeaponInit, isReloading, onScope;
     int bulletsInMag, mags;
@@ -26,6 +29,7 @@ public class NetWeapon : CachedNetTransform
     BulletData bulletData;
     Transform firePivot;
     Collider[] raycastShootlastCollider;
+    Coroutine meleeRoutine;
 
     public override void OnStartClient()
     {
@@ -71,6 +75,13 @@ public class NetWeapon : CachedNetTransform
     void Fire()
     {
         if (owningPlayer.PlayerIsRunning() || NetworkTime.time < fireTime || NetworkTime.time < scopeTime || isReloading) return;
+
+        if (IsMelee)
+        {
+            meleeRoutine = StartCoroutine(MeleeSwing());
+            return;
+        }
+
         if (bulletsInMag <= 0) return;
 
         MyTransform.eulerAngles = new Vector3(owningPlayer.GetPlayerCameraXAxis(), MyTransform.eulerAngles.y, MyTransform.eulerAngles.z);
@@ -185,7 +196,7 @@ public class NetWeapon : CachedNetTransform
     [Server]
     void Reload()
     {
-        if (isReloading || onScope || bulletsInMag >= weaponData.bulletsPerMag || mags <= 0) return;
+        if (IsMelee || isReloading || onScope || bulletsInMag >= weaponData.bulletsPerMag || mags <= 0) return;
         owningPlayer.TogglePlayerRunAbility(false);
         isReloading = true;
         RpcReloadWeapon();
@@ -200,25 +211,9 @@ public class NetWeapon : CachedNetTransform
     }
 
     [Server]
-    IEnumerator ApplyDistanceToDamage(Vector3 hitOrigin, float distance)
-    {
-        yield return new WaitForSeconds((distance / bulletData.initialSpeed) + weaponData.weaponAnimsTiming.initFire);
-        int quantity = Physics.OverlapSphereNonAlloc(hitOrigin, .1f, raycastShootlastCollider, weaponLayerMask);
-
-        for (int i = 0; i < quantity; i++)
-        {
-            HitBox hitBoxToHit = raycastShootlastCollider[i].GetComponent<HitBox>();
-            if (hitBoxToHit == null) continue;
-
-            hitBoxToHit.GetCharacterScript().TakeDamage(bulletData.damage, DamageType.Bullet);
-            yield break;
-        }
-    }
-
-    [Server]
     void ScopeIn()
     {
-        if (owningPlayer.PlayerIsRunning() || isReloading || onScope) return;
+        if (IsMelee || owningPlayer.PlayerIsRunning() || isReloading || onScope) return;
         owningPlayer.TogglePlayerScopeStatus(true);
         onScope = true;
         scopeTime = NetworkTime.time + weaponData.weaponAnimsTiming.zoomInSpeed;
@@ -227,10 +222,20 @@ public class NetWeapon : CachedNetTransform
     [Server]
     void ScopeOut()
     {
-        if (!onScope) return;
+        if (IsMelee || !onScope) return;
         owningPlayer.TogglePlayerScopeStatus(false);
         onScope = false;
         scopeTime = NetworkTime.time + weaponData.weaponAnimsTiming.zoomOutSpeed;
+    }
+
+    [Server]
+    public void OnWeaponSwitch()
+    {
+        if (meleeRoutine != null)
+        {
+            StopCoroutine(meleeRoutine);
+            meleeRoutine = null;
+        }
     }
 
     #endregion
@@ -344,9 +349,52 @@ public class NetWeapon : CachedNetTransform
     #region Coroutines
 
     [Server]
+    IEnumerator MeleeSwing()
+    {
+        yield return new WaitForSeconds(weaponData.weaponAnimsTiming.meleeHitboxIn);
+
+        float hitboxTime = 0;
+        while (hitboxTime < weaponData.weaponAnimsTiming.meleeHitboxOut)
+        {
+            int quantity = Physics.OverlapBoxNonAlloc(firePivot.position + firePivot.forward * .5f, new Vector3(.5f, .5f, .5f), raycastShootlastCollider, firePivot.rotation, weaponLayerMask);
+
+            for (int i = 0; i < quantity; i++)
+            {
+                HitBox hitBoxToHit = raycastShootlastCollider[i].GetComponent<HitBox>();
+                if (hitBoxToHit != null) continue;
+
+                hitBoxToHit.GetCharacterScript().TakeDamage(weaponData.meleeDamage, DamageType.Base);
+                meleeRoutine = null;
+                yield break;
+            }
+
+            hitboxTime += Time.deltaTime;
+            yield return null;
+        }
+
+        meleeRoutine = null;
+    }
+
+    [Server]
+    IEnumerator ApplyDistanceToDamage(Vector3 hitOrigin, float distance)
+    {
+        yield return new WaitForSeconds((distance / bulletData.initialSpeed) + weaponData.weaponAnimsTiming.initFire);
+        int quantity = Physics.OverlapSphereNonAlloc(hitOrigin, .1f, raycastShootlastCollider, weaponLayerMask);
+
+        for (int i = 0; i < quantity; i++)
+        {
+            HitBox hitBoxToHit = raycastShootlastCollider[i].GetComponent<HitBox>();
+            if (hitBoxToHit == null) continue;
+
+            hitBoxToHit.GetCharacterScript().TakeDamage(bulletData.damage, DamageType.Bullet);
+            yield break;
+        }
+    }
+
+    [Server]
     IEnumerator ReloadRoutine()
     {
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(weaponData.weaponAnimsTiming.reload);
         bulletsInMag = weaponData.bulletsPerMag;
         mags--;
         isReloading = false;

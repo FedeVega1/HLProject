@@ -223,11 +223,12 @@ MonoBehaviour:
   crouchAmmount: 0.7
   maxRunSpeed: 8.5
   jumpHeight: 1
-  horizontalSens: 250
-  verticalSens: 300
+  horizontalSens: 470
+  verticalSens: 250
   timeBetweenJumps: 0.2
   maxScopeSpeed: 3
   maxWeaponWeight: 5000
+  cameraYLimits: {x: -70, y: 70}
   playerVCam: {fileID: 2527544677063496800}
   freezePlayer: 0
   spectatorMov: 0

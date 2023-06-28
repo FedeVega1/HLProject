@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbc436bff5906864d8060ea6fbb33a4f, type: 3}
+  m_Name: Crowbar
+  m_EditorClassIdentifier: 
+  weaponName: Crowbar
+  clientPrefab: {fileID: 8219420985294490289, guid: 2d53601c1e2f435448dcb25524c53ed8, type: 3}
+  propPrefab: {fileID: 0}
+  bulletData: {fileID: 0}
+  maxBulletSpread: 0
+  weaponWeight: 500
+  meleeDamage: 10
+  weaponType: 0
+  weaponAnimsTiming:
+    initFire: 0
+    fireMaxDelay: 0
+    reload: 0
+    holster: 0.5
+    draw: 1.21
+    zoomInSpeed: 0
+    zoomOutSpeed: 0
+    meleeHitboxIn: 0.04
+    meleeHitboxOut: 0.08
+  bulletsPerMag: 0
+  mags: 0

@@ -253,6 +253,7 @@ public class PlayerInventory : NetworkBehaviour
 
         isSwappingWeapons = true;
         weaponsInventoryOnServer[currentWeaponIndex].RpcToggleClientWeapon(false);
+        weaponsInventoryOnServer[currentWeaponIndex].OnWeaponSwitch();
         weaponsInventoryOnServer[weaponIndex].RpcToggleClientWeapon(true);
 
         RpcChangeWeapon(connectionToClient, weaponIndex, currentWeaponIndex);

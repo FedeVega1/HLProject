@@ -17,6 +17,8 @@ public class Weapon : CachedTransform
     public int BulletsInMag { get; private set; }
     public int Mags { get; private set; }
 
+    bool IsMelee => weaponData.weaponType == WeaponType.Melee;
+
     bool isReloading, onScope;
     RaycastHit rayHit;
 
@@ -61,6 +63,13 @@ public class Weapon : CachedTransform
     public void Fire()
     {
         if (NetworkTime.time < wTime || NetworkTime.time < scopeTime || isReloading) return;
+
+        if (IsMelee)
+        {
+            netWeapon.CmdRequestFire();
+            return;
+        }
+
         if (BulletsInMag <= 0)
         {
             clientWeapon.EmptyFire();

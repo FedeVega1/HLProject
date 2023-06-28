@@ -11,6 +11,7 @@ public class PlayerMovement : CachedNetTransform
 
     [SerializeField] float maxWalkSpeed, maxCrouchSpeed, crouchAmmount, maxRunSpeed, jumpHeight, horizontalSens, verticalSens, timeBetweenJumps, maxScopeSpeed;
     [SerializeField] float maxWeaponWeight;
+    [SerializeField] Vector2 cameraYLimits;
     [SerializeField] CinemachineVirtualCamera playerVCam;
 
     [SyncVar(hook = nameof(OnFreezePlayerSet))] public bool freezePlayer;
@@ -66,7 +67,7 @@ public class PlayerMovement : CachedNetTransform
 
     bool jumped;
     InputFlag inputFlags;
-    float startHeight, playerSpeed;//, xAxisRotaion;
+    float startHeight, playerSpeed, yAxisRotation;//, xAxisRotaion;
     double jumpTimer;
     Vector2 playerMovInput, lastPlayerMovInput, cameraRotInput, lastCameraRotInput;
     Vector3 velocity;
@@ -94,12 +95,16 @@ public class PlayerMovement : CachedNetTransform
     void Update()
     {
         if (freezePlayer) return;
-        if (isLocalPlayer) CheckForInput();
+        if (isLocalPlayer)
+        {
+            CheckForInput();
+            RotateClient();
+        }
 
         if (!isServer) return;
 
         Move();
-        Rotate();
+        RotateServer();
         Lean();
     }
 
@@ -253,13 +258,21 @@ public class PlayerMovement : CachedNetTransform
         if (spectatorMov) return;
     }
 
-    void Rotate()
+    [Client]
+    void RotateClient()
     {
-        float rotationX = MyTransform.localEulerAngles.y + cameraRotInput.y * horizontalSens * Time.deltaTime;
-        MyTransform.rotation = Quaternion.AngleAxis(rotationX, Vector3.up);
+        if (!isServer) return;
+        yAxisRotation += cameraRotInput.y * verticalSens * Time.deltaTime;
+        yAxisRotation = Mathf.Clamp(yAxisRotation, cameraYLimits.x, cameraYLimits.y);
 
-        float rotationY = MyTransform.localEulerAngles.x + cameraRotInput.x * verticalSens * Time.deltaTime;
-        MyTransform.rotation = Quaternion.AngleAxis(-rotationY, Vector3.up);
+        playerVCam.transform.localEulerAngles = new Vector3(-yAxisRotation, 0, 0);
+    }
+
+    [Server]
+    void RotateServer()
+    {
+        float rotationX = MyTransform.localEulerAngles.y + cameraRotInput.x * horizontalSens * Time.deltaTime;
+        MyTransform.rotation = Quaternion.AngleAxis(rotationX, Vector3.up);
     }
 
     float CalculateSpeedByWeight(float maxSpeed) => (1 - (currentWeaponWeight / maxWeaponWeight)) * maxSpeed;
