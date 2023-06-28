@@ -2,41 +2,44 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerSpawnPoint : CachedTransform
+namespace HLProject
 {
-    [SerializeField] bool debugDrawPlayerMesh;
-    [SerializeField] Mesh debugPlayerMesh;
-    [SerializeField] int playerTeam;
-
-    [HideInInspector] public bool playerOnPoint;
-
-    GameObject currentPlayerOnSpawn;
-
-    public bool SpawnPlayer(GameObject playerObject)
+    public class PlayerSpawnPoint : CachedTransform
     {
-        if (playerOnPoint) return false;
-        currentPlayerOnSpawn = playerObject;
-        playerOnPoint = true;
-        return true;
-    }
+        [SerializeField] bool debugDrawPlayerMesh;
+        [SerializeField] Mesh debugPlayerMesh;
+        [SerializeField] int playerTeam;
 
-    void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player") && other.gameObject == currentPlayerOnSpawn)
+        [HideInInspector] public bool playerOnPoint;
+
+        GameObject currentPlayerOnSpawn;
+
+        public bool SpawnPlayer(GameObject playerObject)
         {
-            currentPlayerOnSpawn = null;
-            playerOnPoint = false;
+            if (playerOnPoint) return false;
+            currentPlayerOnSpawn = playerObject;
+            playerOnPoint = true;
+            return true;
         }
-    }
 
-    void OnDrawGizmos()
-    {
-        if (!debugDrawPlayerMesh) return;
+        void OnTriggerExit(Collider other)
+        {
+            if (other.CompareTag("Player") && other.gameObject == currentPlayerOnSpawn)
+            {
+                currentPlayerOnSpawn = null;
+                playerOnPoint = false;
+            }
+        }
 
-        Color color = playerTeam == 0 ? Color.white : TeamManager.FactionColors[playerTeam - 1];
-        color.a = .35f;
+        void OnDrawGizmos()
+        {
+            if (!debugDrawPlayerMesh) return;
 
-        Gizmos.color = color;
-        Gizmos.DrawMesh(debugPlayerMesh, transform.position + Vector3.up, transform.rotation);        
+            Color color = playerTeam == 0 ? Color.white : TeamManager.FactionColors[playerTeam - 1];
+            color.a = .35f;
+
+            Gizmos.color = color;
+            Gizmos.DrawMesh(debugPlayerMesh, transform.position + Vector3.up, transform.rotation);
+        }
     }
 }

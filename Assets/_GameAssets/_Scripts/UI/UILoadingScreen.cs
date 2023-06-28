@@ -3,23 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UILoadingScreen : MonoBehaviour
+namespace HLProject
 {
-    [SerializeField] CanvasGroup loadingScreenCanvasGroup;
-    [SerializeField] Image imgLoadingScreen;
-
-    public void ShowLoadingScreen()
+    public class UILoadingScreen : MonoBehaviour
     {
-        loadingScreenCanvasGroup.blocksRaycasts = true;
-        loadingScreenCanvasGroup.alpha = 1;
-        //LeanTween.alphaCanvas(loadingScreenCanvasGroup, 1, .15f);
-    }
+        [SerializeField] CanvasGroup loadingScreenCanvasGroup;
+        [SerializeField] Image imgLoadingScreen;
 
-    public void HideLoadingScreen()
-    {
-        LeanTween.alphaCanvas(loadingScreenCanvasGroup, 0, .15f).setOnComplete(() =>
+        public void ShowLoadingScreen()
         {
-            loadingScreenCanvasGroup.blocksRaycasts = false;
-        });
+            loadingScreenCanvasGroup.blocksRaycasts = true;
+            loadingScreenCanvasGroup.alpha = 1;
+            //LeanTween.alphaCanvas(loadingScreenCanvasGroup, 1, .15f);
+        }
+
+        public void HideLoadingScreen()
+        {
+            LeanTween.alphaCanvas(loadingScreenCanvasGroup, 0, .15f).setOnComplete(() =>
+            {
+                loadingScreenCanvasGroup.blocksRaycasts = false;
+            });
+        }
     }
 }

@@ -3,128 +3,131 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public enum DamageType { Base, Bleed, Bullet, Explosion }
-
-public class Character : CachedNetTransform
+namespace HLProject
 {
-    [Header("Character")]
+    public enum DamageType { Base, Bleed, Bullet, Explosion }
 
-    [SerializeField] protected float maxHealth, maxArmor;
-    [SerializeField] protected float maxBleedTime;
-    [SerializeField] protected float bleedThreshold;
-    [SerializeField] [SyncVar] protected bool isInvencible;
-
-    [SyncVar] protected bool isDead;
-    [SyncVar(hook = nameof(OnHealthChange))] protected float currentHealth;
-    [SyncVar(hook = nameof(OnArmorChange))] protected float currentArmor;
-    [SyncVar(hook = nameof(OnBleedingSet))] protected bool isBleeding;
-
-    public bool IsDead => isDead;
-
-    double bleedTime;
-
-    public System.Action OnPlayerDead;
-
-    #region Hooks
-
-    protected void OnBleedingSet(bool oldValue, bool newValue) {}
-
-    protected void OnHealthChange(float oldValue, float newValue)
+    public class Character : CachedNetTransform
     {
-        currentHealth = Mathf.Clamp(newValue, 0, maxHealth);
-    }
+        [Header("Character")]
 
-    protected void OnArmorChange(float oldValue, float newValue)
-    {
-        currentArmor = Mathf.Clamp(newValue, 0, maxArmor);
-    }
+        [SerializeField] protected float maxHealth, maxArmor;
+        [SerializeField] protected float maxBleedTime;
+        [SerializeField] protected float bleedThreshold;
+        [SerializeField][SyncVar] protected bool isInvencible;
 
-    #endregion
+        [SyncVar] protected bool isDead;
+        [SyncVar(hook = nameof(OnHealthChange))] protected float currentHealth;
+        [SyncVar(hook = nameof(OnArmorChange))] protected float currentArmor;
+        [SyncVar(hook = nameof(OnBleedingSet))] protected bool isBleeding;
 
-    public override void OnStartServer() => InitCharacter();
+        public bool IsDead => isDead;
 
-    protected virtual void Update()
-    {
-        if (!isServer || isDead || !isBleeding || NetworkTime.time < bleedTime) return;
+        double bleedTime;
 
-        TakeDamage(1, DamageType.Bleed);
-        bleedTime = NetworkTime.time + maxBleedTime;
-    }
+        public System.Action OnPlayerDead;
 
-    [Server]
-    public virtual void TakeDamage(float ammount, DamageType damageType = DamageType.Base)
-    {
-        if (!isServer || isDead || isInvencible) return;
+        #region Hooks
 
-        float damageToArmor = ammount * .6f;
+        protected void OnBleedingSet(bool oldValue, bool newValue) { }
 
-        switch (damageType)
+        protected void OnHealthChange(float oldValue, float newValue)
         {
-            case DamageType.Base:
-            case DamageType.Bleed:
-                damageToArmor = 0;
-                break;
-
-            default:
-                if (currentArmor <= 0 && ammount >= bleedThreshold)
-                {
-                    isBleeding = true;
-                    bleedTime = NetworkTime.time + maxBleedTime;
-                }
-                break;
+            currentHealth = Mathf.Clamp(newValue, 0, maxHealth);
         }
-        
-        float dmgToHealth;
-        if (currentArmor > 0)
+
+        protected void OnArmorChange(float oldValue, float newValue)
         {
-            currentArmor -= damageToArmor;
-            dmgToHealth = ammount - damageToArmor;
+            currentArmor = Mathf.Clamp(newValue, 0, maxArmor);
         }
-        else
+
+        #endregion
+
+        public override void OnStartServer() => InitCharacter();
+
+        protected virtual void Update()
         {
-            dmgToHealth = ammount + damageToArmor;
+            if (!isServer || isDead || !isBleeding || NetworkTime.time < bleedTime) return;
+
+            TakeDamage(1, DamageType.Bleed);
+            bleedTime = NetworkTime.time + maxBleedTime;
         }
-        
-        currentHealth -= Mathf.Clamp(dmgToHealth, 0, 9999999);
 
-        print($"Character {name} took {ammount} of {damageType} damage - DamageToArmor: {damageToArmor} - DamageToHealth: {dmgToHealth}");
-        if (currentHealth <= 0) CharacterDies(damageType == DamageType.Base);
-    }
+        [Server]
+        public virtual void TakeDamage(float ammount, DamageType damageType = DamageType.Base)
+        {
+            if (!isServer || isDead || isInvencible) return;
 
-    [Server]
-    public virtual void TakeHealth(float ammount)
-    {
-        if (!isServer || isDead) return;
-        currentHealth += ammount;
-    }
+            float damageToArmor = ammount * .6f;
 
-    [Server]
-    public virtual void TakeArmor(float ammount)
-    {
-        if (!isServer || isDead) return;
-        currentArmor += ammount;
-    }
+            switch (damageType)
+            {
+                case DamageType.Base:
+                case DamageType.Bleed:
+                    damageToArmor = 0;
+                    break;
 
-    [Server]
-    protected virtual void CharacterDies(bool criticalHit)
-    {
-        if (!isServer || isDead || isInvencible) return;
-        isBleeding = false;
-        isDead = true;
-        OnPlayerDead?.Invoke();
-        RpcCharacterDied();
-    }
+                default:
+                    if (currentArmor <= 0 && ammount >= bleedThreshold)
+                    {
+                        isBleeding = true;
+                        bleedTime = NetworkTime.time + maxBleedTime;
+                    }
+                    break;
+            }
 
-    protected void InitCharacter()
-    {
-        currentHealth = maxHealth;
-        currentArmor = maxArmor;
-        isDead = false;
-    }
+            float dmgToHealth;
+            if (currentArmor > 0)
+            {
+                currentArmor -= damageToArmor;
+                dmgToHealth = ammount - damageToArmor;
+            }
+            else
+            {
+                dmgToHealth = ammount + damageToArmor;
+            }
 
-    [ClientRpc]
-    protected virtual void RpcCharacterDied()
-    {
-        Destroy(gameObject);
+            currentHealth -= Mathf.Clamp(dmgToHealth, 0, 9999999);
+
+            print($"Character {name} took {ammount} of {damageType} damage - DamageToArmor: {damageToArmor} - DamageToHealth: {dmgToHealth}");
+            if (currentHealth <= 0) CharacterDies(damageType == DamageType.Base);
+        }
+
+        [Server]
+        public virtual void TakeHealth(float ammount)
+        {
+            if (!isServer || isDead) return;
+            currentHealth += ammount;
+        }
+
+        [Server]
+        public virtual void TakeArmor(float ammount)
+        {
+            if (!isServer || isDead) return;
+            currentArmor += ammount;
+        }
+
+        [Server]
+        protected virtual void CharacterDies(bool criticalHit)
+        {
+            if (!isServer || isDead || isInvencible) return;
+            isBleeding = false;
+            isDead = true;
+            OnPlayerDead?.Invoke();
+            RpcCharacterDied();
+        }
+
+        protected void InitCharacter()
+        {
+            currentHealth = maxHealth;
+            currentArmor = maxArmor;
+            isDead = false;
+        }
+
+        [ClientRpc]
+        protected virtual void RpcCharacterDied()
+        {
+            Destroy(gameObject);
+        }
     }
 }

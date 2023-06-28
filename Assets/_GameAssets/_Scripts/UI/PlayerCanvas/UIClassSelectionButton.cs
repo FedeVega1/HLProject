@@ -4,23 +4,26 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class UIClassSelectionButton : MonoBehaviour
+namespace HLProject
 {
-    [SerializeField] Image imgClassIcon;
-    [SerializeField] TMP_Text lblClassName;
-    [SerializeField] Button btnClassSelection;
-
-    public int ClassIndex { get; private set; }
-
-    public void Init(TeamClassData classData, int classIndex, System.Action<int> OnButtonClick)
+    public class UIClassSelectionButton : MonoBehaviour
     {
-        imgClassIcon.sprite = classData.classSprite;
-        lblClassName.text = classData.className;
-        btnClassSelection.onClick.AddListener(() => { OnButtonClick?.Invoke(classIndex); });
-    }
+        [SerializeField] Image imgClassIcon;
+        [SerializeField] TMP_Text lblClassName;
+        [SerializeField] Button btnClassSelection;
 
-    public void ToggleSelection(bool toggle)
-    {
-        btnClassSelection.image.color = toggle ? btnClassSelection.colors.pressedColor : btnClassSelection.colors.normalColor;
+        public int ClassIndex { get; private set; }
+
+        public void Init(TeamClassData classData, int classIndex, System.Action<int> OnButtonClick)
+        {
+            imgClassIcon.sprite = classData.classSprite;
+            lblClassName.text = classData.className;
+            btnClassSelection.onClick.AddListener(() => { OnButtonClick?.Invoke(classIndex); });
+        }
+
+        public void ToggleSelection(bool toggle)
+        {
+            btnClassSelection.image.color = toggle ? btnClassSelection.colors.pressedColor : btnClassSelection.colors.normalColor;
+        }
     }
 }

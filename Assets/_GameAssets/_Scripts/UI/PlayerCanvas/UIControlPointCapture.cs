@@ -1,57 +1,60 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIControlPointCapture : MonoBehaviour
+namespace HLProject
 {
-    [SerializeField] Image imgPointFaction, imgCPProgressBackground, imgCPProgressSlide;
-    [SerializeField] Slider cpCaptureProgress;
-
-    bool onCapturePoint;
-    float controlPointProgress;
-    Sprite[] factionSprites;
-
-    void Update()
+    public class UIControlPointCapture : MonoBehaviour
     {
-        if (onCapturePoint) 
-            cpCaptureProgress.value = Mathf.Lerp(cpCaptureProgress.value, controlPointProgress, Time.deltaTime);
-    }
+        [SerializeField] Image imgPointFaction, imgCPProgressBackground, imgCPProgressSlide;
+        [SerializeField] Slider cpCaptureProgress;
 
-    public void Init(ref Sprite[] factionSprites)
-    {
-        this.factionSprites = factionSprites;
-    }
+        bool onCapturePoint;
+        float controlPointProgress;
+        Sprite[] factionSprites;
 
-    public void OnPointCaptured(int newTeam, int newDefyingTeam)
-    {
-        if (newTeam == 0)
+        void Update()
         {
-            imgPointFaction.sprite = null;
-            imgCPProgressBackground.color = Color.white;
-        }
-        else
-        {
-            imgPointFaction.sprite = factionSprites[newTeam];
-            imgCPProgressBackground.color = TeamManager.FactionColors[newTeam - 1];
+            if (onCapturePoint)
+                cpCaptureProgress.value = Mathf.Lerp(cpCaptureProgress.value, controlPointProgress, Time.deltaTime);
         }
 
-        imgCPProgressSlide.color = newDefyingTeam == 0 ? Color.white : TeamManager.FactionColors[newDefyingTeam - 1];
-        cpCaptureProgress.value = controlPointProgress = 0;
-    }
+        public void Init(ref Sprite[] factionSprites)
+        {
+            this.factionSprites = factionSprites;
+        }
 
-    public void UpdateCPProgress(float progress) => controlPointProgress = progress;
+        public void OnPointCaptured(int newTeam, int newDefyingTeam)
+        {
+            if (newTeam == 0)
+            {
+                imgPointFaction.sprite = null;
+                imgCPProgressBackground.color = Color.white;
+            }
+            else
+            {
+                imgPointFaction.sprite = factionSprites[newTeam];
+                imgCPProgressBackground.color = TeamManager.FactionColors[newTeam - 1];
+            }
 
-    public void OnControlPoint(int pointTeam, int defyingTeam, float currentProgress)
-    {
-        OnPointCaptured(pointTeam, defyingTeam);
+            imgCPProgressSlide.color = newDefyingTeam == 0 ? Color.white : TeamManager.FactionColors[newDefyingTeam - 1];
+            cpCaptureProgress.value = controlPointProgress = 0;
+        }
 
-        imgPointFaction.color = Color.white;
-        cpCaptureProgress.value = controlPointProgress = currentProgress;
-        onCapturePoint = true;
-    }
+        public void UpdateCPProgress(float progress) => controlPointProgress = progress;
 
-    public void OnExitControlPoint()
-    {
-        imgCPProgressSlide.color = imgPointFaction.color = imgCPProgressBackground.color = new Color(1, 1, 1, 0);
-        onCapturePoint = false;
+        public void OnControlPoint(int pointTeam, int defyingTeam, float currentProgress)
+        {
+            OnPointCaptured(pointTeam, defyingTeam);
+
+            imgPointFaction.color = Color.white;
+            cpCaptureProgress.value = controlPointProgress = currentProgress;
+            onCapturePoint = true;
+        }
+
+        public void OnExitControlPoint()
+        {
+            imgCPProgressSlide.color = imgPointFaction.color = imgCPProgressBackground.color = new Color(1, 1, 1, 0);
+            onCapturePoint = false;
+        }
     }
 }

@@ -2,23 +2,26 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class UIControlPointNotice : MonoBehaviour
+namespace HLProject
 {
-    [SerializeField] Image imgCPNotice;
-    [SerializeField] TMP_Text lblNotice;
-    [SerializeField] CanvasGroup capturedCPNoticeCanvasGroup;
-
-    Sprite[] factionSprites;
-
-    public void Init(ref Sprite[] factionSprites) => this.factionSprites = factionSprites;
-
-    public void NewCapturedControlPoint(int cpTeam, string pointName)
+    public class UIControlPointNotice : MonoBehaviour
     {
-        LeanTween.cancel(capturedCPNoticeCanvasGroup.gameObject);
-        LeanTween.alphaCanvas(capturedCPNoticeCanvasGroup, 1, .5f).setEaseInSine();
-        LeanTween.alphaCanvas(capturedCPNoticeCanvasGroup, 0, .5f).setDelay(2.5f).setEaseOutSine();
+        [SerializeField] Image imgCPNotice;
+        [SerializeField] TMP_Text lblNotice;
+        [SerializeField] CanvasGroup capturedCPNoticeCanvasGroup;
 
-        imgCPNotice.sprite = factionSprites[cpTeam];
-        lblNotice.text = pointName + " captured";
+        Sprite[] factionSprites;
+
+        public void Init(ref Sprite[] factionSprites) => this.factionSprites = factionSprites;
+
+        public void NewCapturedControlPoint(int cpTeam, string pointName)
+        {
+            LeanTween.cancel(capturedCPNoticeCanvasGroup.gameObject);
+            LeanTween.alphaCanvas(capturedCPNoticeCanvasGroup, 1, .5f).setEaseInSine();
+            LeanTween.alphaCanvas(capturedCPNoticeCanvasGroup, 0, .5f).setDelay(2.5f).setEaseOutSine();
+
+            imgCPNotice.sprite = factionSprites[cpTeam];
+            lblNotice.text = pointName + " captured";
+        }
     }
 }

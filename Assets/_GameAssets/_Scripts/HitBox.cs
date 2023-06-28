@@ -1,11 +1,14 @@
 using UnityEngine;
 
-public enum HitBoxType { Generic, Head, Torso, Leg, Arm }
-
-public class HitBox : CachedTransform
+namespace HLProject
 {
-    [SerializeField] HitBoxType type;
-    [SerializeField] Character characterScript;
+    public enum HitBoxType { Generic, Head, Torso, Leg, Arm }
 
-    public Character GetCharacterScript() => characterScript;
+    public class HitBox : CachedTransform
+    {
+        [SerializeField] HitBoxType type;
+        [SerializeField] Character characterScript;
+
+        public Character GetCharacterScript() => characterScript;
+    }
 }

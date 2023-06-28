@@ -3,132 +3,135 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-public readonly struct PlayerScoreboardInfo
+namespace HLProject
 {
-    public readonly int playerTeam;
-    public readonly int playerClass;
-    public readonly string playerName;
-    public readonly int playerScore;
-    public readonly int playerRevives;
-    public readonly int playerDeaths;
-    public readonly bool isPlayerDead;
-    public readonly bool isLocalPlayer;
-
-    public PlayerScoreboardInfo(int team, int _playerClass, string name, int score, int revives, int deaths, bool dead, bool _isLocalPlayer)
+    public readonly struct PlayerScoreboardInfo
     {
-        playerTeam = team;
-        playerClass = _playerClass;
-        playerName = name;
-        playerScore = score;
-        playerRevives = revives;
-        playerDeaths = deaths;
-        isPlayerDead = dead;
-        isLocalPlayer = _isLocalPlayer;
-    }
+        public readonly int playerTeam;
+        public readonly int playerClass;
+        public readonly string playerName;
+        public readonly int playerScore;
+        public readonly int playerRevives;
+        public readonly int playerDeaths;
+        public readonly bool isPlayerDead;
+        public readonly bool isLocalPlayer;
 
-    public PlayerScoreboardInfo(int team, string name, int score)
-    {
-        playerTeam = team;
-        playerName = name;
-        playerScore = score;
-
-        playerClass = playerRevives = playerDeaths = 0;
-        isLocalPlayer = isPlayerDead = false;
-    }
-}
-
-public class UIScoreBoard : MonoBehaviour
-{
-    [SerializeField] CanvasGroup canvasGroup;
-    [SerializeField] RectTransform[] teamsPivot;
-    //[SerializeField] GameObject teamPrefabs;
-
-    int playerTeam;
-    List<UIPlayerInfo> playersInScore;
-
-    AsyncOperationHandle<GameObject> teamPrefabHandle;
-
-    void Start()
-    {
-        playersInScore = new List<UIPlayerInfo>();
-        LoadAssets();
-    }
-
-    void OnDestroy()
-    {
-        Addressables.Release(teamPrefabHandle);
-    }
-
-    void LoadAssets()
-    {
-        teamPrefabHandle = Addressables.LoadAssetAsync<GameObject>("UIPrefabs/TeamPlayerInfo");
-        teamPrefabHandle.Completed += OnTeamPrefabHandleCompleted;
-    }
-
-    void OnTeamPrefabHandleCompleted(AsyncOperationHandle<GameObject> operation)
-    {
-        if (operation.Status == AsyncOperationStatus.Failed)
-            Debug.LogErrorFormat("Couldn't load TeamPlayerInfo Prefab: {0}", operation.OperationException);
-    }
-
-    public void Init(PlayerScoreboardInfo[] playersInfo, int _playerTeam)
-    {
-        playerTeam = _playerTeam;
-
-        int size = playersInfo.Length;
-        for (int i = 0; i < size; i++)
+        public PlayerScoreboardInfo(int team, int _playerClass, string name, int score, int revives, int deaths, bool dead, bool _isLocalPlayer)
         {
-            if (playersInfo[i].playerTeam == 0 || playersInfo[i].playerName == "") continue;
+            playerTeam = team;
+            playerClass = _playerClass;
+            playerName = name;
+            playerScore = score;
+            playerRevives = revives;
+            playerDeaths = deaths;
+            isPlayerDead = dead;
+            isLocalPlayer = _isLocalPlayer;
+        }
 
-            bool updateList = false;
-            UIPlayerInfo info;
-            int teamIndex = playersInfo[i].playerTeam != playerTeam ? 1 : 0;
+        public PlayerScoreboardInfo(int team, string name, int score)
+        {
+            playerTeam = team;
+            playerName = name;
+            playerScore = score;
 
-            if (playersInScore.Count > 0 && i < playersInScore.Count)
-            {
-                info = playersInScore[i];
-                info.SetTeamLayout(teamIndex);
-                info.transform.parent = teamsPivot[teamIndex];
-            }
-            else
-            {
-                info = Instantiate(teamPrefabHandle.Result, teamsPivot[teamIndex]).GetComponent<UIPlayerInfo>();
-                info.SetTeamLayout(teamIndex);
-                updateList = true;
-            }
-            
-            if (info == null) continue;
-            
-            info.UpdateInfo(playersInfo[i]);
-            if (updateList) playersInScore.Add(info);
+            playerClass = playerRevives = playerDeaths = 0;
+            isLocalPlayer = isPlayerDead = false;
         }
     }
 
-    public void AddNewPlayer(PlayerScoreboardInfo playerInfo)
+    public class UIScoreBoard : MonoBehaviour
     {
-        int teamIndex = playerInfo.playerTeam != playerTeam ? 1 : 0;
-        UIPlayerInfo info = Instantiate(teamPrefabHandle.Result, teamsPivot[teamIndex]).GetComponent<UIPlayerInfo>();
-        if (info == null) return;
-        playersInScore.Add(info);
-        info.SetTeamLayout(teamIndex);
-        info.UpdateInfo(playerInfo);
-    }
+        [SerializeField] CanvasGroup canvasGroup;
+        [SerializeField] RectTransform[] teamsPivot;
+        //[SerializeField] GameObject teamPrefabs;
 
-    public void RemovePlayer(string playerName)
-    {
-        int size = playersInScore.Count;
-        for (int i = 0; i < size; i++)
+        int playerTeam;
+        List<UIPlayerInfo> playersInScore;
+
+        AsyncOperationHandle<GameObject> teamPrefabHandle;
+
+        void Start()
         {
-            UIPlayerInfo info = playersInScore[playerTeam].GetComponent<UIPlayerInfo>();
-            if (info == null) continue;
-            if (info.PlayerInfoData.playerName == playerName)
+            playersInScore = new List<UIPlayerInfo>();
+            LoadAssets();
+        }
+
+        void OnDestroy()
+        {
+            Addressables.Release(teamPrefabHandle);
+        }
+
+        void LoadAssets()
+        {
+            teamPrefabHandle = Addressables.LoadAssetAsync<GameObject>("UIPrefabs/TeamPlayerInfo");
+            teamPrefabHandle.Completed += OnTeamPrefabHandleCompleted;
+        }
+
+        void OnTeamPrefabHandleCompleted(AsyncOperationHandle<GameObject> operation)
+        {
+            if (operation.Status == AsyncOperationStatus.Failed)
+                Debug.LogErrorFormat("Couldn't load TeamPlayerInfo Prefab: {0}", operation.OperationException);
+        }
+
+        public void Init(PlayerScoreboardInfo[] playersInfo, int _playerTeam)
+        {
+            playerTeam = _playerTeam;
+
+            int size = playersInfo.Length;
+            for (int i = 0; i < size; i++)
             {
-                Destroy(info.gameObject);
-                playersInScore.Remove(info);
-                break;
+                if (playersInfo[i].playerTeam == 0 || playersInfo[i].playerName == "") continue;
+
+                bool updateList = false;
+                UIPlayerInfo info;
+                int teamIndex = playersInfo[i].playerTeam != playerTeam ? 1 : 0;
+
+                if (playersInScore.Count > 0 && i < playersInScore.Count)
+                {
+                    info = playersInScore[i];
+                    info.SetTeamLayout(teamIndex);
+                    info.transform.parent = teamsPivot[teamIndex];
+                }
+                else
+                {
+                    info = Instantiate(teamPrefabHandle.Result, teamsPivot[teamIndex]).GetComponent<UIPlayerInfo>();
+                    info.SetTeamLayout(teamIndex);
+                    updateList = true;
+                }
+
+                if (info == null) continue;
+
+                info.UpdateInfo(playersInfo[i]);
+                if (updateList) playersInScore.Add(info);
             }
         }
-    }
 
-    public void Toggle(bool toggle) => canvasGroup.alpha = toggle ? 1 : 0;
+        public void AddNewPlayer(PlayerScoreboardInfo playerInfo)
+        {
+            int teamIndex = playerInfo.playerTeam != playerTeam ? 1 : 0;
+            UIPlayerInfo info = Instantiate(teamPrefabHandle.Result, teamsPivot[teamIndex]).GetComponent<UIPlayerInfo>();
+            if (info == null) return;
+            playersInScore.Add(info);
+            info.SetTeamLayout(teamIndex);
+            info.UpdateInfo(playerInfo);
+        }
+
+        public void RemovePlayer(string playerName)
+        {
+            int size = playersInScore.Count;
+            for (int i = 0; i < size; i++)
+            {
+                UIPlayerInfo info = playersInScore[playerTeam].GetComponent<UIPlayerInfo>();
+                if (info == null) continue;
+                if (info.PlayerInfoData.playerName == playerName)
+                {
+                    Destroy(info.gameObject);
+                    playersInScore.Remove(info);
+                    break;
+                }
+            }
+        }
+
+        public void Toggle(bool toggle) => canvasGroup.alpha = toggle ? 1 : 0;
+    }
 }

@@ -2,65 +2,68 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TeamBase : ControlPoint
+namespace HLProject
 {
-    [SerializeField] PlayerSpawnPoint[] spawnPoints;
-
-    protected override void OnTriggerEnter(Collider other)
+    public class TeamBase : ControlPoint
     {
-        if (!isServer || !other.CompareTag("Player")) return;
+        [SerializeField] PlayerSpawnPoint[] spawnPoints;
 
-        if (uncapturablePoint)
+        protected override void OnTriggerEnter(Collider other)
         {
-            Player playerScript = other.GetComponent<Player>();
-            if (playerScript.GetPlayerTeam() != currentTeam) GameModeManager.INS.PlayerOnEnemyBase(playerScript);
-            playersInCP.Add(playerScript);
-            return;
+            if (!isServer || !other.CompareTag("Player")) return;
+
+            if (uncapturablePoint)
+            {
+                Player playerScript = other.GetComponent<Player>();
+                if (playerScript.GetPlayerTeam() != currentTeam) GameModeManager.INS.PlayerOnEnemyBase(playerScript);
+                playersInCP.Add(playerScript);
+                return;
+            }
+
+            base.OnTriggerEnter(other);
         }
 
-        base.OnTriggerEnter(other);
-    }
-
-    protected override void OnTriggerExit(Collider other)
-    {
-        if (!isServer || !other.CompareTag("Player")) return;
-
-        if (uncapturablePoint)
+        protected override void OnTriggerExit(Collider other)
         {
-            int size = playersInCP.Count;
+            if (!isServer || !other.CompareTag("Player")) return;
+
+            if (uncapturablePoint)
+            {
+                int size = playersInCP.Count;
+                for (int i = 0; i < size; i++)
+                {
+                    if (playersInCP[i].gameObject == other.gameObject)
+                    {
+                        if (playersInCP[i].GetPlayerTeam() != currentTeam) GameModeManager.INS.PlayerLeftEnemyBase(playersInCP[i]);
+                        playersInCP.RemoveAt(i);
+                        break;
+                    }
+                }
+
+                return;
+            }
+
+            base.OnTriggerExit(other);
+        }
+
+        public Transform GetFreeSpawnPoint(GameObject playerObject)
+        {
+            bool onFreePoint = false;
+            int size = spawnPoints.Length;
             for (int i = 0; i < size; i++)
             {
-                if (playersInCP[i].gameObject == other.gameObject)
+                if (!spawnPoints[i].playerOnPoint)
                 {
-                    if (playersInCP[i].GetPlayerTeam() != currentTeam) GameModeManager.INS.PlayerLeftEnemyBase(playersInCP[i]);
-                    playersInCP.RemoveAt(i);
+                    onFreePoint = true;
                     break;
                 }
             }
 
-            return;
+            if (!onFreePoint) return transform;
+
+            int random = Random.Range(0, size);
+            while (!spawnPoints[random].SpawnPlayer(playerObject)) random = Random.Range(0, size);
+            return spawnPoints[random].MyTransform;
         }
-
-        base.OnTriggerExit(other);
-    }
-
-    public Transform GetFreeSpawnPoint(GameObject playerObject)
-    {
-        bool onFreePoint = false;
-        int size = spawnPoints.Length;
-        for (int i = 0; i < size; i++)
-        {
-            if (!spawnPoints[i].playerOnPoint)
-            {
-                onFreePoint = true;
-                break;
-            }
-        }
-
-        if (!onFreePoint) return transform;
-
-        int random = Random.Range(0, size);
-        while (!spawnPoints[random].SpawnPlayer(playerObject)) random = Random.Range(0, size);
-        return spawnPoints[random].MyTransform;
     }
 }

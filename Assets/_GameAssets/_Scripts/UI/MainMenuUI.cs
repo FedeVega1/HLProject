@@ -5,60 +5,63 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Rendering.HighDefinition;
 
-public class MainMenuUI : MonoBehaviour
+namespace HLProject
 {
-    enum UIState { MainMenu, ConnectToServer }
-
-    [SerializeField] CanvasGroup rayCastBlocker;
-    [SerializeField] RectTransform connectToServerPanel;
-    [SerializeField] TMP_InputField txtConnectToServer;
-    [SerializeField] HDAdditionalCameraData mainMenuCamera;
-    [SerializeField] UIOptions optionsMenu;
-
-    UIState currentState;
-
-    void Start()
+    public class MainMenuUI : MonoBehaviour
     {
-        txtConnectToServer.text = "localhost";
-        currentState = UIState.MainMenu;
+        enum UIState { MainMenu, ConnectToServer }
 
-        optionsMenu.Init();
-    }
+        [SerializeField] CanvasGroup rayCastBlocker;
+        [SerializeField] RectTransform connectToServerPanel;
+        [SerializeField] TMP_InputField txtConnectToServer;
+        [SerializeField] HDAdditionalCameraData mainMenuCamera;
+        [SerializeField] UIOptions optionsMenu;
 
-    void Update()
-    {
-        switch (currentState)
+        UIState currentState;
+
+        void Start()
         {
-            case UIState.ConnectToServer:
-                if (Input.GetKeyDown(KeyCode.Return))
-                    ConnectToServer();
-                break;
+            txtConnectToServer.text = "localhost";
+            currentState = UIState.MainMenu;
+
+            optionsMenu.Init();
         }
 
-        Cursor.lockState = CursorLockMode.Confined;
-    }
+        void Update()
+        {
+            switch (currentState)
+            {
+                case UIState.ConnectToServer:
+                    if (Input.GetKeyDown(KeyCode.Return))
+                        ConnectToServer();
+                    break;
+            }
 
-    public void StartGameServer() => GameManager.INS.CreateMatch();
+            Cursor.lockState = CursorLockMode.Confined;
+        }
 
-    public void CheckServerIP()
-    {
+        public void StartGameServer() => GameManager.INS.CreateMatch();
 
-    }
+        public void CheckServerIP()
+        {
 
-    public void ConnectToServer() => GameManager.INS.ConnectToServerByIP(txtConnectToServer.text);
+        }
 
-    public void ToggleConnectPanel(bool toggle)
-    {
-        connectToServerPanel.localScale = toggle ? Vector3.one : Vector3.zero;
-        rayCastBlocker.alpha = toggle ? 1 : 0;
-        rayCastBlocker.blocksRaycasts = rayCastBlocker.interactable = toggle;
-    }
+        public void ConnectToServer() => GameManager.INS.ConnectToServerByIP(txtConnectToServer.text);
 
-    public void QuitGame() => GameManager.INS.QuitGame();
+        public void ToggleConnectPanel(bool toggle)
+        {
+            connectToServerPanel.localScale = toggle ? Vector3.one : Vector3.zero;
+            rayCastBlocker.alpha = toggle ? 1 : 0;
+            rayCastBlocker.blocksRaycasts = rayCastBlocker.interactable = toggle;
+        }
 
-    public void DisableCameraBackground()
-    {
-        mainMenuCamera.clearColorMode = HDAdditionalCameraData.ClearColorMode.Color;
-        mainMenuCamera.backgroundColorHDR = new Color(0x11, 0x11, 0x11, 0xFF);
+        public void QuitGame() => GameManager.INS.QuitGame();
+
+        public void DisableCameraBackground()
+        {
+            mainMenuCamera.clearColorMode = HDAdditionalCameraData.ClearColorMode.Color;
+            mainMenuCamera.backgroundColorHDR = new Color(0x11, 0x11, 0x11, 0xFF);
+        }
     }
 }

@@ -4,19 +4,22 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class UITeamSelection : MonoBehaviour
+namespace HLProject
 {
-    [SerializeField] TMP_Text[] lblTeams;
-    [SerializeField] CanvasGroup teamSelectionCanvasGroup;
-
-    public void Init()
+    public class UITeamSelection : MonoBehaviour
     {
-        for (int i = 0; i < TeamManager.MAXTEAMS; i++) lblTeams[i].text = TeamManager.FactionNames[i];
-    }
+        [SerializeField] TMP_Text[] lblTeams;
+        [SerializeField] CanvasGroup teamSelectionCanvasGroup;
 
-    public void ToggleTeamSelection(bool toggle)
-    {
-        teamSelectionCanvasGroup.alpha = toggle ? 1 : 0;
-        teamSelectionCanvasGroup.interactable = teamSelectionCanvasGroup.blocksRaycasts = toggle;
+        public void Init()
+        {
+            for (int i = 0; i < TeamManager.MAXTEAMS; i++) lblTeams[i].text = TeamManager.FactionNames[i];
+        }
+
+        public void ToggleTeamSelection(bool toggle)
+        {
+            teamSelectionCanvasGroup.alpha = toggle ? 1 : 0;
+            teamSelectionCanvasGroup.interactable = teamSelectionCanvasGroup.blocksRaycasts = toggle;
+        }
     }
 }

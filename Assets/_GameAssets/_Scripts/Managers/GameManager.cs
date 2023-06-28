@@ -6,279 +6,282 @@ using UnityEngine.AddressableAssets;
 using Mirror;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-public class VideoOptions
+namespace HLProject
 {
-    int _EnableMainMenuBackgrounds = -1;
-    public bool EnableMainMenuBackgrounds
+    public class VideoOptions
     {
-        get
+        int _EnableMainMenuBackgrounds = -1;
+        public bool EnableMainMenuBackgrounds
         {
-            if (_EnableMainMenuBackgrounds == -1)
+            get
             {
-                if (PlayerPrefs.HasKey("MainMenuBackgrounds"))
+                if (_EnableMainMenuBackgrounds == -1)
                 {
-                    _EnableMainMenuBackgrounds = PlayerPrefs.GetInt("MainMenuBackgrounds");
+                    if (PlayerPrefs.HasKey("MainMenuBackgrounds"))
+                    {
+                        _EnableMainMenuBackgrounds = PlayerPrefs.GetInt("MainMenuBackgrounds");
+                    }
+                    else
+                    {
+                        _EnableMainMenuBackgrounds = 1;
+                        PlayerPrefs.SetInt("MainMenuBackgrounds", _EnableMainMenuBackgrounds);
+                    }
                 }
-                else
-                {
-                    _EnableMainMenuBackgrounds = 1;
-                    PlayerPrefs.SetInt("MainMenuBackgrounds", _EnableMainMenuBackgrounds);
-                }
+
+                return _EnableMainMenuBackgrounds == 1;
             }
 
-            return _EnableMainMenuBackgrounds == 1;
-        }
-
-        set
-        {
-            _EnableMainMenuBackgrounds = value ? 1 : 0;
-            PlayerPrefs.SetInt("MainMenuBackgrounds", _EnableMainMenuBackgrounds);
-        }
-    }
-
-    int _FullScreenMode = -1;
-    public FullScreenMode CurrentFullScreenMode
-    {
-        get
-        {
-            if (_FullScreenMode == -1)
+            set
             {
-                if (PlayerPrefs.HasKey("EnableFullscreen"))
+                _EnableMainMenuBackgrounds = value ? 1 : 0;
+                PlayerPrefs.SetInt("MainMenuBackgrounds", _EnableMainMenuBackgrounds);
+            }
+        }
+
+        int _FullScreenMode = -1;
+        public FullScreenMode CurrentFullScreenMode
+        {
+            get
+            {
+                if (_FullScreenMode == -1)
                 {
-                    _FullScreenMode = PlayerPrefs.GetInt("EnableFullscreen");
+                    if (PlayerPrefs.HasKey("EnableFullscreen"))
+                    {
+                        _FullScreenMode = PlayerPrefs.GetInt("EnableFullscreen");
+                    }
+                    else
+                    {
+                        _FullScreenMode = 1;
+                        PlayerPrefs.SetInt("EnableFullscreen", _FullScreenMode);
+                    }
                 }
-                else
-                {
-                    _FullScreenMode = 1;
-                    PlayerPrefs.SetInt("EnableFullscreen", _FullScreenMode);
-                }
+
+                return (FullScreenMode) _FullScreenMode;
             }
 
-            return (FullScreenMode) _FullScreenMode;
-        }
-
-        set
-        {
-            _FullScreenMode = (int) value;
-            PlayerPrefs.SetInt("EnableFullscreen", _FullScreenMode);
-            Screen.fullScreenMode = value;
-        }
-    }
-
-    int _CurrentResolution = -1;
-    public int CurrentResolution
-    {
-        get
-        {
-            if (_CurrentResolution == -1)
+            set
             {
-                if (PlayerPrefs.HasKey("CurrentResolution"))
+                _FullScreenMode = (int) value;
+                PlayerPrefs.SetInt("EnableFullscreen", _FullScreenMode);
+                Screen.fullScreenMode = value;
+            }
+        }
+
+        int _CurrentResolution = -1;
+        public int CurrentResolution
+        {
+            get
+            {
+                if (_CurrentResolution == -1)
                 {
-                    _CurrentResolution = PlayerPrefs.GetInt("CurrentResolution");
+                    if (PlayerPrefs.HasKey("CurrentResolution"))
+                    {
+                        _CurrentResolution = PlayerPrefs.GetInt("CurrentResolution");
+                    }
+                    else
+                    {
+                        _CurrentResolution = GetResolutionIndex(Screen.currentResolution);
+                        PlayerPrefs.SetInt("CurrentResolution", _CurrentResolution);
+                    }
                 }
-                else
-                {
-                    _CurrentResolution = GetResolutionIndex(Screen.currentResolution);
-                    PlayerPrefs.SetInt("CurrentResolution", _CurrentResolution);
-                }
+
+                return _CurrentResolution;
             }
 
-            return _CurrentResolution;
-        }
-
-        set
-        {
-            _CurrentResolution = value;
-            PlayerPrefs.SetInt("CurrentResolution", _CurrentResolution);
-
-            Resolution newRes = GetResolutionByIndex(_CurrentResolution);
-            Screen.SetResolution(newRes.width, newRes.height, CurrentFullScreenMode, newRes.refreshRateRatio);
-        }
-    }
-
-    int _CurrentQualityPreset = -1;
-    public int CurrentQualityPreset
-    {
-        get
-        {
-            if (_CurrentQualityPreset == -1)
+            set
             {
-                if (PlayerPrefs.HasKey("CurrentQualityPreset"))
+                _CurrentResolution = value;
+                PlayerPrefs.SetInt("CurrentResolution", _CurrentResolution);
+
+                Resolution newRes = GetResolutionByIndex(_CurrentResolution);
+                Screen.SetResolution(newRes.width, newRes.height, CurrentFullScreenMode, newRes.refreshRateRatio);
+            }
+        }
+
+        int _CurrentQualityPreset = -1;
+        public int CurrentQualityPreset
+        {
+            get
+            {
+                if (_CurrentQualityPreset == -1)
                 {
-                    _CurrentQualityPreset = PlayerPrefs.GetInt("CurrentQualityPreset");
+                    if (PlayerPrefs.HasKey("CurrentQualityPreset"))
+                    {
+                        _CurrentQualityPreset = PlayerPrefs.GetInt("CurrentQualityPreset");
+                    }
+                    else
+                    {
+                        _CurrentQualityPreset = QualitySettings.GetQualityLevel();
+                        PlayerPrefs.SetInt("CurrentQualityPreset", _CurrentQualityPreset);
+                    }
                 }
-                else
-                {
-                    _CurrentQualityPreset = QualitySettings.GetQualityLevel();
-                    PlayerPrefs.SetInt("CurrentQualityPreset", _CurrentQualityPreset);
-                }
+
+                return _CurrentQualityPreset;
             }
 
-            return _CurrentQualityPreset;
-        }
-
-        set
-        {
-            _CurrentQualityPreset = value;
-            PlayerPrefs.SetInt("CurrentQualityPreset", _CurrentQualityPreset);
-
-            QualitySettings.SetQualityLevel(_CurrentQualityPreset, true);
-        }
-    }
-
-    Resolution[] resArray = Screen.resolutions;
-
-    int GetResolutionIndex(Resolution res)
-    {
-        int size = resArray.Length;
-
-        for (int i = 0; i < size; i++)
-        {
-            if (resArray[i].width == res.width && resArray[i].height == res.height && resArray[i].refreshRateRatio.value == res.refreshRateRatio.value)
-                return i;
-        }
-
-        return 0;
-    }
-
-    Resolution GetResolutionByIndex(int index) => resArray[index];
-}
-
-public class GameManager : MonoBehaviour
-{
-    public static GameManager INS;
-
-    [SerializeField] NetManager netManager;
-    [SerializeField] UILoadingScreen loadingScreen;
-
-    string _PlayerName = "";
-    public string PlayerName 
-    { 
-        get
-        {
-            if (_PlayerName == "")
+            set
             {
-                if (PlayerPrefs.HasKey("PlayerName"))
-                {
-                    _PlayerName = PlayerPrefs.GetString("PlayerName");
-                }
-                else
-                {
-                    _PlayerName = "AnonPlayer";
-                    PlayerPrefs.SetString("PlayerName", _PlayerName);
-                }
+                _CurrentQualityPreset = value;
+                PlayerPrefs.SetInt("CurrentQualityPreset", _CurrentQualityPreset);
+
+                QualitySettings.SetQualityLevel(_CurrentQualityPreset, true);
+            }
+        }
+
+        Resolution[] resArray = Screen.resolutions;
+
+        int GetResolutionIndex(Resolution res)
+        {
+            int size = resArray.Length;
+
+            for (int i = 0; i < size; i++)
+            {
+                if (resArray[i].width == res.width && resArray[i].height == res.height && resArray[i].refreshRateRatio.value == res.refreshRateRatio.value)
+                    return i;
             }
 
-            return _PlayerName;
+            return 0;
         }
 
-        private set
-        {
-            _PlayerName = value;
-            PlayerPrefs.SetString("PlayerName", _PlayerName);
-        }
+        Resolution GetResolutionByIndex(int index) => resArray[index];
     }
 
-    public VideoOptions VideoOptions { get; private set; }
-
-    bool returningtoMainMenu;
-    AsyncOperationHandle<IList<GameObject>> backgroundsLoadHandle;
-
-    void Awake()
+    public class GameManager : MonoBehaviour
     {
-        if (INS == null)
+        public static GameManager INS;
+
+        [SerializeField] NetManager netManager;
+        [SerializeField] UILoadingScreen loadingScreen;
+
+        string _PlayerName = "";
+        public string PlayerName
         {
-            INS = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
+            get
+            {
+                if (_PlayerName == "")
+                {
+                    if (PlayerPrefs.HasKey("PlayerName"))
+                    {
+                        _PlayerName = PlayerPrefs.GetString("PlayerName");
+                    }
+                    else
+                    {
+                        _PlayerName = "AnonPlayer";
+                        PlayerPrefs.SetString("PlayerName", _PlayerName);
+                    }
+                }
 
-        DontDestroyOnLoad(gameObject);
-        SceneManager.sceneLoaded += (_, __) => OnLoadedScene();
+                return _PlayerName;
+            }
 
-        VideoOptions = new VideoOptions();
-    }
-
-    void Start() => LoadAssets();
-
-    void OnDestroy()
-    {
-        Addressables.Release(backgroundsLoadHandle);
-    }
-
-    void LoadAssets()
-    {
-        backgroundsLoadHandle = Addressables.LoadAssetsAsync<GameObject>("MainMenuBackgrounds", null);
-        backgroundsLoadHandle.Completed += OnBackgroundLoaded;
-    }
-
-    void OnBackgroundLoaded(AsyncOperationHandle<IList<GameObject>> operation)
-    {
-        if (operation.Status == AsyncOperationStatus.Failed)
-        {
-            Debug.LogErrorFormat("Couldn't load MainMenu backgrounds: {0}", operation.OperationException);
-            return;
+            private set
+            {
+                _PlayerName = value;
+                PlayerPrefs.SetString("PlayerName", _PlayerName);
+            }
         }
 
-        InitMainMenu();
-    }
+        public VideoOptions VideoOptions { get; private set; }
 
-    void InitMainMenu()
-    {
-        if (VideoOptions.EnableMainMenuBackgrounds) 
-            Instantiate(backgroundsLoadHandle.Result[Random.Range(0, backgroundsLoadHandle.Result.Count)]);
-    }
+        bool returningtoMainMenu;
+        AsyncOperationHandle<IList<GameObject>> backgroundsLoadHandle;
 
-    public void QuitGame() => Application.Quit();
-
-    public void CreateMatch()
-    {
-        ShowLoadingScreen(netManager.StartHost);
-    }
-
-    public void ConnectToServerByIP(string serverIP)
-    {
-        netManager.networkAddress = serverIP;
-        ShowLoadingScreen(netManager.StartClient);
-    }
-
-    public void StopServer()
-    {
-        ShowLoadingScreen(() => 
-        { 
-            netManager.StopHost();
-            returningtoMainMenu = true;
-        });
-    }
-
-    public void DisconnectFromServer()
-    {
-        ShowLoadingScreen(() =>
+        void Awake()
         {
-            netManager.StopClient(); 
-            returningtoMainMenu = true;
-        });
-    }
+            if (INS == null)
+            {
+                INS = this;
+            }
+            else
+            {
+                Destroy(gameObject);
+                return;
+            }
 
-    public void OnLoadedScene()
-    {
-        if (loadingScreen != null) loadingScreen.HideLoadingScreen();
-        if (returningtoMainMenu) InitMainMenu();
-    }
+            DontDestroyOnLoad(gameObject);
+            SceneManager.sceneLoaded += (_, __) => OnLoadedScene();
 
-    void ShowLoadingScreen(System.Action OnLoadingScreenShown)
-    {
-        if (loadingScreen != null) loadingScreen.ShowLoadingScreen();
-        LeanTween.value(0, 1, .5f).setOnComplete(() => { OnLoadingScreenShown?.Invoke(); });
-    }
+            VideoOptions = new VideoOptions();
+        }
 
-    public void ServerChangeLevel()
-    {
-        ShowLoadingScreen(() => { netManager.ServerChangeScene(netManager.onlineScene); });
-    }
+        void Start() => LoadAssets();
 
-    public string SetPlayerName(string newName) => PlayerName = newName;
+        void OnDestroy()
+        {
+            Addressables.Release(backgroundsLoadHandle);
+        }
+
+        void LoadAssets()
+        {
+            backgroundsLoadHandle = Addressables.LoadAssetsAsync<GameObject>("MainMenuBackgrounds", null);
+            backgroundsLoadHandle.Completed += OnBackgroundLoaded;
+        }
+
+        void OnBackgroundLoaded(AsyncOperationHandle<IList<GameObject>> operation)
+        {
+            if (operation.Status == AsyncOperationStatus.Failed)
+            {
+                Debug.LogErrorFormat("Couldn't load MainMenu backgrounds: {0}", operation.OperationException);
+                return;
+            }
+
+            InitMainMenu();
+        }
+
+        void InitMainMenu()
+        {
+            if (VideoOptions.EnableMainMenuBackgrounds)
+                Instantiate(backgroundsLoadHandle.Result[Random.Range(0, backgroundsLoadHandle.Result.Count)]);
+        }
+
+        public void QuitGame() => Application.Quit();
+
+        public void CreateMatch()
+        {
+            ShowLoadingScreen(netManager.StartHost);
+        }
+
+        public void ConnectToServerByIP(string serverIP)
+        {
+            netManager.networkAddress = serverIP;
+            ShowLoadingScreen(netManager.StartClient);
+        }
+
+        public void StopServer()
+        {
+            ShowLoadingScreen(() =>
+            {
+                netManager.StopHost();
+                returningtoMainMenu = true;
+            });
+        }
+
+        public void DisconnectFromServer()
+        {
+            ShowLoadingScreen(() =>
+            {
+                netManager.StopClient();
+                returningtoMainMenu = true;
+            });
+        }
+
+        public void OnLoadedScene()
+        {
+            if (loadingScreen != null) loadingScreen.HideLoadingScreen();
+            if (returningtoMainMenu) InitMainMenu();
+        }
+
+        void ShowLoadingScreen(System.Action OnLoadingScreenShown)
+        {
+            if (loadingScreen != null) loadingScreen.ShowLoadingScreen();
+            LeanTween.value(0, 1, .5f).setOnComplete(() => { OnLoadingScreenShown?.Invoke(); });
+        }
+
+        public void ServerChangeLevel()
+        {
+            ShowLoadingScreen(() => { netManager.ServerChangeScene(netManager.onlineScene); });
+        }
+
+        public string SetPlayerName(string newName) => PlayerName = newName;
+    }
 }

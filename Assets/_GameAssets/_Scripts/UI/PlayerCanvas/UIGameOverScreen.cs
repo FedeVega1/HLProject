@@ -5,43 +5,46 @@ using UnityEngine.UI;
 using TMPro;
 using Mirror;
 
-public class UIGameOverScreen : MonoBehaviour
+namespace HLProject
 {
-    [SerializeField] CanvasGroup gameOverCanvasGroup;
-    [SerializeField] TMP_Text[] lblTeamTickets;
-    [SerializeField] Image[] imgTeamIcons;
-    [SerializeField] TMP_Text lblLoosingTeam, lblTimeToChangeLevel;
-
-    bool onScreen;
-    double timeToChangeLevel;
-
-    void Update()
+    public class UIGameOverScreen : MonoBehaviour
     {
-        if (!onScreen) return;
+        [SerializeField] CanvasGroup gameOverCanvasGroup;
+        [SerializeField] TMP_Text[] lblTeamTickets;
+        [SerializeField] Image[] imgTeamIcons;
+        [SerializeField] TMP_Text lblLoosingTeam, lblTimeToChangeLevel;
 
-        double time = timeToChangeLevel - NetworkTime.time;
-        if (time <= 0) return;
+        bool onScreen;
+        double timeToChangeLevel;
 
-        lblTimeToChangeLevel.text = $"Time to change level: {System.Math.Round(time, 0)}";
-    }
+        void Update()
+        {
+            if (!onScreen) return;
 
-    public void Init(ref Sprite[] teamSprites)
-    {
-        int size = teamSprites.Length;
-        for (int i = 1; i < size; i++) imgTeamIcons[i - 1].sprite = teamSprites[i];
-    }
+            double time = timeToChangeLevel - NetworkTime.time;
+            if (time <= 0) return;
 
-    public void ShowGameOverScreen(int loosingTeam, int[] tickets, double time)
-    {
-        timeToChangeLevel = time;
-        lblTimeToChangeLevel.text = $"Time to change level: {time}";
+            lblTimeToChangeLevel.text = $"Time to change level: {System.Math.Round(time, 0)}";
+        }
 
-        lblLoosingTeam.text = loosingTeam != -1 ? $"{TeamManager.FactionNames[loosingTeam]} lost" : "Draw";
+        public void Init(ref Sprite[] teamSprites)
+        {
+            int size = teamSprites.Length;
+            for (int i = 1; i < size; i++) imgTeamIcons[i - 1].sprite = teamSprites[i];
+        }
 
-        int size = TeamManager.MAXTEAMS;
-        for (int i = 0; i < size; i++) lblTeamTickets[i].text = tickets[i].ToString();
-        LeanTween.alphaCanvas(gameOverCanvasGroup, 1, .15f);
+        public void ShowGameOverScreen(int loosingTeam, int[] tickets, double time)
+        {
+            timeToChangeLevel = time;
+            lblTimeToChangeLevel.text = $"Time to change level: {time}";
 
-        onScreen = true;
+            lblLoosingTeam.text = loosingTeam != -1 ? $"{TeamManager.FactionNames[loosingTeam]} lost" : "Draw";
+
+            int size = TeamManager.MAXTEAMS;
+            for (int i = 0; i < size; i++) lblTeamTickets[i].text = tickets[i].ToString();
+            LeanTween.alphaCanvas(gameOverCanvasGroup, 1, .15f);
+
+            onScreen = true;
+        }
     }
 }
