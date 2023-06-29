@@ -5,7 +5,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace HLProject
 {
-    [RequireComponent(typeof(OnCollideSound))]
+    [RequireComponent(typeof(AudioSource))]
     public class OnCollideSound : MonoBehaviour
     {
         [SerializeField] List<AssetReference> randomSoundsToPlay;

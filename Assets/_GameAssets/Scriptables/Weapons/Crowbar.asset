@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: Crowbar
   clientPrefab: {fileID: 8219420985294490289, guid: 2d53601c1e2f435448dcb25524c53ed8, type: 3}
-  propPrefab: {fileID: 0}
+  propPrefab: {fileID: 3034316941136978740, guid: a36c5617b4b27ef4b95c7cae47273cb2, type: 3}
   bulletData: {fileID: 0}
   maxBulletSpread: 0
   weaponWeight: 500

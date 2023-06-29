@@ -28,14 +28,14 @@ namespace HLProject
             virtualHitSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "WeaponSounds/Crowbar", "FireSound" }, null, Addressables.MergeMode.Intersection);
             virtualSwingSoundsHandle.Completed += OnWeaponSoundsComplete;
 
-            /*inspectionSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(inspectionSounds, null, Addressables.MergeMode.Union);
-            inspectionSoundsHandle.Completed += OnWeaponSoundsComplete;*/
+            inspectionSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(inspectionSounds, null, Addressables.MergeMode.Union);
+            inspectionSoundsHandle.Completed += OnWeaponSoundsComplete;
         }
 
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            //Addressables.Release(inspectionSoundsHandle);
+            Addressables.Release(inspectionSoundsHandle);
         }
 
         protected override void Update()
@@ -68,8 +68,6 @@ namespace HLProject
         void RandomIdleAnim()
         {
             if (onScopeAim) return;
-            //int randomIdle = Random.Range(0, 2);
-            //weaponAnim.SetInteger("RandomIdle", randomIdle);
             weaponAnim.SetTrigger("InspectIdle");
 
             if (handleInspectionSoundsRoutine != null)
@@ -157,22 +155,16 @@ namespace HLProject
                 StopCoroutine(handleInspectionSoundsRoutine);
         }
 
-        IEnumerator HanldeInspectionSound()//int randomIdle)
+        IEnumerator HanldeInspectionSound()
         {
-            /*if (randomIdle == 1)
-            {
-                yield return new WaitForSeconds(.65f);
-                virtualAudioSource.pitch = 1;
-                virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[0]);
-                yield break;
-            }*/
+            virtualAudioSource.pitch = 1;
+            virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[0]);
 
-            yield return new WaitForSeconds(.96f);
-            /*virtualAudioSource.pitch = 1;
+            yield return new WaitForSeconds(1.75f);
             virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[1]);
 
-            yield return new WaitForSeconds(1.14f);
-            virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[2]);*/
+            yield return new WaitForSeconds(2.15f);
+            virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[2]);
         }
     }
 }

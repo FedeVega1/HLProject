@@ -12,11 +12,13 @@ namespace HLProject
         [SerializeField] List<AssetReference> reloadSounds, inspectionSounds;
         [SerializeField] Transform bulletCasingPivot;
         [SerializeField] Rigidbody bulletCasingPrefab;
+        [SerializeField] Vector3 sprintOffset;
 
         bool lastWalkCheck, lastRunningCheck, isFiring;
         int delayTweenID = -1;
         float randomInspectTime, movementSoundTime;
         Coroutine handleInspectionSoundsRoutine;
+        Vector3 lastGunPos;
 
         AsyncOperationHandle<IList<AudioClip>> virtualShootSoundsHandle, reloadSoundsHandle, inspectionSoundsHandle;
         AsyncOperationHandle<AudioClip> lowAmmoSoundHandle, zoomInSoundHandle, zoomOutSoundHandle;
@@ -206,7 +208,21 @@ namespace HLProject
                 }
             }
 
-            if (isRunning != lastRunningCheck) weaponAnim.SetBool("Sprint", isRunning);
+            if (isRunning != lastRunningCheck)
+            {
+                if (isRunning)
+                {
+                    lastGunPos = viewModels[(int) currentActiveViewModel].transform.localPosition;
+                    LeanTween.moveLocal(viewModels[(int) currentActiveViewModel], sprintOffset, .2f);
+                }
+                else
+                {
+                    //viewModels[(int) currentActiveViewModel].transform.localPosition = lastGunPos;
+                    LeanTween.moveLocal(viewModels[(int) currentActiveViewModel], lastGunPos, .2f);
+                }
+
+                weaponAnim.SetBool("Sprint", isRunning);
+            }
 
             lastWalkCheck = isMoving;
             lastRunningCheck = isRunning;

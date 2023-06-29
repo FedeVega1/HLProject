@@ -20,8 +20,6 @@ namespace HLProject
         [SerializeField] protected AudioClip deploySound;
         [SerializeField] protected Vector3 aimPosition;
         [SerializeField] protected Quaternion aimRotation;
-        [SerializeField] Transform meleeHitPoint;
-        [SerializeField] Bounds meleeHitBox;
 
         public Transform WeaponRootBone => weaponRootBone;
 
@@ -200,20 +198,11 @@ namespace HLProject
 
         public void ToggleWeaponSway(bool toggle) => enableWeaponSway = toggle;
 
-        public Bounds GetMeleeHitBox() => meleeHitBox;
-        public Transform GetMeleeHitPoint() => meleeHitPoint;
-
         public Animator GetCurrentViewmodelAnimator() => viewModels[(int) currentActiveViewModel].GetComponentInChildren<Animator>();
 
 #if UNITY_EDITOR
         void OnDrawGizmosSelected()
         {
-            if (meleeHitPoint != null)
-            {
-                Gizmos.color = Color.red;
-                Gizmos.DrawWireCube(meleeHitPoint.position + meleeHitBox.center, meleeHitBox.size);
-            }
-
             if (virtualBulletPivot == null) return;
             Debug.DrawRay(virtualBulletPivot.position, virtualBulletPivot.forward, Color.red, Time.deltaTime);
         }

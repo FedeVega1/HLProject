@@ -251,10 +251,6 @@ MonoBehaviour:
   deploySound: {fileID: 8300000, guid: d3b6ded7f03c2f2458f60658f0a54f6a, type: 3}
   aimPosition: {x: -0.34, y: 0.03, z: -0.07}
   aimRotation: {x: -0.017449746, y: -0.00030458733, z: 0.0174498, w: -0.9996954}
-  meleeHitPoint: {fileID: 0}
-  meleeHitBox:
-    m_Center: {x: 0, y: 0, z: 0}
-    m_Extent: {x: 0, y: 0, z: 0}
   weaponAnim: {fileID: 2141567596152882556}
   reloadSounds:
   - m_AssetGUID: 96e97789df72fe14e8ad8fd7efcbbc78
@@ -292,6 +288,7 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   bulletCasingPivot: {fileID: 7801568151234230273}
   bulletCasingPrefab: {fileID: 170406477161654109, guid: 1560892d3cfacef4bbf8d6fe3f8f2c28, type: 3}
+  sprintOffset: {x: -0.16, y: 0.077, z: -0.73}
 --- !u!1001 &2077485798794677695
 PrefabInstance:
   m_ObjectHideFlags: 0
