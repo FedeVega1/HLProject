@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbc436bff5906864d8060ea6fbb33a4f, type: 3}
+  m_Name: SMG1
+  m_EditorClassIdentifier: 
+  weaponName: SMG1
+  clientPrefab: {fileID: 5294691519935721278, guid: c219f4e6fc2b26d4e92f5e4f76429741, type: 3}
+  propPrefab: {fileID: 4628130916506816131, guid: da9a76bf3a9aeb3419ac06abe3139d50, type: 3}
+  bulletData: {fileID: 11400000, guid: 4eadb97707037ad4dacc66138da84899, type: 2}
+  maxBulletSpread: 0
+  weaponWeight: 1900
+  meleeDamage: 0
+  weaponType: 2
+  weaponAnimsTiming:
+    initFire: 0
+    fireMaxDelay: 0
+    reload: 0
+    holster: 0
+    draw: 0
+    zoomInSpeed: 0
+    zoomOutSpeed: 0
+    meleeHitboxIn: 0
+    meleeHitboxOut: 0
+  bulletsPerMag: 45
+  mags: 6

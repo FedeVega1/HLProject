@@ -47,6 +47,8 @@ namespace HLProject
 
                 HandPosConstrains[weaponBones[i].name].constraintActive = true;
                 HandRotConstrains[weaponBones[i].name].constraintActive = true;
+
+                Debug.Log(weaponBones[i].name);
             }
         }
 

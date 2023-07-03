@@ -77,7 +77,7 @@ namespace HLProject
             randomInspectTime = Time.time + Random.Range(20f, 40f);
         }
 
-        public override void MeleeSwing(bool didHit, bool killHit)
+        public override void MeleeSwing(bool didHit, bool playerHit, bool killHit)
         {
             if (!isDrawn) return;
 

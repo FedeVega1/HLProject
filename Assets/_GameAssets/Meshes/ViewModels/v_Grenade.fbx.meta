@@ -3,7 +3,27 @@ guid: c4390ccc1ee10044da9f6ef07a8a50d6
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: grenade body
+    second: {fileID: 2100000, guid: cd1efb8c5c11f46408b92a18d16fdcee, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: grenadetop
+    second: {fileID: 2100000, guid: c2d8dc6767808254e901cc0b0c44aa99, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: handle
+    second: {fileID: 2100000, guid: 2d42b36c2ce5009429e7456c09ad307c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: rim
+    second: {fileID: 2100000, guid: 74843297e96af5a43a57326600caeed2, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

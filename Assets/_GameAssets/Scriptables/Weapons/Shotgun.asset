@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbc436bff5906864d8060ea6fbb33a4f, type: 3}
+  m_Name: Shotgun
+  m_EditorClassIdentifier: 
+  weaponName: Shotgun
+  clientPrefab: {fileID: 5652844147881647559, guid: b0d63857b7a68d540a1cff2ebc36eb80, type: 3}
+  propPrefab: {fileID: 6210242672777419000, guid: 3b2e7015edbfff649a7af6d75b4616f9, type: 3}
+  bulletData: {fileID: 11400000, guid: eb260e7d56f888a47b176b40b4921359, type: 2}
+  maxBulletSpread: 0
+  weaponWeight: 4400
+  meleeDamage: 0
+  weaponType: 2
+  weaponAnimsTiming:
+    initFire: 0
+    fireMaxDelay: 0
+    reload: 0
+    holster: 0
+    draw: 0
+    zoomInSpeed: 0
+    zoomOutSpeed: 0
+    meleeHitboxIn: 0
+    meleeHitboxOut: 0
+  bulletsPerMag: 6
+  mags: 30

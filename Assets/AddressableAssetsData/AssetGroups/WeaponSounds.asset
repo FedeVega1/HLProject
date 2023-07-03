@@ -554,6 +554,264 @@ MonoBehaviour:
     m_SerializedLabels:
     - ShellSound
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c4b150c7e97548e4a81dde4bb95beef3
+    m_Address: spark1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Stunstick
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b0d93a4a84d273b4e88ea4e4eabce0aa
+    m_Address: spark2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Stunstick
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9f6a984aca6136f4aa1636819e9ee54b
+    m_Address: spark3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Stunstick
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 962e8f124ed08144ab97e1979ba08567
+    m_Address: spark4
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Stunstick
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b44025b62bdfca0479c271cbe358d20e
+    m_Address: stunstick_deploy
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Stunstick
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 92288b9b0a7ea084eba2da77fc2b6732
+    m_Address: stunstick_fleshhit1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - FleshHitSound
+    - WeaponSounds/Stunstick
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 778bd9eec03af99469914a28bafae932
+    m_Address: stunstick_fleshhit2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - FleshHitSound
+    - WeaponSounds/Stunstick
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8058d322b80611c4ba8cc9ee22ae4788
+    m_Address: stunstick_fleshhit3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - FleshHitSound
+    - WeaponSounds/Stunstick
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5597cc2440822994ca09fbaa64b3c9f9
+    m_Address: stunstick_impact1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - FireSound
+    - WeaponSounds/Stunstick
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b479951d7e7718047a5a75db2af7f6bf
+    m_Address: stunstick_impact2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - FireSound
+    - WeaponSounds/Stunstick
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 50f75a9cfb1ef244989e1d8edc089420
+    m_Address: stunstick_impact3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - FireSound
+    - WeaponSounds/Stunstick
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 88501df06ba57b04c838baf68a86b372
+    m_Address: stunstick_swing1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - SwingSound
+    - WeaponSounds/Stunstick
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3e2a313abc88cb04d8373325b0c282ca
+    m_Address: stunstick_swing2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - SwingSound
+    - WeaponSounds/Stunstick
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8bae488da5b0a44498682560c8ad1668
+    m_Address: stunstick_swing3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - SwingSound
+    - WeaponSounds/Stunstick
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8ec75f1d83bfba247897d45b526e66f3
+    m_Address: shotgun_bolt_back
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8b9e3ce0997aa5c41a5cf3081c2570c0
+    m_Address: shotgun_bolt_forward
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4b74c28cd04cd554c99fbf5409edaa76
+    m_Address: shotgun_cock
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 17b0d83b748d8d64c88c669e400a8ea5
+    m_Address: shotgun_cock_back1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 027ecf58d0192434dad601818bfe56ab
+    m_Address: shotgun_cock_back2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ee5413bc77269c14e8a2bbdbdc8c4782
+    m_Address: shotgun_cock_back3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 000f3c089b04f2d4c8c28b1ca1d5ceeb
+    m_Address: shotgun_cock_forward1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e2285130ccdf09f4d976b14bd891e6b5
+    m_Address: shotgun_cock_forward2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6ec3c1d7c4265d840b994562b542d9eb
+    m_Address: shotgun_cock_forward3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 83d76d5ef22b863489f7c7a3475a9ada
+    m_Address: shotgun_dbl_fire1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6aab91f42a95cf44eabbb0dcb8689d5d
+    m_Address: shotgun_dbl_fire2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c157a819fe700b743911d316da2f98b6
+    m_Address: shotgun_dbl_fire3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: baceb6ea03638a948a26852b8c9a0c2c
+    m_Address: shotgun_deploy
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 55549acb08448b240a5a2c33c558ab05
+    m_Address: shotgun_fire1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    - FireSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aa9206754e32cad4d8536fe1779721e7
+    m_Address: shotgun_fire2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    - FireSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fe403412d3fd1074d8c484a5708a8a0b
+    m_Address: shotgun_fire3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    - FireSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 333e66ad416e4f44fb21c8f4269a2870
+    m_Address: shotgun_reload1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    - ReloadSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c9ee7b3ad51ea284d8fa801936021f52
+    m_Address: shotgun_reload2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    - ReloadSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a079616a0b05cc3489c05380d698a81d
+    m_Address: shotgun_reload3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    - ReloadSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4a5273d74a3b59d4bbc3fb314eea5fc8
+    m_Address: shotgun_reload4
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    - ReloadSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4a461680e8fcba8499b7e36d90aa16d6
+    m_Address: shotgun_reload5
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    - ReloadSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 782067fb5fdd50949ad1a276ed311ab6
+    m_Address: shotgun_reload6
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    - ReloadSound
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8011a23bfd13b4e41b9ef2efd9ac1a00
+    m_Address: spas_sling1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2f8e92316aeb922409274d171687491e
+    m_Address: spas_sling2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7dd3ba699f204b845a5a96b7ef8631ba
+    m_Address: spas_sling3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 506b9be8b6b01734db17e14243487069
+    m_Address: spas_sling4
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponSounds/Shotgun
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 3cf91d3a9f4e16f4dbcc0b305a57378e, type: 2}
   m_SchemaSet:

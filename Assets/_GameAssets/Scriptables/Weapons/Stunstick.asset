@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbc436bff5906864d8060ea6fbb33a4f, type: 3}
+  m_Name: Stunstick
+  m_EditorClassIdentifier: 
+  weaponName: Stunstick
+  clientPrefab: {fileID: 348199105780317059, guid: 8d5b09057541bd4489a6517d4934addb, type: 3}
+  propPrefab: {fileID: 4183911160793651234, guid: 87686ace98ef5f6429851bf1f4a54c32, type: 3}
+  bulletData: {fileID: 0}
+  maxBulletSpread: 0
+  weaponWeight: 500
+  meleeDamage: 40
+  weaponType: 0
+  weaponAnimsTiming:
+    initFire: 0
+    fireMaxDelay: 0.75
+    reload: 0
+    holster: 0.375
+    draw: 0.96
+    zoomInSpeed: 0
+    zoomOutSpeed: 0
+    meleeHitboxIn: 0.125
+    meleeHitboxOut: 0.25
+  bulletsPerMag: 0
+  mags: 0

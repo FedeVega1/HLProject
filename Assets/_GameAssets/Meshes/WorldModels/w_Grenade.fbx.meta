@@ -3,7 +3,12 @@ guid: df51cbf5c77f3a64d89f2a1cd23215fa
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: W_grenadesheet
+    second: {fileID: 2100000, guid: df770c31fd997084592f50bc87f2d431, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

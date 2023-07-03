@@ -121,7 +121,7 @@ namespace HLProject
             });
         }
 
-        public virtual void MeleeSwing(bool didHit, bool killHit) { }
+        public virtual void MeleeSwing(bool didHit, bool playerHit, bool killHit) { }
 
         public abstract void EmptyFire();
 

@@ -114,7 +114,7 @@ namespace HLProject
         {
             int quantity = Physics.OverlapBoxNonAlloc(firePivot.position, new Vector3(.5f, 1, .5f), meleeCollider, firePivot.rotation, weaponLayerMask);
 
-            bool killHit = false;
+            bool killHit = false, playerHit = false;
             for (int i = 0; i < quantity; i++)
             {
                 HitBox hitBox = meleeCollider[i].GetComponent<HitBox>();
@@ -127,6 +127,7 @@ namespace HLProject
                         break;
                     }
 
+                    playerHit = true;
                     continue;
                 }
 
@@ -134,7 +135,7 @@ namespace HLProject
             }
 
             bool hit = quantity > 0;
-            clientWeapon.MeleeSwing(hit, killHit);
+            clientWeapon.MeleeSwing(hit, playerHit, killHit);
             netWeapon.CmdRequestFire();
             wTime = NetworkTime.time + weaponData.weaponAnimsTiming.fireMaxDelay;
         }

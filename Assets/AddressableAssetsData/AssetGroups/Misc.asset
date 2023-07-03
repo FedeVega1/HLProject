@@ -58,6 +58,24 @@ MonoBehaviour:
     m_SerializedLabels:
     - TeamClasses
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eec28b6f150b4e147ac6c1b009dbdcce
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/MetrocopShock.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7afed0422e2293147821e8023a902209
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/Combine Shotgunner.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1275b38d36cde28459455ba5eb7aa64e
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/Rebel Shotgunner.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 3cf91d3a9f4e16f4dbcc0b305a57378e, type: 2}
   m_SchemaSet:
