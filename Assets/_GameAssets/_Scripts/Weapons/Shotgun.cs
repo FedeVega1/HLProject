@@ -59,6 +59,7 @@ namespace HLProject
             Addressables.Release(lowAmmoSoundHandle);
             Addressables.Release(zoomInSoundHandle);
             Addressables.Release(zoomOutSoundHandle);
+            Addressables.Release(inspectionSoundsHandle);
         }
 
         void OnWeaponSoundComplete(AsyncOperationHandle<AudioClip> operation)

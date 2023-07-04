@@ -812,6 +812,36 @@ MonoBehaviour:
     m_SerializedLabels:
     - WeaponSounds/Shotgun
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2dbef978d2413b7409dac33510131ad3
+    m_Address: grenade_lob
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5b55b1747cdb8564f940017a9c0f724d
+    m_Address: grenade_ready
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 478d39bdbf9410c45963bf13d2482e86
+    m_Address: grenade_throw
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b8b77c507b254f54087273a3dc34b7d1
+    m_Address: pin_pull
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5bc522dda904aec40aae88b36038e802
+    m_Address: tick1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e50f72859c92891479fbd2ac0dc36ff0
+    m_Address: draw_grenade
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 3cf91d3a9f4e16f4dbcc0b305a57378e, type: 2}
   m_SchemaSet:

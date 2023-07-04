@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbc436bff5906864d8060ea6fbb33a4f, type: 3}
+  m_Name: Grenade
+  m_EditorClassIdentifier: 
+  weaponName: 
+  clientPrefab: {fileID: 4375675641660897313, guid: 6806e1956f91f3440983b1f692a1f397, type: 3}
+  propPrefab: {fileID: 5024598332638949063, guid: f2ce6bc24df6f694a8966ad266c7bcaa, type: 3}
+  bulletData: {fileID: 11400000, guid: c850eadc633789f45bdf5f4e9a389765, type: 2}
+  maxBulletSpread: 0
+  weaponWeight: 680
+  meleeDamage: 0
+  meleeDamageType: 0
+  weaponType: 3
+  weaponAnimsTiming:
+    initFire: 0
+    fireMaxDelay: 0
+    reload: 0
+    holster: 0
+    draw: 0
+    zoomInSpeed: 0
+    zoomOutSpeed: 0
+    meleeHitboxIn: 0
+    meleeHitboxOut: 0
+    shotgunPumpFireMaxDelay: 0
+    initReload: 0
+  bulletsPerMag: 1
+  mags: 5
+  pelletsPerShot: 1
