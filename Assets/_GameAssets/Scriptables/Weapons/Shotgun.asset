@@ -16,7 +16,7 @@ MonoBehaviour:
   clientPrefab: {fileID: 5652844147881647559, guid: b0d63857b7a68d540a1cff2ebc36eb80, type: 3}
   propPrefab: {fileID: 6210242672777419000, guid: 3b2e7015edbfff649a7af6d75b4616f9, type: 3}
   bulletData: {fileID: 11400000, guid: eb260e7d56f888a47b176b40b4921359, type: 2}
-  maxBulletSpread: 0.1
+  maxBulletSpread: 0.08
   weaponWeight: 4400
   meleeDamage: 0
   meleeDamageType: 0

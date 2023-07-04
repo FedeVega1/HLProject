@@ -6,7 +6,7 @@ namespace HLProject
     public class WeaponDataEditor : Editor
     {
         SerializedProperty weaponName, clientPrefab, propPrefab, bulletData, maxBulletSpread, weaponWeight, meleeDamage,
-            weaponType, weaponAnimsTiming, bulletsPerMag, mags, meleeDamageType;
+            weaponType, weaponAnimsTiming, bulletsPerMag, mags, meleeDamageType, pelletsPerShot;
 
         void OnEnable()
         {
@@ -21,7 +21,8 @@ namespace HLProject
             weaponAnimsTiming = serializedObject.FindProperty("weaponAnimsTiming");
             bulletsPerMag = serializedObject.FindProperty("bulletsPerMag");
             mags = serializedObject.FindProperty("mags");
-            meleeDamageType = serializedObject.FindProperty("meleeDamageType");
+            pelletsPerShot = serializedObject.FindProperty("pelletsPerShot");
+            meleeDamageType = serializedObject.FindProperty("meleeDamageType"); 
         }
 
         public override void OnInspectorGUI()
@@ -50,6 +51,7 @@ namespace HLProject
                     EditorGUILayout.PropertyField(maxBulletSpread);
                     EditorGUILayout.PropertyField(bulletsPerMag);
                     EditorGUILayout.PropertyField(mags);
+                    EditorGUILayout.PropertyField(pelletsPerShot);
                     break;
             }
 
