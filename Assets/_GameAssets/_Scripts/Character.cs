@@ -5,17 +5,18 @@ using Mirror;
 
 namespace HLProject
 {
-    public enum DamageType { Base, Bleed, Bullet, Explosion }
+    public enum DamageType { Base, Bleed, Bullet, Explosion, Blunt, Shock }
 
     public class Character : CachedNetTransform
     {
         [Header("Character")]
 
         [SerializeField] protected float maxHealth, maxArmor;
-        [SerializeField] protected float maxBleedTime;
-        [SerializeField] protected float bleedThreshold;
+        [SerializeField] protected float maxBleedTime, bleedThreshold, maxShockTime;
         [SerializeField][SyncVar] protected bool isInvencible;
 
+        [SyncVar] protected bool onShock;
+        [SyncVar] protected double shockTime;
         [SyncVar] protected bool isDead;
         [SyncVar(hook = nameof(OnHealthChange))] protected float currentHealth;
         [SyncVar(hook = nameof(OnArmorChange))] protected float currentArmor;
@@ -47,7 +48,14 @@ namespace HLProject
 
         protected virtual void Update()
         {
-            if (!isServer || isDead || !isBleeding || NetworkTime.time < bleedTime) return;
+            if (!isServer || isDead) return;
+
+            if (onShock && NetworkTime.time >= shockTime)
+            {
+                onShock = false;
+            }
+
+            if (!isBleeding || NetworkTime.time < bleedTime) return;
 
             TakeDamage(1, DamageType.Bleed);
             bleedTime = NetworkTime.time + maxBleedTime;
@@ -67,11 +75,21 @@ namespace HLProject
                     damageToArmor = 0;
                     break;
 
+                case DamageType.Blunt:
+                    if (!isBleeding) bleedTime = NetworkTime.time + maxBleedTime;
+                    isBleeding = true;
+                    break;
+
+                case DamageType.Shock:
+                    onShock = true;
+                    shockTime = NetworkTime.time + maxShockTime;
+                    break;
+
                 default:
                     if (currentArmor <= 0 && ammount >= bleedThreshold)
                     {
+                        if (!isBleeding) bleedTime = NetworkTime.time + maxBleedTime;
                         isBleeding = true;
-                        bleedTime = NetworkTime.time + maxBleedTime;
                     }
                     break;
             }
@@ -88,6 +106,7 @@ namespace HLProject
             }
 
             currentHealth -= Mathf.Clamp(dmgToHealth, 0, 9999999);
+            RpcCharacterTookDamage(ammount, damageType);
 
             print($"Character {name} took {ammount} of {damageType} damage - DamageToArmor: {damageToArmor} - DamageToHealth: {dmgToHealth}");
             if (currentHealth <= 0) CharacterDies(damageType == DamageType.Base);
@@ -128,6 +147,12 @@ namespace HLProject
         protected virtual void RpcCharacterDied()
         {
             Destroy(gameObject);
+        }
+
+        [ClientRpc]
+        protected virtual void RpcCharacterTookDamage(float ammount, DamageType type)
+        {
+            Debug.LogFormat("Character took {0} of {1}", ammount, type);
         }
     }
 }

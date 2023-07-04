@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine.Networking;
 using UnityEngine;
 using Mirror;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.HighDefinition;
 
 namespace HLProject
 {
@@ -30,6 +32,10 @@ namespace HLProject
         protected PlayerInventory inventory;
         protected TeamClassData classData;
 
+        float originalMaxExposure;
+        Volume playerLocalVolume;
+        Exposure exposureComponent;
+
         #region Hooks
 
         void OnTeamChange(int oldTeam, int newTeam) => print($"{playerName} Team is {newTeam}");
@@ -49,6 +55,9 @@ namespace HLProject
             PlayerCanvasScript.Init(this);
             movementScript.FreezeInputs = true;
             GameModeManager.INS.TeamManagerInstance.OnTicketChange += UpdateMatchTickets;
+
+            playerLocalVolume = movementScript.GetLocalVolumeFromVCam();
+            playerLocalVolume.profile.TryGet<Exposure>(out exposureComponent);
         }
 
         //public override void OnStartClient()
@@ -70,7 +79,17 @@ namespace HLProject
         {
             base.Update();
 
-            if (isLocalPlayer) CheckInputs();
+            if (isLocalPlayer)
+            {
+                if (onShock)
+                {
+                    double currentShockTime = 1 - (shockTime - NetworkTime.time);
+                    exposureComponent.limitMax.value = 14f * (float) currentShockTime;
+                }
+
+                CheckInputs();
+            }
+                
             if (isServer) PlayerWoundedUpdate();
         }
 
@@ -105,6 +124,7 @@ namespace HLProject
 
             if (Input.GetKeyDown(KeyCode.Delete)) GameModeManager.INS.KillPlayer(this);
             if (Input.GetKeyDown(KeyCode.F1)) GameModeManager.INS.EndMatch();
+            if (Input.GetKeyDown(KeyCode.F3)) TakeDamage(0, DamageType.Shock);
 
             //if (!PlayerCanvasScript.IsScoreboardMenuOpen && !PlayerCanvasScript.IsScoreboardMenuOpen && !PlayerCanvasScript.IsScoreboardMenuOpen && Input.GetKeyDown(KeyCode.Escape))
             //{
@@ -573,6 +593,23 @@ namespace HLProject
             }
 
             playerMesh.enabled = false;
+        }
+
+        [ClientRpc]
+        protected override void RpcCharacterTookDamage(float ammount, DamageType type)
+        {
+            base.RpcCharacterTookDamage(ammount, type);
+
+            switch (type)
+            {
+                case DamageType.Shock:
+                    if (isLocalPlayer)
+                    {
+                        originalMaxExposure = exposureComponent.limitMax.value;
+                        exposureComponent.limitMax.value = 0;
+                    }
+                    break;
+            }
         }
 
         #endregion

@@ -16,6 +16,7 @@ namespace HLProject
         public GameObject clientPrefab, propPrefab;
         public BulletData bulletData;
         public float maxBulletSpread, weaponWeight, meleeDamage;
+        public DamageType meleeDamageType;
         public WeaponType weaponType;
         public WeaponAnimationTimings weaponAnimsTiming;
         public int bulletsPerMag, mags;

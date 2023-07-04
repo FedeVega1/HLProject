@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
 using Mirror;
+using UnityEngine.Rendering;
 
 namespace HLProject
 {
@@ -295,5 +296,8 @@ namespace HLProject
 
         [Server]
         public void TogglePlayerRunAbility(bool toggle) => canRun = toggle;
+
+        [Client]
+        public Volume GetLocalVolumeFromVCam() => playerVCam.GetComponentInChildren<Volume>();
     }
 }

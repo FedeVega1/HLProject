@@ -19,6 +19,7 @@ MonoBehaviour:
   maxBulletSpread: 0
   weaponWeight: 500
   meleeDamage: 10
+  meleeDamageType: 4
   weaponType: 0
   weaponAnimsTiming:
     initFire: 0
