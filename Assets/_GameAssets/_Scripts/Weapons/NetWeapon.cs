@@ -103,7 +103,10 @@ namespace HLProject
                     break;
             }
 
-            fireTime = NetworkTime.time + weaponData.weaponAnimsTiming.fireMaxDelay;
+            if (weaponData.weaponName == "Shotgun" && owningPlayer.GetPlayerTeam() > 1)
+                fireTime = NetworkTime.time + weaponData.weaponAnimsTiming.shotgunPumpFireMaxDelay;
+            else
+                fireTime = NetworkTime.time + weaponData.weaponAnimsTiming.fireMaxDelay;
         }
 
         [Server]
@@ -122,42 +125,50 @@ namespace HLProject
         [Server]
         void ShootRayCastBullet()
         {
-            Ray weaponRay = new Ray(firePivot.position, firePivot.forward);
+            Ray weaponRay;
+            bool[] didHit = new bool[weaponData.pelletsPerShot];
+            Vector3[] hitVectors = new Vector3[weaponData.pelletsPerShot];
 
-            if (Physics.Raycast(weaponRay, out rayHit, bulletData.maxTravelDistance, weaponLayerMask))
+            for (int i = 0; i < weaponData.pelletsPerShot; i++)
             {
-                Vector3 hitPos = rayHit.point;
-
-                bool fallOffCheck = CheckBulletFallOff(ref weaponRay, ref rayHit, out float distance);
-                if (!fallOffCheck) hitPos = rayHit.point;
-                RpcFireWeapon(hitPos, true);
-
-                if (fallOffCheck)
+                weaponRay = new Ray(firePivot.position, firePivot.forward + Random.onUnitSphere * Random.Range(.01f, weaponData.maxBulletSpread));
+                if (Physics.Raycast(weaponRay, out rayHit, bulletData.maxTravelDistance, weaponLayerMask))
                 {
-                    StartCoroutine(ApplyDistanceToDamage(hitPos, rayHit.distance));
-                    Debug.DrawLine(weaponRay.origin, hitPos, Color.green, 5);
+                    hitVectors[i] = rayHit.point;
 
-                    //HitBox hitBox = rayHit.transform.GetComponent<HitBox>();
-                    //if (hitBox != null)
-                    //{
-                    //    StartCoroutine(ApplyDistanceToDamage(hitBox, rayHit.distance));
-                    //    Debug.DrawLine(weaponRay.origin, hitPos, Color.green, 5);
-                    //    return;
-                    //}
+                    bool fallOffCheck = CheckBulletFallOff(ref weaponRay, ref rayHit, out float distance);
+                    if (!fallOffCheck) hitVectors[i] = rayHit.point;
+                    didHit[i] = true;
+
+                    if (fallOffCheck)
+                    {
+                        StartCoroutine(ApplyDistanceToDamage(hitVectors[i], rayHit.distance));
+                        Debug.DrawLine(weaponRay.origin, hitVectors[i], Color.green, 5);
+
+                        //HitBox hitBox = rayHit.transform.GetComponent<HitBox>();
+                        //if (hitBox != null)
+                        //{
+                        //    StartCoroutine(ApplyDistanceToDamage(hitBox, rayHit.distance));
+                        //    Debug.DrawLine(weaponRay.origin, hitPos, Color.green, 5);
+                        //    return;
+                        //}
+                    }
+
+                    if (rayHit.collider != null) Debug.LogFormat("Server Fire! Range[{0}] - HitPoint: {1}|{2}", bulletData.maxTravelDistance, rayHit.point, rayHit.collider.name);
+                    //else RpcFireWeapon(weaponRay.origin + (weaponRay.direction * distance), false);
                 }
 
-                if (rayHit.collider != null) Debug.LogFormat("Server Fire! Range[{0}] - HitPoint: {1}|{2}", bulletData.maxTravelDistance, rayHit.point, rayHit.collider.name);
-                //else RpcFireWeapon(weaponRay.origin + (weaponRay.direction * distance), false);
+                Vector3 fallOff = Vector3.down * bulletData.fallOff;
+                hitVectors[i] = weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance);
+                didHit[i] = false;
+
+                Debug.DrawRay(weaponRay.origin, weaponRay.direction + fallOff, Color.red, 2);
+                Debug.DrawLine(weaponRay.origin, weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), Color.red, 2);
             }
 
-            bulletsInMag--;
             //if (bulletsInMag == 0) ScopeOut();
-
-            Vector3 fallOff = Vector3.down * bulletData.fallOff;
-            RpcFireWeapon(weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), false);
-
-            Debug.DrawRay(weaponRay.origin, weaponRay.direction + fallOff, Color.red, 2);
-            Debug.DrawLine(weaponRay.origin, weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), Color.red, 2);
+            bulletsInMag--;
+            RpcFireWeapon(hitVectors, didHit);
         }
 
         bool CheckBulletFallOff(ref Ray weaponRay, ref RaycastHit rayHit, out float distance)
@@ -200,8 +211,8 @@ namespace HLProject
             if (IsMelee || isReloading || onScope || bulletsInMag >= weaponData.bulletsPerMag || mags <= 0) return;
             owningPlayer.TogglePlayerRunAbility(false);
             isReloading = true;
-            RpcReloadWeapon();
-            StartCoroutine(ReloadRoutine());
+            RpcReloadWeapon(bulletsInMag - weaponData.bulletsPerMag);
+            StartCoroutine(ReloadRoutine(weaponData.weaponName == "Shotgun" ? (weaponData.bulletsPerMag - bulletsInMag) : 1));
         }
 
         [Server]
@@ -310,15 +321,17 @@ namespace HLProject
         }
 
         [ClientRpc(includeOwner = false)]
-        public void RpcFireWeapon(Vector3 destination, bool didHit)
+        public void RpcFireWeapon(Vector3[] destinations, bool[] didHit)
         {
-            clientWeapon.Fire(destination, didHit, -1);
+            int size = destinations.Length;
+            for (int i = 0; i < size; i++)
+                clientWeapon.Fire(destinations[i], didHit[i], -1);
         }
 
         [ClientRpc(includeOwner = false)]
-        public void RpcReloadWeapon()
+        public void RpcReloadWeapon(int bullets)
         {
-            clientWeapon.Reload();
+            clientWeapon.Reload(bullets);
         }
 
         [ClientRpc]
@@ -403,11 +416,11 @@ namespace HLProject
         }
 
         [Server]
-        IEnumerator ReloadRoutine()
+        IEnumerator ReloadRoutine(int bulletsToReload)
         {
-            yield return new WaitForSeconds(weaponData.weaponAnimsTiming.reload);
+            yield return new WaitForSeconds(weaponData.weaponAnimsTiming.reload * bulletsToReload);
             bulletsInMag = weaponData.bulletsPerMag;
-            mags--;
+            mags -= bulletsToReload;
             isReloading = false;
             owningPlayer.TogglePlayerRunAbility(true);
         }

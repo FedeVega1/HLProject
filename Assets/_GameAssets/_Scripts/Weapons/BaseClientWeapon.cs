@@ -25,7 +25,7 @@ namespace HLProject
 
         protected bool isServer, isDrawn, enableWeaponSway, onScopeAim, doingScopeAnim;
         protected ActiveViewModel currentActiveViewModel;
-        protected int scopeID = -1;
+        protected int scopeID = -1, currentPlayerTeam;
         protected Vector3 defaultWeaponPos;
         protected Vector3 swayFactor;
         protected Quaternion defaultWeaponRotation, lastCameraRotation;
@@ -165,7 +165,7 @@ namespace HLProject
             }).setOnComplete(() => { scopeID = -1; doingScopeAnim = false; }).uniqueId;
         }
 
-        public abstract void Reload();
+        public abstract void Reload(int bulletsToReload);
 
         public virtual void HolsterWeapon()
         {
@@ -199,6 +199,8 @@ namespace HLProject
         public void ToggleWeaponSway(bool toggle) => enableWeaponSway = toggle;
 
         public Animator GetCurrentViewmodelAnimator() => viewModels[(int) currentActiveViewModel].GetComponentInChildren<Animator>();
+
+        public void SetPlayerTeam(int team) => currentPlayerTeam = team;
 
 #if UNITY_EDITOR
         void OnDrawGizmosSelected()

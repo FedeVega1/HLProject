@@ -10,6 +10,7 @@ namespace HLProject
         {
             public float initFire, fireMaxDelay, reload, holster, draw;
             public float zoomInSpeed, zoomOutSpeed, meleeHitboxIn, meleeHitboxOut;
+            public float shotgunPumpFireMaxDelay, initReload;
         }
 
         public string weaponName;
@@ -19,6 +20,6 @@ namespace HLProject
         public DamageType meleeDamageType;
         public WeaponType weaponType;
         public WeaponAnimationTimings weaponAnimsTiming;
-        public int bulletsPerMag, mags;
+        public int bulletsPerMag, mags, pelletsPerShot = 1;
     }
 }

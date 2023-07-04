@@ -40,7 +40,7 @@ namespace HLProject
 
         }
 
-        public override void Reload() { }
+        public override void Reload(int bulletsToReload) { }
 
         public override void DrawWeapon()
         {

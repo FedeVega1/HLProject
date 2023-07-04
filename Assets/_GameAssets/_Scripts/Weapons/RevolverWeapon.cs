@@ -54,6 +54,8 @@ namespace HLProject
             Addressables.Release(reloadSoundsHandle);
             Addressables.Release(lowAmmoSoundHandle);
             Addressables.Release(inspectionSoundsHandle);
+            Addressables.Release(zoomInSoundHandle);
+            Addressables.Release(zoomOutSoundHandle);
         }
 
         void OnWeaponSoundComplete(AsyncOperationHandle<AudioClip> operation)
@@ -154,7 +156,7 @@ namespace HLProject
 
         public override void AltFire(Vector3 destination, bool didHit) { }
 
-        public override void Reload()
+        public override void Reload(int bulletsToReload)
         {
             weaponAnim.SetTrigger("Reload");
             weaponAnim.SetBool("IsReloading", true);

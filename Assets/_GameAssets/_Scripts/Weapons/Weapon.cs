@@ -55,6 +55,7 @@ namespace HLProject
             if (clientWeapon != null)
             {
                 clientWeapon.Init(false, weaponData, bulletData, weaponData.propPrefab);
+                clientWeapon.SetPlayerTeam(owningPlayer.GetPlayerTeam());
                 firePivot = clientWeapon.GetVirtualPivot();
             }
             else
@@ -83,28 +84,34 @@ namespace HLProject
                 return;
             }
 
-            Ray weaponRay = new Ray(firePivot.position, firePivot.forward);
-            if (Physics.Raycast(weaponRay, out rayHit, bulletData.maxTravelDistance, weaponLayerMask))
+            for (int i = 0; i < weaponData.pelletsPerShot; i++)
             {
-                Vector3 hitPos = rayHit.point;
-                bool fallOffCheck = CheckBulletFallOff(ref weaponRay, ref rayHit, out float distance);
+                Ray weaponRay = new Ray(firePivot.position, firePivot.forward + Random.onUnitSphere * Random.Range(.01f, weaponData.maxBulletSpread));
+                if (Physics.Raycast(weaponRay, out rayHit, bulletData.maxTravelDistance, weaponLayerMask))
+                {
+                    Vector3 hitPos = rayHit.point;
+                    bool fallOffCheck = CheckBulletFallOff(ref weaponRay, ref rayHit, out float distance);
 
-                if (!fallOffCheck) hitPos = rayHit.point;
-                clientWeapon.Fire(hitPos, true, BulletsInMag);
+                    if (!fallOffCheck) hitPos = rayHit.point;
+                    clientWeapon.Fire(hitPos, true, BulletsInMag);
 
-                if (rayHit.collider != null) Debug.LogFormat("Client Fire! Range[{0}] - HitPoint: {1}|{2}", bulletData.maxTravelDistance, rayHit.point, rayHit.collider.name);
-            }
-            else
-            {
-                Vector3 fallOff = Vector3.down * bulletData.fallOff;
-                clientWeapon.Fire(weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), false, BulletsInMag);
+                    if (rayHit.collider != null) Debug.LogFormat("Client Fire! Range[{0}] - HitPoint: {1}|{2}", bulletData.maxTravelDistance, rayHit.point, rayHit.collider.name);
+                }
+                else
+                {
+                    Vector3 fallOff = Vector3.down * bulletData.fallOff;
+                    clientWeapon.Fire(weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), false, BulletsInMag);
 
-                Debug.DrawRay(weaponRay.origin, weaponRay.direction + fallOff, Color.red, 2);
-                Debug.DrawLine(weaponRay.origin, weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), Color.red, 2);
+                    Debug.DrawRay(weaponRay.origin, weaponRay.direction + fallOff, Color.red, 2);
+                    Debug.DrawLine(weaponRay.origin, weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), Color.red, 2);
+                }
             }
 
             BulletsInMag--;
-            wTime = NetworkTime.time + weaponData.weaponAnimsTiming.fireMaxDelay;
+            if (weaponData.weaponName == "Shotgun" && owningPlayer.GetPlayerTeam() > 1)
+                wTime = NetworkTime.time + weaponData.weaponAnimsTiming.shotgunPumpFireMaxDelay;
+            else 
+                wTime = NetworkTime.time + weaponData.weaponAnimsTiming.fireMaxDelay;
 
             //if (BulletsInMag == 0) ScopeOut();
             netWeapon.CmdRequestFire();
@@ -195,17 +202,18 @@ namespace HLProject
         {
             if (isReloading || onScope || BulletsInMag >= weaponData.bulletsPerMag || Mags <= 0) return;
             isReloading = true;
-            clientWeapon.Reload();
-            StartCoroutine(ReloadRoutine());
+            int diff = weaponData.bulletsPerMag - BulletsInMag;
+            clientWeapon.Reload(diff);
+            StartCoroutine(ReloadRoutine(weaponData.weaponName == "Shotgun" ? diff : 1));
             netWeapon.CmdRequestReload();
         }
 
-        IEnumerator ReloadRoutine()
+        IEnumerator ReloadRoutine(int bullets)
         {
-            yield return new WaitForSeconds(weaponData.weaponAnimsTiming.reload);
+            yield return new WaitForSeconds(weaponData.weaponAnimsTiming.reload + bullets);
             isReloading = false;
             BulletsInMag = weaponData.bulletsPerMag;
-            Mags--;
+            Mags -= bullets;
             OnFinishedReload?.Invoke();
         }
 

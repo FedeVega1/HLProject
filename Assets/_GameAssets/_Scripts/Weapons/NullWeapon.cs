@@ -16,7 +16,7 @@ namespace HLProject
         public override void AltFire(Vector3 destination, bool didHit) { }
         public override void ScopeIn() { }
         public override void ScopeOut() { }
-        public override void Reload() { }
+        public override void Reload(int bulletsToReload) { }
         public override void DrawWeapon() { }
         public override void HolsterWeapon() { }
         public override void DropProp() { }
