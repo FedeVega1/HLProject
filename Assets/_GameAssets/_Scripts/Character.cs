@@ -72,6 +72,7 @@ namespace HLProject
             {
                 case DamageType.Base:
                 case DamageType.Bleed:
+                case DamageType.Explosion:
                     damageToArmor = 0;
                     break;
 

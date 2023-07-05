@@ -1,6 +1,9 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace HLProject
 {
@@ -8,12 +11,18 @@ namespace HLProject
     {
         [SerializeField] DecalProjector bulletDecal;
         [SerializeField] ParticleSystem explosionPS;
+        [SerializeField] AudioSource aSrc;
+        [SerializeField] MeshRenderer meshRenderer;
+        [SerializeField] AudioClip greandeTickSound;
 
         bool canTravel, canShowDecal, explodeOnHit, canExplode, isServer;
-        float speed, timeToExplode, radius;
+        float speed, timeToExplode, radius, grenadeTickTime, maxTimeToExplode;
         Vector3 startPosition;
         Vector3 destination;
         Rigidbody rb;
+
+        AsyncOperationHandle<IList<AudioClip>> normalExplosionSounds, underwaterExplosionSound, explosionDebris;
+        //AsyncOperationHandle<AudioClip> grenadeTickSoundHandle;
 
         public System.Action<List<HitBox>, Vector3, Quaternion> OnExplode;
 
@@ -21,6 +30,36 @@ namespace HLProject
         {
             rb = GetComponent<Rigidbody>();
         }
+
+        void LoadAssets()
+        {
+            if (!canExplode) return;
+            normalExplosionSounds = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "explode0", "explode1", "explode2", "explode3", "explode4", "explode5", "explode6", "explode7", "explode8" }, null, Addressables.MergeMode.Union);
+            normalExplosionSounds.Completed += OnSoundsLoaded;
+
+            explosionDebris = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "debris1", "debris2", "debris3", "debris4", "debris5", "debris6" }, null, Addressables.MergeMode.Union);
+            explosionDebris.Completed += OnSoundsLoaded;
+
+            /*grenadeTickSoundHandle = Addressables.LoadAssetAsync<AudioClip>("tick1");
+            grenadeTickSoundHandle.Completed += OnSoundLoaded;*/
+        }
+
+        void OnSoundsLoaded(AsyncOperationHandle<IList<AudioClip>> operation)
+        {
+            if (operation.Status == AsyncOperationStatus.Failed)
+                Debug.LogErrorFormat("Couldn't load Sounds for bullet: {0}", operation.OperationException);
+        }
+
+        private void OnDestroy()
+        {
+            Addressables.Release(normalExplosionSounds);
+        }
+
+        /*void OnSoundLoaded(AsyncOperationHandle<AudioClip> operation)
+        {
+            if (operation.Status == AsyncOperationStatus.Failed)
+                Debug.LogErrorFormat("Couldn't load sound for bullet: {0}", operation.OperationException);
+        }*/
 
         public void Init(float initialSpeed, bool showDecal)
         {
@@ -32,7 +71,21 @@ namespace HLProject
         {
             if (canExplode)
             {
-                if (Time.time < timeToExplode) return;
+                if (Time.time < timeToExplode)
+                {
+                    if (Time.time >= grenadeTickTime)
+                    {
+                        aSrc.PlayOneShot(greandeTickSound);
+                        float remainingTime = (timeToExplode - Time.time) / maxTimeToExplode;
+                        float pow = Mathf.Pow(remainingTime, 1.2f);
+                        if (pow < .18f) pow = .18f;
+                        grenadeTickTime = Time.time + pow;
+                        //Debug.LogFormat("{0} - {1} - {2} - {3}", (timeToExplode - Time.time), remainingTime, Mathf.Pow(remainingTime, 1.2f), grenadeTickTime);
+                    }
+
+                    return;
+                }
+
                 Explode();
                 return;
             }
@@ -78,10 +131,17 @@ namespace HLProject
             explodeOnHit = explodeOnTouch;
 
             this.timeToExplode = Time.time + timeToExplode;
+            maxTimeToExplode = timeToExplode;
             this.isServer = isServer;
 
             canExplode = true;
             radius = explosionRadious;
+            LoadAssets();
+
+            aSrc.PlayOneShot(greandeTickSound);
+            //float remainingTime = (this.timeToExplode - Time.time) / maxTimeToExplode;
+            grenadeTickTime = Time.time + 1;
+            //Debug.LogFormat("{0} - {1} - {2} - {3}", (this.timeToExplode - Time.time), remainingTime, Mathf.Pow(remainingTime, 4), grenadeTickTime);
         }
 
         void OnCollisionEnter(Collision collision) { if (canExplode && explodeOnHit) Explode(); }
@@ -114,9 +174,12 @@ namespace HLProject
                 {
                     bulletDecal.gameObject.SetActive(true);
                     bulletDecal.transform.position = MyTransform.position;
+                    bulletDecal.transform.rotation = Quaternion.identity;
                     bulletDecal.transform.SetParent(null);
                 }
-
+                
+                aSrc.PlayOneShot(normalExplosionSounds.Result[Random.Range(0, normalExplosionSounds.Result.Count)]);
+                LeanTween.delayedCall(1, () => aSrc.PlayOneShot(explosionDebris.Result[Random.Range(0, explosionDebris.Result.Count)]));
                 //GameObject areaDebug = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 //areaDebug.layer = LayerMask.NameToLayer("Debug");
                 //areaDebug.transform.position = MyTransform.position;
@@ -128,7 +191,14 @@ namespace HLProject
             }
 
             canExplode = false;
-            Destroy(gameObject);
+            meshRenderer.enabled = false;
+            StartCoroutine(WaitForSound(() => Destroy(gameObject)));
+        }
+
+        IEnumerator WaitForSound(System.Action endAction)
+        {
+            yield return new WaitUntil(() => !aSrc.isPlaying);
+            endAction?.Invoke();
         }
     }
 }

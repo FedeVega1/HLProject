@@ -84,6 +84,31 @@ namespace HLProject
                 return;
             }
 
+            switch (bulletData.type)
+            {
+                case BulletType.RayCast:
+                    HandleRaycast();
+                    BulletsInMag--;
+                    break;
+
+                case BulletType.Physics:
+                    clientWeapon.Fire(Vector3.zero, true, BulletsInMag);
+                    BulletsInMag = 0;
+                    Reload();
+                    break;
+            }
+
+            if (weaponData.weaponName == "Shotgun" && owningPlayer.GetPlayerTeam() > 1)
+                wTime = NetworkTime.time + weaponData.weaponAnimsTiming.shotgunPumpFireMaxDelay;
+            else 
+                wTime = NetworkTime.time + weaponData.weaponAnimsTiming.fireMaxDelay;
+
+            //if (BulletsInMag == 0) ScopeOut();
+            netWeapon.CmdRequestFire();
+        }
+
+        void HandleRaycast()
+        {
             for (int i = 0; i < weaponData.pelletsPerShot; i++)
             {
                 Ray weaponRay = new Ray(firePivot.position, firePivot.forward + Random.onUnitSphere * Random.Range(.01f, weaponData.maxBulletSpread));
@@ -106,15 +131,6 @@ namespace HLProject
                     Debug.DrawLine(weaponRay.origin, weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), Color.red, 2);
                 }
             }
-
-            BulletsInMag--;
-            if (weaponData.weaponName == "Shotgun" && owningPlayer.GetPlayerTeam() > 1)
-                wTime = NetworkTime.time + weaponData.weaponAnimsTiming.shotgunPumpFireMaxDelay;
-            else 
-                wTime = NetworkTime.time + weaponData.weaponAnimsTiming.fireMaxDelay;
-
-            //if (BulletsInMag == 0) ScopeOut();
-            netWeapon.CmdRequestFire();
         }
 
         void HandleMeleeSwing()

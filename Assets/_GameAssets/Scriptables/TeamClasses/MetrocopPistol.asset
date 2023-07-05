@@ -17,5 +17,5 @@ MonoBehaviour:
   teamSpecific: 1
   classVHands: 2
   classWeapons:
-  - {fileID: 11400000, guid: afaeaa6edbf5dae4eb1592eead827724, type: 2}
   - {fileID: 11400000, guid: 1fe7f61ed922f3d4c99c2e6d8c0d9a13, type: 2}
+  - {fileID: 11400000, guid: afaeaa6edbf5dae4eb1592eead827724, type: 2}

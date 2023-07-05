@@ -18,3 +18,4 @@ MonoBehaviour:
   classVHands: 1
   classWeapons:
   - {fileID: 11400000, guid: 5bed5d8b635cabd41a01bedae0d8e993, type: 2}
+  - {fileID: 11400000, guid: 980b792773e13124f861f1c51bf47757, type: 2}

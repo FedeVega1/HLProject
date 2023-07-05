@@ -98,12 +98,14 @@ namespace HLProject
                     break;
 
                 case BulletType.Physics:
-                    GameObject granade = Instantiate(bulletData.bulletPrefab, MyTransform.position + MyTransform.forward * 1.5f, MyTransform.rotation);
+                    GameObject granade = Instantiate(bulletData.bulletPrefab, firePivot.position + firePivot.forward, firePivot.rotation);
                     Bullet granadeBulletScript = granade.GetComponent<Bullet>();
                     granadeBulletScript.Init(bulletData.initialSpeed, true);
-                    granadeBulletScript.PhysicsTravelTo(true, firePivot.forward, bulletData.radius, false, bulletData.timeToExplode);
+
+                    granadeBulletScript.PhysicsTravelTo(true, Vector3.Normalize(firePivot.forward + Vector3.up * .5f), bulletData.radius, false, bulletData.timeToExplode);
                     granadeBulletScript.OnExplode += OnBulletExplode;
                     NetworkServer.Spawn(granade);
+                    Reload();
                     break;
             }
 

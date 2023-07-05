@@ -23,7 +23,7 @@ namespace HLProject
         {
             base.LoadAssets();
 
-            virtualShootSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "WeaponSounds/Grenade", "FireSound" }, null, Addressables.MergeMode.Intersection);
+            virtualShootSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "pin_pull", "grenade_throw" }, null, Addressables.MergeMode.Union);
             virtualShootSoundsHandle.Completed += OnWeaponSoundsComplete;
 
             inspectionSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "shotgun_bolt_back", "shotgun_bolt_forward" }, null, Addressables.MergeMode.Union);
@@ -49,16 +49,38 @@ namespace HLProject
             randomInspectTime = Time.time + Random.Range(20f, 40f);
         }
 
+        protected override void Update()
+        {
+            if (!isDrawn) return;
+            base.Update();
+
+            if (lastWalkCheck && Time.time >= movementSoundTime)
+            {
+                if (lastRunningCheck)
+                {
+                    virtualMovementSource.PlayOneShot(weaponSprintSoundsHandle.Result[Random.Range(0, weaponSprintSoundsHandle.Result.Count)]);
+                    movementSoundTime = Time.time + .4f;
+                    return;
+                }
+
+                virtualMovementSource.PlayOneShot(weaponWalkSoundsHandle.Result[Random.Range(0, weaponWalkSoundsHandle.Result.Count)]);
+                movementSoundTime = Time.time + .5f;
+            }
+
+            /*if (weaponAnim == null || Time.time < randomInspectTime) return;
+            RandomIdleAnim();*/
+        }
+
         public override void Fire(Vector3 destination, bool didHit, int ammo)
         {
             if (!isDrawn) return;
-            base.Fire(destination, didHit, ammo);
 
             if (handleInspectionSoundsRoutine != null) StopCoroutine(handleInspectionSoundsRoutine);
 
             weaponAnim.SetTrigger("Fire");
 
-            virtualAudioSource.PlayOneShot(virtualShootSoundsHandle.Result[Random.Range(0, virtualShootSoundsHandle.Result.Count)]);
+            virtualAudioSource.PlayOneShot(virtualShootSoundsHandle.Result[1]);
+            //virtualAudioSource.PlayOneShot(virtualShootSoundsHandle.Result[1]);
 
             weaponAnim.ResetTrigger("Walk");
             weaponAnim.ResetTrigger("Idle");

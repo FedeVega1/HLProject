@@ -5,6 +5,8 @@ using UnityEngine;
 using Mirror;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace HLProject
 {
@@ -16,6 +18,7 @@ namespace HLProject
         [SerializeField] protected MeshRenderer playerMesh;
         [SerializeField] protected PlayerMovement movementScript;
         [SerializeField] protected float woundedMaxTime;
+        [SerializeField] AudioSource localPlayerSource;
 
         [SyncVar(hook = nameof(OnTeamChange))] protected int playerTeam;
         [SyncVar] protected bool isWounded, firstSpawn;
@@ -32,9 +35,12 @@ namespace HLProject
         protected PlayerInventory inventory;
         protected TeamClassData classData;
 
+        int currentTweenEffectID = -1;
         float originalMaxExposure;
         Volume playerLocalVolume;
         Exposure exposureComponent;
+        MotionBlur motionBlurComponent;
+        AsyncOperationHandle<IList<AudioClip>> hearingLossSoundHandle;
 
         #region Hooks
 
@@ -58,6 +64,8 @@ namespace HLProject
 
             playerLocalVolume = movementScript.GetLocalVolumeFromVCam();
             playerLocalVolume.profile.TryGet<Exposure>(out exposureComponent);
+            playerLocalVolume.profile.TryGet<MotionBlur>(out motionBlurComponent);
+            LoadAssets();
         }
 
         //public override void OnStartClient()
@@ -114,6 +122,20 @@ namespace HLProject
         #region Client
 
         [Client]
+        protected virtual void LoadAssets()
+        {
+            hearingLossSoundHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "impairedhearing_1", "impairedhearing_2", "impairedhearing_3", "impairedhearing_4" }, null, Addressables.MergeMode.Union);
+            hearingLossSoundHandle.Completed += OnSoundsLoaded;
+        }
+
+        [Client]
+        protected virtual void OnSoundsLoaded(AsyncOperationHandle<IList<AudioClip>> operation)
+        {
+            if (operation.Status == AsyncOperationStatus.Failed)
+                Debug.LogErrorFormat("Couldn't load Sounds for local player: {0}", operation.OperationException);
+        }
+
+        [Client]
         protected virtual void CheckInputs()
         {
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Escape))
@@ -125,6 +147,7 @@ namespace HLProject
             if (Input.GetKeyDown(KeyCode.Delete)) GameModeManager.INS.KillPlayer(this);
             if (Input.GetKeyDown(KeyCode.F1)) GameModeManager.INS.EndMatch();
             if (Input.GetKeyDown(KeyCode.F3)) TakeDamage(0, DamageType.Shock);
+            if (Input.GetKeyDown(KeyCode.F4)) TakeDamage(0, DamageType.Explosion);
 
             //if (!PlayerCanvasScript.IsScoreboardMenuOpen && !PlayerCanvasScript.IsScoreboardMenuOpen && !PlayerCanvasScript.IsScoreboardMenuOpen && Input.GetKeyDown(KeyCode.Escape))
             //{
@@ -607,6 +630,20 @@ namespace HLProject
                     {
                         originalMaxExposure = exposureComponent.limitMax.value;
                         exposureComponent.limitMax.value = 0;
+                    }
+                    break;
+
+                case DamageType.Explosion:
+                    if (isLocalPlayer)
+                    {
+                        AudioClip clip = hearingLossSoundHandle.Result[Random.Range(0, hearingLossSoundHandle.Result.Count)];
+                        if (!localPlayerSource.isPlaying)
+                            localPlayerSource.PlayOneShot(clip);
+
+                        if (currentTweenEffectID != -1) LeanTween.cancel(currentTweenEffectID);
+                        motionBlurComponent.active = true;
+                        motionBlurComponent.intensity.value = 150;
+                        currentTweenEffectID = LeanTween.value(1, 0, clip.length).setOnUpdate((float x) => motionBlurComponent.intensity.value = x * 150f).setOnComplete(() => motionBlurComponent.active = false).uniqueId;
                     }
                     break;
             }

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbc436bff5906864d8060ea6fbb33a4f, type: 3}
   m_Name: Grenade
   m_EditorClassIdentifier: 
-  weaponName: 
+  weaponName: Grenade
   clientPrefab: {fileID: 4375675641660897313, guid: 6806e1956f91f3440983b1f692a1f397, type: 3}
   propPrefab: {fileID: 5024598332638949063, guid: f2ce6bc24df6f694a8966ad266c7bcaa, type: 3}
   bulletData: {fileID: 11400000, guid: c850eadc633789f45bdf5f4e9a389765, type: 2}
@@ -23,10 +23,10 @@ MonoBehaviour:
   weaponType: 3
   weaponAnimsTiming:
     initFire: 0
-    fireMaxDelay: 0
-    reload: 0
-    holster: 0
-    draw: 0
+    fireMaxDelay: 1.5
+    reload: 0.5
+    holster: 0.42
+    draw: 1.5
     zoomInSpeed: 0
     zoomOutSpeed: 0
     meleeHitboxIn: 0

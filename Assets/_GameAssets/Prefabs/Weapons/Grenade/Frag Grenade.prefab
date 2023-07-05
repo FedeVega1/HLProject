@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8252844010341807762}
   - component: {fileID: 8154795855475373337}
   - component: {fileID: 9203381972496372613}
+  - component: {fileID: 2474168874814496138}
   m_Layer: 0
   m_Name: Frag Grenade
   m_TagString: Untagged
@@ -37,7 +38,7 @@ Transform:
   - {fileID: 8706651982342917148}
   - {fileID: 335066448975132405}
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &670551652023092188
 CapsuleCollider:
@@ -104,7 +105,7 @@ MonoBehaviour:
   sceneId: 0
   serverOnly: 0
   visible: 0
-  m_AssetId: 81b4d6b6823c1794c8ff92d5b1fd7d48
+  m_AssetId: e4096f00017b76848b93d369ef56f5fa
   hasSpawned: 0
 --- !u!114 &8154795855475373337
 MonoBehaviour:
@@ -142,6 +143,105 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletDecal: {fileID: 8617560567586172561}
   explosionPS: {fileID: 6742584853937286690}
+  aSrc: {fileID: 2474168874814496138}
+  meshRenderer: {fileID: 4608820120636418339}
+  greandeTickSound: {fileID: 8300000, guid: 5bc522dda904aec40aae88b36038e802, type: 3}
+--- !u!82 &2474168874814496138
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2918623712023293449}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 25
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &4713950267596041392
 GameObject:
   m_ObjectHideFlags: 0
@@ -5108,6 +5208,11 @@ PrefabInstance:
 --- !u!4 &3440466061209309772 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: df51cbf5c77f3a64d89f2a1cd23215fa, type: 3}
+  m_PrefabInstance: {fileID: 2897016167670904231}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &4608820120636418339 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: df51cbf5c77f3a64d89f2a1cd23215fa, type: 3}
   m_PrefabInstance: {fileID: 2897016167670904231}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8076467702967704636
