@@ -76,6 +76,66 @@ MonoBehaviour:
     m_SerializedLabels:
     - TeamClasses
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1fe7f61ed922f3d4c99c2e6d8c0d9a13
+    m_Address: 9mm Pistol.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2dce0be5ee7e2a94d9d928b29c3d2436
+    m_Address: 357 Revolver.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 755c9b19adc7320489f809e7c25a0bea
+    m_Address: Crowbar.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 980b792773e13124f861f1c51bf47757
+    m_Address: Grenade.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5bed5d8b635cabd41a01bedae0d8e993
+    m_Address: Shotgun.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7e38726d4cf707e44b42e080d556f996
+    m_Address: SMG1.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: afaeaa6edbf5dae4eb1592eead827724
+    m_Address: Stunstick.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6a7f85c0540dcc24e80aca79ec8d64cb
+    m_Address: TestGranadeWeapon.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 86407aa0a0f00034b90e85dc6c1f109c
+    m_Address: TestPistol.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d5486f3c38a945441973d816979a3302
+    m_Address: TestSMG.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponScriptables
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 3cf91d3a9f4e16f4dbcc0b305a57378e, type: 2}
   m_SchemaSet:

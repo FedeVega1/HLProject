@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace HLProject
 {
@@ -31,6 +33,8 @@ namespace HLProject
         Transform firePivot;
         Collider[] raycastShootlastCollider;
         Coroutine meleeRoutine;
+
+        AsyncOperationHandle<WeaponData> clientSyncWeaponData;
 
         public override void OnStartClient()
         {
@@ -337,9 +341,22 @@ namespace HLProject
         [ClientRpc]
         void RpcSyncWeaponData(string weaponAssetName)//(int weaponID)
         {
-            if (weaponData == null) weaponData = Resources.Load<WeaponData>($"Weapons/{weaponAssetName}");
-            if (bulletData == null) bulletData = weaponData.bulletData;
+            if (weaponData != null) return;
+            clientSyncWeaponData = Addressables.LoadAssetAsync<WeaponData>(weaponAssetName + ".asset");
+            clientSyncWeaponData.Completed += OnClientSyncWeaponLoaded;
+        }
 
+        void OnClientSyncWeaponLoaded(AsyncOperationHandle<WeaponData> operation)
+        {
+            if (operation.Status == AsyncOperationStatus.Failed)
+            {
+                Debug.LogErrorFormat("Couldn't load the requested weapon: {0}", operation.OperationException);
+                return;
+            }
+
+            //if (weaponData == null) weaponData = Resources.Load<WeaponData>($"Weapons/{weaponAssetName}");
+            weaponData = clientSyncWeaponData.Result;
+            if (bulletData == null) bulletData = weaponData.bulletData;
             if (serverInitialized && clientWeapon == null) InitClientWeapon();
         }
 

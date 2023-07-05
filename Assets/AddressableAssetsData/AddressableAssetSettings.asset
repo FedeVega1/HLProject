@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: 1e47929d279ff724eab76cbf2ee375b6
   m_currentHash:
     serializedVersion: 2
-    Hash: 5c077d9d169c7adb277f08be0cf6db20
+    Hash: 2a8c1b16ff9f248ec0e5c898c7621550
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 0
   m_BundleLocalCatalog: 0
@@ -105,6 +105,7 @@ MonoBehaviour:
     - FleshHitSound
     - WeaponSounds/Stunstick
     - WeaponSounds/Shotgun
+    - WeaponScriptables
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: 504e4fa150fd28444925efc6824fe786, type: 2}
