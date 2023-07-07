@@ -19,16 +19,20 @@ MonoBehaviour:
   maxBulletSpread: 0
   weaponWeight: 1900
   meleeDamage: 0
+  meleeDamageType: 0
   weaponType: 2
   weaponAnimsTiming:
     initFire: 0
-    fireMaxDelay: 0
-    reload: 0
-    holster: 0
-    draw: 0
-    zoomInSpeed: 0
-    zoomOutSpeed: 0
+    fireMaxDelay: 0.08
+    reload: 2.71
+    holster: 0.42
+    draw: 1.33
+    zoomInSpeed: 0.25
+    zoomOutSpeed: 0.25
     meleeHitboxIn: 0
     meleeHitboxOut: 0
+    shotgunPumpFireMaxDelay: 0
+    initReload: 0
   bulletsPerMag: 45
   mags: 6
+  pelletsPerShot: 1

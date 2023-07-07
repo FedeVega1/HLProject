@@ -52,7 +52,8 @@ namespace HLProject
 
         private void OnDestroy()
         {
-            Addressables.Release(normalExplosionSounds);
+            if (normalExplosionSounds.IsValid() && normalExplosionSounds.IsDone) 
+                Addressables.Release(normalExplosionSounds);
         }
 
         /*void OnSoundLoaded(AsyncOperationHandle<AudioClip> operation)

@@ -10,11 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1195f7eb5de05504e9b544713461ba5e, type: 3}
-  m_Name: MetrocopSMG
+  m_Name: CombineSMG
   m_EditorClassIdentifier: 
-  className: Metrocop - SMG
-  classSprite: {fileID: 21300000, guid: 404f62ca882b9534ebf9e5e21ebb95ce, type: 3}
+  className: Combine - SMG
+  classSprite: {fileID: 21300000, guid: 9f427259b83344b48997593c7df9b1bc, type: 3}
   teamSpecific: 1
-  classVHands: 2
+  classVHands: 3
   classWeapons:
   - {fileID: 11400000, guid: 7e38726d4cf707e44b42e080d556f996, type: 2}
+  - {fileID: 11400000, guid: 980b792773e13124f861f1c51bf47757, type: 2}

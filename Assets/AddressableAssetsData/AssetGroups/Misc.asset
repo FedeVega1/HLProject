@@ -136,6 +136,18 @@ MonoBehaviour:
     m_SerializedLabels:
     - WeaponScriptables
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4240b9aca45d40b41933a8f1b9b4280d
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/CombineSMG.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 61a3d15b7d728de44b47b4f6d7fcd24e
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/SMG Rebel.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 3cf91d3a9f4e16f4dbcc0b305a57378e, type: 2}
   m_SchemaSet:
