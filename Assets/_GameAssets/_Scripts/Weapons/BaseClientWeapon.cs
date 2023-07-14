@@ -81,8 +81,19 @@ namespace HLProject
                 Debug.LogErrorFormat("Couldn't load Weapon Sounds: {0}", operation.OperationException);
         }
 
+        protected virtual void OnEnable()
+        {
+            AudioManager.INS.RegisterAudioSource(virtualAudioSource, AudioManager.AudioSourceTarget.CurrentWeapon);
+            AudioManager.INS.RegisterAudioSource(worldAudioSource, AudioManager.AudioSourceTarget.CurrentWeapon);
+            AudioManager.INS.RegisterAudioSource(virtualMovementSource, AudioManager.AudioSourceTarget.CurrentWeapon);
+        }
+
         protected virtual void OnDestroy()
         {
+            AudioManager.INS.UnRegisterAudioSource(virtualAudioSource, AudioManager.AudioSourceTarget.CurrentWeapon);
+            AudioManager.INS.UnRegisterAudioSource(worldAudioSource, AudioManager.AudioSourceTarget.CurrentWeapon);
+            AudioManager.INS.UnRegisterAudioSource(virtualMovementSource, AudioManager.AudioSourceTarget.CurrentWeapon);
+
             if (weaponWalkSoundsHandle.IsValid()) Addressables.Release(weaponWalkSoundsHandle);
             if (weaponWalkSoundsHandle.IsValid()) Addressables.Release(weaponSprintSoundsHandle);
             if (weaponWalkSoundsHandle.IsValid()) Addressables.Release(weaponMovSoundsHandle);
