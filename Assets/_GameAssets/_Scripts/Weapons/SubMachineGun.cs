@@ -69,8 +69,9 @@ namespace HLProject
             weaponAnim = weaponAnimators[isServer ? 0 : 1];
         }
 
-        void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
             randomInspectTime = Time.time + Random.Range(20f, 40f);
         }
 

@@ -148,6 +148,7 @@ namespace HLProject
 
                     if (fallOffCheck)
                     {
+
                         StartCoroutine(ApplyDistanceToDamage(hitVectors[i], rayHit.distance));
                         Debug.DrawLine(weaponRay.origin, hitVectors[i], Color.green, 5);
 
@@ -203,6 +204,20 @@ namespace HLProject
             }
 
             return true;
+        }
+
+        [Server]
+        void DoBulletFlyby(Ray ray, float distance)
+        {
+            RaycastHit[] hits = Physics.SphereCastAll(ray, .2f, distance, weaponLayerMask);
+
+            int size = hits.Length;
+            for (int i = 0; i < size; i++)
+            {
+                HitBox boxTarget = hits[i].transform.GetComponent<HitBox>();
+                if (boxTarget == null) continue;
+                boxTarget.GetCharacterScript().OnBulletFlyby(hits[i].point);
+            }
         }
 
         [Server]

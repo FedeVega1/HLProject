@@ -31,6 +31,9 @@ namespace HLProject
             rb = GetComponent<Rigidbody>();
         }
 
+        void OnEnable() => AudioManager.INS.RegisterAudioSource(aSrc, AudioManager.AudioSourceTarget.Other);
+        void OnDisable() => AudioManager.INS.UnRegisterAudioSource(aSrc, AudioManager.AudioSourceTarget.Other);
+
         void LoadAssets()
         {
             if (!canExplode) return;

@@ -40,6 +40,8 @@ namespace HLProject
         Volume playerLocalVolume;
         Exposure exposureComponent;
         MotionBlur motionBlurComponent;
+        DepthOfField depthOfFieldComponent;
+        Vignette vignetteComponent;
         AsyncOperationHandle<IList<AudioClip>> hearingLossSoundHandle;
 
         #region Hooks
@@ -65,6 +67,8 @@ namespace HLProject
             playerLocalVolume = movementScript.GetLocalVolumeFromVCam();
             playerLocalVolume.profile.TryGet<Exposure>(out exposureComponent);
             playerLocalVolume.profile.TryGet<MotionBlur>(out motionBlurComponent);
+            playerLocalVolume.profile.TryGet<DepthOfField>(out depthOfFieldComponent);
+            playerLocalVolume.profile.TryGet<Vignette>(out vignetteComponent);
             LoadAssets();
         }
 
@@ -95,14 +99,23 @@ namespace HLProject
                     exposureComponent.limitMax.value = 14f * (float) currentShockTime;
                 }
 
+                ClientHandlePlayerSuppression();
                 CheckInputs();
             }
-                
-            if (isServer) PlayerWoundedUpdate();
+
+            if (!isServer) return;
+            PlayerWoundedUpdate();
+            ServerHandlePlayerSuppression();
+        }
+
+        void OnEnable()
+        {
+            AudioManager.INS.RegisterAudioSource(localPlayerSource, AudioManager.AudioSourceTarget.LocalPlayer);
         }
 
         void OnDisable()
         {
+            AudioManager.INS.UnRegisterAudioSource(localPlayerSource, AudioManager.AudioSourceTarget.LocalPlayer);
             GameModeManager.INS.TeamManagerInstance.OnTicketChange -= UpdateMatchTickets;
         }
 
@@ -120,6 +133,21 @@ namespace HLProject
         #endregion
 
         #region Client
+
+        [Client]
+        void ClientHandlePlayerSuppression()
+        {
+            if (suppressionAmmount <= 0) return;
+            vignetteComponent.intensity.value = suppressionAmmount * .5f;
+
+            float invert = 1 - suppressionAmmount;
+
+            AudioManager.INS.CurrentWeaponVolume = Mathf.Clamp(invert, .08f, 1);
+            AudioManager.INS.OtherVolume = Mathf.Clamp(invert, .08f, 1);
+
+            depthOfFieldComponent.nearFocusEnd.value = suppressionAmmount * 10;
+            depthOfFieldComponent.farFocusEnd.value = invert * 80000;
+        }
 
         [Client]
         protected virtual void LoadAssets()
@@ -148,6 +176,8 @@ namespace HLProject
             if (Input.GetKeyDown(KeyCode.F1)) GameModeManager.INS.EndMatch();
             if (Input.GetKeyDown(KeyCode.F3)) TakeDamage(0, DamageType.Shock);
             if (Input.GetKeyDown(KeyCode.F4)) TakeDamage(0, DamageType.Explosion);
+            if (Input.GetKeyDown(KeyCode.F5)) TakeDamage(0, DamageType.Base);
+            if (Input.GetKeyDown(KeyCode.F6)) OnBulletFlyby(MyTransform.position + MyTransform.right * Random.Range(.05f, 1));
 
             //if (!PlayerCanvasScript.IsScoreboardMenuOpen && !PlayerCanvasScript.IsScoreboardMenuOpen && !PlayerCanvasScript.IsScoreboardMenuOpen && Input.GetKeyDown(KeyCode.Escape))
             //{
@@ -264,10 +294,23 @@ namespace HLProject
         #region Server
 
         [Server]
+        protected virtual void ServerHandlePlayerSuppression()
+        {
+            if (suppressionAmmount > .45f) movementScript.CameraSensMult = .5f;
+        }
+
+        [Server]
         public override void TakeDamage(float ammount, DamageType damageType = DamageType.Base)
         {
             if (isWounded) return;
             base.TakeDamage(ammount, damageType);
+
+            switch (damageType)
+            {
+                case DamageType.Explosion:
+                    movementScript.ShakeCamera(new Vector3(.55f, .55f, 0), 5, .55f);
+                    break;
+            }
         }
 
         [Server]
@@ -643,7 +686,26 @@ namespace HLProject
                         if (currentTweenEffectID != -1) LeanTween.cancel(currentTweenEffectID);
                         motionBlurComponent.active = true;
                         motionBlurComponent.intensity.value = 150;
-                        currentTweenEffectID = LeanTween.value(1, 0, clip.length).setOnUpdate((float x) => motionBlurComponent.intensity.value = x * 150f).setOnComplete(() => motionBlurComponent.active = false).uniqueId;
+
+                        depthOfFieldComponent.nearFocusEnd.value = 10;
+                        depthOfFieldComponent.farFocusEnd.value = 0;
+
+                        float weaponsStartingVolume = AudioManager.INS.CurrentWeaponVolume;
+                        float otherStartingVolume = AudioManager.INS.CurrentWeaponVolume;
+
+                        LeanTween.value(weaponsStartingVolume, .02f, .2f).setOnUpdate((float x) => AudioManager.INS.CurrentWeaponVolume = x);
+                        LeanTween.value(.02f, weaponsStartingVolume, .7f).setOnUpdate((float x) => AudioManager.INS.CurrentWeaponVolume = x).setDelay(clip.length * .6f);
+
+                        LeanTween.value(otherStartingVolume, .02f, .2f).setOnUpdate((float x) => AudioManager.INS.OtherVolume = x);
+                        LeanTween.value(.02f, otherStartingVolume, .7f).setOnUpdate((float x) => AudioManager.INS.OtherVolume = x).setDelay(clip.length * .6f);
+
+                        currentTweenEffectID = LeanTween.value(1, 0, .55f).setOnUpdate((float x) => motionBlurComponent.intensity.value = x * 150f).setOnComplete(() => motionBlurComponent.active = false).uniqueId;
+                        currentTweenEffectID = LeanTween.value(0, 1, .2f).setOnUpdate((float x) =>
+                        {
+                            depthOfFieldComponent.nearFocusEnd.value = (1 - x) * 10;
+                            depthOfFieldComponent.farFocusEnd.value = x * 80000;
+                            print(depthOfFieldComponent.farFocusEnd.value);
+                        }).setEaseOutQuad().setDelay(clip.length * .8f).uniqueId;
                     }
                     break;
             }

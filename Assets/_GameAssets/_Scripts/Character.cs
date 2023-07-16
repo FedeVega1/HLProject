@@ -18,13 +18,15 @@ namespace HLProject
         [SyncVar] protected bool onShock;
         [SyncVar] protected double shockTime;
         [SyncVar] protected bool isDead;
+        [SyncVar] protected float suppressionAmmount;
         [SyncVar(hook = nameof(OnHealthChange))] protected float currentHealth;
         [SyncVar(hook = nameof(OnArmorChange))] protected float currentArmor;
         [SyncVar(hook = nameof(OnBleedingSet))] protected bool isBleeding;
 
         public bool IsDead => isDead;
 
-        double bleedTime;
+        float suppressionTargetValue;
+        double bleedTime, suppressionTime;
 
         public System.Action OnPlayerDead;
 
@@ -50,6 +52,14 @@ namespace HLProject
         {
             if (!isServer || isDead) return;
 
+            if (suppressionAmmount > 0 && NetworkTime.time >= suppressionTime)
+            {
+                suppressionTargetValue = Mathf.Clamp01(suppressionTargetValue - Time.deltaTime * .5f);
+                suppressionTime = NetworkTime.time + .2f;
+            }
+
+            suppressionAmmount = Mathf.Lerp(suppressionAmmount, suppressionTargetValue, Time.deltaTime);
+
             if (onShock && NetworkTime.time >= shockTime)
             {
                 onShock = false;
@@ -62,6 +72,14 @@ namespace HLProject
         }
 
         [Server]
+        public virtual void ApplySuppression(float ammount)
+        {
+            suppressionAmmount = Mathf.Clamp01(suppressionAmmount + ammount);
+            suppressionTargetValue = suppressionAmmount;
+            suppressionTime = NetworkTime.time + .2f;
+        }
+
+        [Server]
         public virtual void TakeDamage(float ammount, DamageType damageType = DamageType.Base)
         {
             if (!isServer || isDead || isInvencible) return;
@@ -71,6 +89,10 @@ namespace HLProject
             switch (damageType)
             {
                 case DamageType.Base:
+                    damageToArmor = 0;
+                    ApplySuppression(.1f);
+                    break;
+
                 case DamageType.Bleed:
                 case DamageType.Explosion:
                     damageToArmor = 0;
@@ -79,11 +101,13 @@ namespace HLProject
                 case DamageType.Blunt:
                     if (!isBleeding) bleedTime = NetworkTime.time + maxBleedTime;
                     isBleeding = true;
+                    ApplySuppression(.01f);
                     break;
 
                 case DamageType.Shock:
                     onShock = true;
                     shockTime = NetworkTime.time + maxShockTime;
+                    ApplySuppression(.2f);
                     break;
 
                 default:
@@ -92,6 +116,8 @@ namespace HLProject
                         if (!isBleeding) bleedTime = NetworkTime.time + maxBleedTime;
                         isBleeding = true;
                     }
+
+                    ApplySuppression(.1f);
                     break;
             }
 
@@ -154,6 +180,14 @@ namespace HLProject
         protected virtual void RpcCharacterTookDamage(float ammount, DamageType type)
         {
             Debug.LogFormat("Character took {0} of {1}", ammount, type);
+        }
+
+        [Server]
+        public void OnBulletFlyby(Vector3 origin)
+        {
+            float dist = Vector3.Distance(MyTransform.position, origin);
+            ApplySuppression(.2f * (dist / 1));
+            Debug.LogFormat("Dist: {0} - Sup: {1}", dist, .1f * (dist / 1));
         }
     }
 }

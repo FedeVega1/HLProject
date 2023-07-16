@@ -56,15 +56,19 @@ namespace HLProject
         public bool PlayerIsMoving => playerMovInput.magnitude > 0;
         public bool PlayerIsRunning => canRun && CheckInput(inputFlags, InputFlag.Sprint);
 
+        public float CameraSensMult { get; set; }
+
         [SyncVar] bool onScope, canRun;
         [SyncVar] float currentWeaponWeight;
+        [SyncVar] Vector3 shakeOffset;
 
-        bool jumped;
+        bool jumped, canShakeCamera;
         InputFlag inputFlags;
-        float startHeight, playerSpeed, yAxisRotation;
+        float startHeight, playerSpeed, yAxisRotation, shakeIntensity, shakeEndTime;
         double jumpTimer;
+        Quaternion currentShakeRotationTarget;
         Vector2 playerMovInput, lastPlayerMovInput, cameraRotInput, lastCameraRotInput;
-        Vector3 velocity;
+        Vector3 velocity, shakeAmplitude;
 
         void OnFreezePlayerSet(bool oldValue, bool newValue)
         {
@@ -81,6 +85,7 @@ namespace HLProject
         {
             startHeight = CharCtrl.height;
             playerSpeed = maxWalkSpeed;
+            CameraSensMult = 1;
             canRun = true;
             ToggleCharacterController(false);
         }
@@ -96,6 +101,7 @@ namespace HLProject
 
             if (!isServer) return;
 
+            HandleSake();
             Move();
             RotateServer();
             Lean();
@@ -254,9 +260,9 @@ namespace HLProject
         [Client]
         void RotateClient()
         {
-            if (!isServer) return;
-            yAxisRotation += cameraRotInput.y * verticalSens * Time.deltaTime;
-            yAxisRotation = Mathf.Clamp(yAxisRotation, cameraYLimits.x, cameraYLimits.y);
+            if (!isLocalPlayer) return;
+            yAxisRotation += cameraRotInput.y * verticalSens * CameraSensMult * Time.deltaTime;
+            yAxisRotation = Mathf.Clamp(yAxisRotation + shakeOffset.y, cameraYLimits.x, cameraYLimits.y);
 
             playerVCam.transform.localEulerAngles = new Vector3(-yAxisRotation, 0, 0);
         }
@@ -264,11 +270,11 @@ namespace HLProject
         [Server]
         void RotateServer()
         {
-            float rotationX = MyTransform.localEulerAngles.y + cameraRotInput.x * horizontalSens * Time.deltaTime;
-            MyTransform.rotation = Quaternion.AngleAxis(rotationX, Vector3.up);
+            float rotationX = MyTransform.localEulerAngles.y + cameraRotInput.x * horizontalSens * CameraSensMult * Time.deltaTime;
+            MyTransform.rotation = Quaternion.AngleAxis(rotationX + shakeOffset.x, Vector3.up);
 
             yAxisRotation += cameraRotInput.y * verticalSens * Time.deltaTime;
-            yAxisRotation = Mathf.Clamp(yAxisRotation, cameraYLimits.x, cameraYLimits.y);
+            yAxisRotation = Mathf.Clamp(yAxisRotation + shakeOffset.y, cameraYLimits.x, cameraYLimits.y);
 
             fakeCameraPivot.localEulerAngles = new Vector3(-yAxisRotation, 0, 0);
         }
@@ -299,5 +305,31 @@ namespace HLProject
 
         [Client]
         public Volume GetLocalVolumeFromVCam() => playerVCam.GetComponentInChildren<Volume>();
+
+        [Server]
+        public void ShakeCamera(Vector3 amplitude, float intensity, float duration)
+        {
+            canShakeCamera = true;
+            shakeIntensity = intensity;
+            shakeAmplitude = amplitude;
+            shakeEndTime = duration;
+        }
+
+        [Server]
+        void HandleSake()
+        {
+            if (!canShakeCamera) return;
+            shakeEndTime -= Time.deltaTime;
+
+            if (shakeEndTime <= 0)
+            {
+                canShakeCamera = false;
+                shakeOffset = Vector3.zero;
+                return;
+            }
+
+            Vector3 noise = new Vector3(Random.Range(-.1f, .1f), Random.Range(-.1f, .1f), Random.Range(-.1f, .1f));
+            shakeOffset = new Vector3(Mathf.Sin((float) shakeEndTime * shakeAmplitude.x * noise.x) * shakeIntensity, Mathf.Sin((float) shakeEndTime * shakeAmplitude.y * noise.y) * shakeIntensity, Mathf.Sin((float) shakeEndTime * shakeAmplitude.z * noise.z) * shakeIntensity);
+        }
     }
 }
