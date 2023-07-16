@@ -23,7 +23,7 @@ MonoBehaviour:
   weaponType: 2
   weaponAnimsTiming:
     initFire: 0
-    fireMaxDelay: 0.08
+    fireMaxDelay: 0.085
     reload: 2.71
     holster: 0.42
     draw: 1.33
