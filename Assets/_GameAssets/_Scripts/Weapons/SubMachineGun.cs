@@ -186,17 +186,17 @@ namespace HLProject
         {
             Rigidbody rb = Instantiate(pistolMagazinePrefab, magazinePivot.position, magazinePivot.rotation);
             rb.AddForce(-MyTransform.up * 2, ForceMode.Impulse);
-            rb.AddTorque(Utilities.RandomVector3(Vector3.one, -1, 1) * 2, ForceMode.Impulse);
+            rb.AddTorque(Utilities.RandomVector3(Vector3.one, -1, 1) * 5, ForceMode.Impulse);
         }
 
         void SpawnCasing()
         {
             Rigidbody rb = Instantiate(pistolBulletCasingPrefab, bulletEffectPivot.position, bulletEffectPivot.rotation);
-            //Vector3 cross = Vector3.Cross(-MyTransform.forward, MyTransform.up * Random.Range(.5f, 1f));
-            float y = Random.Range(.5f, .65f);
-            Vector3 cross = Vector3.Normalize(new Vector3(1 - y, y, 0));
+            float y = Random.Range(.1f, .2f);
+            Vector3 cross = new Vector3(1 - y, y);
+
             Debug.DrawRay(bulletEffectPivot.position, cross, Color.red, 2);
-            rb.AddForce(cross * 6, ForceMode.Impulse);
+            rb.AddForce(MyTransform.TransformDirection(cross) * 6, ForceMode.Impulse);
             rb.AddTorque(Utilities.RandomVector3(Vector3.one, -1, 1) * 25);
         }
 

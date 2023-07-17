@@ -24,6 +24,9 @@ namespace HLProject
         [SyncVar(hook = nameof(OnBleedingSet))] protected bool isBleeding;
 
         public bool IsDead => isDead;
+        public bool OnShock => onShock;
+        public double ShockTime => shockTime;
+        public float SuppressionAmmount => suppressionAmmount;
 
         float suppressionTargetValue;
         double bleedTime, suppressionTime;
@@ -93,8 +96,12 @@ namespace HLProject
                     ApplySuppression(.1f);
                     break;
 
-                case DamageType.Bleed:
                 case DamageType.Explosion:
+                    ApplySuppression(1f);
+                    damageToArmor = 0;
+                    break;
+
+                case DamageType.Bleed:
                     damageToArmor = 0;
                     break;
 
@@ -135,7 +142,7 @@ namespace HLProject
             currentHealth -= Mathf.Clamp(dmgToHealth, 0, 9999999);
             RpcCharacterTookDamage(ammount, damageType);
 
-            print($"Character {name} took {ammount} of {damageType} damage - DamageToArmor: {damageToArmor} - DamageToHealth: {dmgToHealth}");
+            Debug.LogFormat("Character {0} took {1} of {2} damage - DamageToArmor: {3} - DamageToHealth: {4}", name, ammount, damageType, damageToArmor, dmgToHealth);
             if (currentHealth <= 0) CharacterDies(damageType == DamageType.Base);
         }
 
@@ -167,6 +174,8 @@ namespace HLProject
         {
             currentHealth = maxHealth;
             currentArmor = maxArmor;
+            suppressionAmmount = 0;
+            onShock = false;
             isDead = false;
         }
 
@@ -187,7 +196,14 @@ namespace HLProject
         {
             float dist = Vector3.Distance(MyTransform.position, origin);
             ApplySuppression(.2f * (dist / 1));
-            Debug.LogFormat("Dist: {0} - Sup: {1}", dist, .1f * (dist / 1));
+            RpcOnBulletFlyBy(connectionToClient, origin);
+            //Debug.LogFormat("Dist: {0} - Sup: {1}", dist, .1f * (dist / 1));
+        }
+
+        [TargetRpc]
+        protected virtual void RpcOnBulletFlyBy(NetworkConnection target, Vector3 origin)
+        {
+
         }
     }
 }

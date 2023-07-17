@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine.Networking;
 using UnityEngine;
 using Mirror;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
@@ -18,7 +16,7 @@ namespace HLProject
         [SerializeField] protected MeshRenderer playerMesh;
         [SerializeField] protected PlayerMovement movementScript;
         [SerializeField] protected float woundedMaxTime;
-        [SerializeField] AudioSource localPlayerSource;
+        [SerializeField] ClientEffectsController effectsController;
 
         [SyncVar(hook = nameof(OnTeamChange))] protected int playerTeam;
         [SyncVar] protected bool isWounded, firstSpawn;
@@ -34,15 +32,6 @@ namespace HLProject
         protected double woundedTime;
         protected PlayerInventory inventory;
         protected TeamClassData classData;
-
-        int currentTweenEffectID = -1;
-        float originalMaxExposure;
-        Volume playerLocalVolume;
-        Exposure exposureComponent;
-        MotionBlur motionBlurComponent;
-        DepthOfField depthOfFieldComponent;
-        Vignette vignetteComponent;
-        AsyncOperationHandle<IList<AudioClip>> hearingLossSoundHandle;
 
         #region Hooks
 
@@ -64,11 +53,7 @@ namespace HLProject
             movementScript.FreezeInputs = true;
             GameModeManager.INS.TeamManagerInstance.OnTicketChange += UpdateMatchTickets;
 
-            playerLocalVolume = movementScript.GetLocalVolumeFromVCam();
-            playerLocalVolume.profile.TryGet<Exposure>(out exposureComponent);
-            playerLocalVolume.profile.TryGet<MotionBlur>(out motionBlurComponent);
-            playerLocalVolume.profile.TryGet<DepthOfField>(out depthOfFieldComponent);
-            playerLocalVolume.profile.TryGet<Vignette>(out vignetteComponent);
+            effectsController.Init(this, movementScript.GetLocalVolumeFromVCam());
             LoadAssets();
         }
 
@@ -92,30 +77,15 @@ namespace HLProject
             base.Update();
 
             if (isLocalPlayer)
-            {
-                if (onShock)
-                {
-                    double currentShockTime = 1 - (shockTime - NetworkTime.time);
-                    exposureComponent.limitMax.value = 14f * (float) currentShockTime;
-                }
-
-                ClientHandlePlayerSuppression();
                 CheckInputs();
-            }
 
             if (!isServer) return;
             PlayerWoundedUpdate();
             ServerHandlePlayerSuppression();
         }
 
-        void OnEnable()
-        {
-            AudioManager.INS.RegisterAudioSource(localPlayerSource, AudioManager.AudioSourceTarget.LocalPlayer);
-        }
-
         void OnDisable()
         {
-            AudioManager.INS.UnRegisterAudioSource(localPlayerSource, AudioManager.AudioSourceTarget.LocalPlayer);
             GameModeManager.INS.TeamManagerInstance.OnTicketChange -= UpdateMatchTickets;
         }
 
@@ -134,26 +104,11 @@ namespace HLProject
 
         #region Client
 
-        [Client]
-        void ClientHandlePlayerSuppression()
-        {
-            if (suppressionAmmount <= 0) return;
-            vignetteComponent.intensity.value = suppressionAmmount * .5f;
-
-            float invert = 1 - suppressionAmmount;
-
-            AudioManager.INS.CurrentWeaponVolume = Mathf.Clamp(invert, .08f, 1);
-            AudioManager.INS.OtherVolume = Mathf.Clamp(invert, .08f, 1);
-
-            depthOfFieldComponent.nearFocusEnd.value = suppressionAmmount * 10;
-            depthOfFieldComponent.farFocusEnd.value = invert * 80000;
-        }
 
         [Client]
         protected virtual void LoadAssets()
         {
-            hearingLossSoundHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "impairedhearing_1", "impairedhearing_2", "impairedhearing_3", "impairedhearing_4" }, null, Addressables.MergeMode.Union);
-            hearingLossSoundHandle.Completed += OnSoundsLoaded;
+            effectsController.LoadAssets();
         }
 
         [Client]
@@ -177,7 +132,7 @@ namespace HLProject
             if (Input.GetKeyDown(KeyCode.F3)) TakeDamage(0, DamageType.Shock);
             if (Input.GetKeyDown(KeyCode.F4)) TakeDamage(0, DamageType.Explosion);
             if (Input.GetKeyDown(KeyCode.F5)) TakeDamage(0, DamageType.Base);
-            if (Input.GetKeyDown(KeyCode.F6)) OnBulletFlyby(MyTransform.position + MyTransform.right * Random.Range(.05f, 1));
+            if (Input.GetKeyDown(KeyCode.F6)) OnBulletFlyby(MyTransform.position + MyTransform.right * Random.Range(-1f, 1f));
 
             //if (!PlayerCanvasScript.IsScoreboardMenuOpen && !PlayerCanvasScript.IsScoreboardMenuOpen && !PlayerCanvasScript.IsScoreboardMenuOpen && Input.GetKeyDown(KeyCode.Escape))
             //{
@@ -611,6 +566,13 @@ namespace HLProject
             PlayerCanvasScript.RemovePlayerFromScoreboard(playerName);
         }
 
+        [TargetRpc]
+        protected override void RpcOnBulletFlyBy(NetworkConnection target, Vector3 origin)
+        {
+            if (target.connectionId != connectionToServer.connectionId) return;
+            effectsController.PlayBulletFlyBy(origin);
+        }
+
         #endregion
 
         #region ClientRpc
@@ -666,49 +628,7 @@ namespace HLProject
         {
             base.RpcCharacterTookDamage(ammount, type);
 
-            switch (type)
-            {
-                case DamageType.Shock:
-                    if (isLocalPlayer)
-                    {
-                        originalMaxExposure = exposureComponent.limitMax.value;
-                        exposureComponent.limitMax.value = 0;
-                    }
-                    break;
-
-                case DamageType.Explosion:
-                    if (isLocalPlayer)
-                    {
-                        AudioClip clip = hearingLossSoundHandle.Result[Random.Range(0, hearingLossSoundHandle.Result.Count)];
-                        if (!localPlayerSource.isPlaying)
-                            localPlayerSource.PlayOneShot(clip);
-
-                        if (currentTweenEffectID != -1) LeanTween.cancel(currentTweenEffectID);
-                        motionBlurComponent.active = true;
-                        motionBlurComponent.intensity.value = 150;
-
-                        depthOfFieldComponent.nearFocusEnd.value = 10;
-                        depthOfFieldComponent.farFocusEnd.value = 0;
-
-                        float weaponsStartingVolume = AudioManager.INS.CurrentWeaponVolume;
-                        float otherStartingVolume = AudioManager.INS.CurrentWeaponVolume;
-
-                        LeanTween.value(weaponsStartingVolume, .02f, .2f).setOnUpdate((float x) => AudioManager.INS.CurrentWeaponVolume = x);
-                        LeanTween.value(.02f, weaponsStartingVolume, .7f).setOnUpdate((float x) => AudioManager.INS.CurrentWeaponVolume = x).setDelay(clip.length * .6f);
-
-                        LeanTween.value(otherStartingVolume, .02f, .2f).setOnUpdate((float x) => AudioManager.INS.OtherVolume = x);
-                        LeanTween.value(.02f, otherStartingVolume, .7f).setOnUpdate((float x) => AudioManager.INS.OtherVolume = x).setDelay(clip.length * .6f);
-
-                        currentTweenEffectID = LeanTween.value(1, 0, .55f).setOnUpdate((float x) => motionBlurComponent.intensity.value = x * 150f).setOnComplete(() => motionBlurComponent.active = false).uniqueId;
-                        currentTweenEffectID = LeanTween.value(0, 1, .2f).setOnUpdate((float x) =>
-                        {
-                            depthOfFieldComponent.nearFocusEnd.value = (1 - x) * 10;
-                            depthOfFieldComponent.farFocusEnd.value = x * 80000;
-                            print(depthOfFieldComponent.farFocusEnd.value);
-                        }).setEaseOutQuad().setDelay(clip.length * .8f).uniqueId;
-                    }
-                    break;
-            }
+            if (isLocalPlayer) effectsController.OnPlayerTakesDamage(type);
         }
 
         #endregion

@@ -16,8 +16,10 @@ MonoBehaviour:
   clientPrefab: {fileID: 2252030675643257087, guid: a2af925affc17474c93e54751ac410e1, type: 3}
   propPrefab: {fileID: 6628245465620843539, guid: 633bc1a0f9edf444c8bf3b351421b72c, type: 3}
   bulletData: {fileID: 11400000, guid: 4eadb97707037ad4dacc66138da84899, type: 2}
-  maxBulletSpread: 1
+  maxBulletSpread: 0
   weaponWeight: 862
+  meleeDamage: 0
+  meleeDamageType: 0
   weaponType: 1
   weaponAnimsTiming:
     initFire: 0
@@ -27,5 +29,10 @@ MonoBehaviour:
     draw: 1.208
     zoomInSpeed: 0.25
     zoomOutSpeed: 0.25
+    meleeHitboxIn: 0
+    meleeHitboxOut: 0
+    shotgunPumpFireMaxDelay: 0
+    initReload: 0
   bulletsPerMag: 18
   mags: 8
+  pelletsPerShot: 1

@@ -21,7 +21,7 @@ namespace HLProject
         Vector3 destination;
         Rigidbody rb;
 
-        AsyncOperationHandle<IList<AudioClip>> normalExplosionSounds, underwaterExplosionSound, explosionDebris;
+        AsyncOperationHandle<IList<AudioClip>> normalExplosionSounds, underwaterExplosionSound, explosionDebris, explosionBass;
         //AsyncOperationHandle<AudioClip> grenadeTickSoundHandle;
 
         public System.Action<List<HitBox>, Vector3, Quaternion> OnExplode;
@@ -42,6 +42,9 @@ namespace HLProject
 
             explosionDebris = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "debris1", "debris2", "debris3", "debris4", "debris5", "debris6" }, null, Addressables.MergeMode.Union);
             explosionDebris.Completed += OnSoundsLoaded;
+
+            explosionBass = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "explosion_bass_1", "explosion_bass_2", "explosion_bass_3", "explosion_bass_4", "explosion_bass_5" }, null, Addressables.MergeMode.Union);
+            explosionBass.Completed += OnSoundsLoaded;
 
             /*grenadeTickSoundHandle = Addressables.LoadAssetAsync<AudioClip>("tick1");
             grenadeTickSoundHandle.Completed += OnSoundLoaded;*/
@@ -183,7 +186,8 @@ namespace HLProject
                 }
                 
                 aSrc.PlayOneShot(normalExplosionSounds.Result[Random.Range(0, normalExplosionSounds.Result.Count)]);
-                LeanTween.delayedCall(1, () => aSrc.PlayOneShot(explosionDebris.Result[Random.Range(0, explosionDebris.Result.Count)]));
+                aSrc.PlayOneShot(explosionBass.Result[Random.Range(0, explosionBass.Result.Count)]);
+                LeanTween.delayedCall(.2f, () => aSrc.PlayOneShot(explosionDebris.Result[Random.Range(0, explosionDebris.Result.Count)]));
                 //GameObject areaDebug = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 //areaDebug.layer = LayerMask.NameToLayer("Debug");
                 //areaDebug.transform.position = MyTransform.position;

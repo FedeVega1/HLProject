@@ -16,14 +16,14 @@ MonoBehaviour:
   clientPrefab: {fileID: 5294691519935721278, guid: c219f4e6fc2b26d4e92f5e4f76429741, type: 3}
   propPrefab: {fileID: 4628130916506816131, guid: da9a76bf3a9aeb3419ac06abe3139d50, type: 3}
   bulletData: {fileID: 11400000, guid: 4eadb97707037ad4dacc66138da84899, type: 2}
-  maxBulletSpread: 0
+  maxBulletSpread: 0.01
   weaponWeight: 1900
   meleeDamage: 0
   meleeDamageType: 0
   weaponType: 2
   weaponAnimsTiming:
     initFire: 0
-    fireMaxDelay: 0.085
+    fireMaxDelay: 0.071
     reload: 2.71
     holster: 0.42
     draw: 1.33

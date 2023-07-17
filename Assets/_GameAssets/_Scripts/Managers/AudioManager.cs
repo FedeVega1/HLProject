@@ -43,21 +43,21 @@ namespace HLProject
         public float LocalPlayerVolume
         {
             get { return _LocalPlayerVolume; }
-            set { _LocalPlayerVolume = Mathf.Clamp01(value); print(_LocalPlayerVolume); SyncVolumeValue(AudioSourceTarget.LocalPlayer); }
+            set { _LocalPlayerVolume = Mathf.Clamp01(value); SyncVolumeValue(AudioSourceTarget.LocalPlayer); }
         }
 
         float _CurrentWeaponVolume = 1;
         public float CurrentWeaponVolume
         {
             get { return _CurrentWeaponVolume; }
-            set { _CurrentWeaponVolume = Mathf.Clamp01(value); print(_CurrentWeaponVolume); SyncVolumeValue(AudioSourceTarget.CurrentWeapon); }
+            set { _CurrentWeaponVolume = Mathf.Clamp01(value); SyncVolumeValue(AudioSourceTarget.CurrentWeapon); }
         }
 
         float _OtherVolume = 1;
         public float OtherVolume
         {
             get { return _OtherVolume; }
-            set { _OtherVolume = Mathf.Clamp01(value); print(_OtherVolume); SyncVolumeValue(AudioSourceTarget.Other); }
+            set { _OtherVolume = Mathf.Clamp01(value); SyncVolumeValue(AudioSourceTarget.Other); }
         }
 
         void Awake()
@@ -112,7 +112,7 @@ namespace HLProject
                 {
                     if (localPlayerSources[i].ASrc == null) continue;
                     localPlayerSources[i].ASrc.volume = localPlayerSources[i].MaxVolume * LocalPlayerVolume * GlobalVolume;
-                    print(localPlayerSources[i].ASrc.volume);
+                    //print(localPlayerSources[i].ASrc.volume);
                 }
                 return;
             }
@@ -124,7 +124,7 @@ namespace HLProject
                 {
                     if (otherAudioSources[i].ASrc == null) continue;
                     otherAudioSources[i].ASrc.volume = otherAudioSources[i].MaxVolume * CurrentWeaponVolume * GlobalVolume;
-                    print(otherAudioSources[i].ASrc.volume);
+                    //print(otherAudioSources[i].ASrc.volume);
                 }
                 return;
             }
@@ -136,7 +136,7 @@ namespace HLProject
                 {
                     if (currentWeaponSources[i].ASrc == null) continue;
                     currentWeaponSources[i].ASrc.volume = currentWeaponSources[i].MaxVolume * OtherVolume * GlobalVolume;
-                    print(currentWeaponSources[i].ASrc.volume);
+                    //print(currentWeaponSources[i].ASrc.volume);
                 }
                 return;
             }
