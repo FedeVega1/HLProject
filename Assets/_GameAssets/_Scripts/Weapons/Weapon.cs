@@ -7,6 +7,7 @@ namespace HLProject
 {
     public enum BulletType { RayCast, Physics }
     public enum WeaponType { Melee, Secondary, Primary, Tools, BandAids }
+    [System.Flags] public enum FireModes { Single = 0b1, Auto = 0b10, Burst = 0b100 }
 
     public class Weapon : CachedTransform
     {
@@ -23,10 +24,13 @@ namespace HLProject
 
         bool isReloading, onScope, weaponDrawn, firstFire, isFiring;
         RaycastHit rayHit;
+        int fireModeCycler;
+        int minValue, maxValue;
 
         Player owningPlayer;
         BaseClientWeapon clientWeapon;
         LayerMask weaponLayerMask;
+        FireModes currentWeaponFireMode;
         WeaponData weaponData;
         BulletData bulletData;
         Transform firePivot;
@@ -50,6 +54,7 @@ namespace HLProject
 
             Mags = weaponData.mags;
             BulletsInMag = weaponData.bulletsPerMag;
+            SetupFireMode();
 
             clientWeapon = Instantiate(weaponData.clientPrefab, MyTransform).GetComponent<BaseClientWeapon>();
             if (clientWeapon != null)
@@ -65,6 +70,32 @@ namespace HLProject
                 clientWeapon.Init(false, weaponData, bulletData, weaponData.propPrefab);
                 Debug.LogError("Client weapon prefab does not have a IWeapon type component.\nSwitching to default weapon");
             }
+        }
+
+        void SetupFireMode()
+        {
+            if ((weaponData.avaibleWeaponFireModes & FireModes.Single) == FireModes.Single)
+            {
+                currentWeaponFireMode = FireModes.Single;
+                minValue = 0;
+            }
+            else if ((weaponData.avaibleWeaponFireModes & FireModes.Burst) == FireModes.Burst)
+            {
+                currentWeaponFireMode = FireModes.Burst;
+                minValue = 2;
+            }
+            else
+            { 
+                currentWeaponFireMode = FireModes.Auto;
+                minValue = 1;
+            }
+
+            if ((weaponData.avaibleWeaponFireModes & FireModes.Auto) == FireModes.Auto)
+                maxValue = 1;
+            else if ((weaponData.avaibleWeaponFireModes & FireModes.Burst) == FireModes.Burst)
+                maxValue = 2;
+            else
+                maxValue = 0;
         }
 
         public void Fire()
@@ -100,8 +131,13 @@ namespace HLProject
 
             if (weaponData.weaponName == "Shotgun" && owningPlayer.GetPlayerTeam() > 1)
                 wTime = NetworkTime.time + weaponData.weaponAnimsTiming.shotgunPumpFireMaxDelay;
-            else 
-                wTime = NetworkTime.time + weaponData.weaponAnimsTiming.fireMaxDelay;
+            else
+                wTime = NetworkTime.time + currentWeaponFireMode switch
+                {
+                    FireModes.Single => weaponData.weaponAnimsTiming.fireMaxDelay,
+                    FireModes.Auto => weaponData.weaponAnimsTiming.secondaryFireModeMaxDelay,
+                    _ => weaponData.weaponAnimsTiming.thirdFireModeMaxDelay
+                };
 
             //if (BulletsInMag == 0) ScopeOut();
             netWeapon.CmdRequestFire(firstFire);
@@ -217,6 +253,25 @@ namespace HLProject
             netWeapon.CmdRequestScopeIn();
             onScope = true;
             scopeTime = NetworkTime.time + weaponData.weaponAnimsTiming.zoomInSpeed;
+        }
+
+        public void SwitchFireMode()
+        {
+            if (minValue == maxValue) return;
+            fireModeCycler++;
+            if (fireModeCycler > maxValue) fireModeCycler = minValue;
+            if (fireModeCycler < minValue) fireModeCycler = maxValue;
+
+            clientWeapon.ChangeFireMode((int) fireModeCycler);
+
+            currentWeaponFireMode = fireModeCycler switch
+            {
+                0 => FireModes.Single,
+                1 => FireModes.Auto,
+                _ => FireModes.Burst,
+            };
+
+            netWeapon.CmdRequestChangeFireMode((int) currentWeaponFireMode);
         }
 
         public void ScopeOut()

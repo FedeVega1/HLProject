@@ -8,7 +8,7 @@ namespace HLProject
 {
     public abstract class BaseClientWeapon : CachedTransform
     {
-        protected static AsyncOperationHandle<IList<AudioClip>> weaponWalkSoundsHandle, weaponSprintSoundsHandle, weaponMovSoundsHandle;
+        protected static AsyncOperationHandle<IList<AudioClip>> weaponWalkSoundsHandle, weaponSprintSoundsHandle, weaponMovSoundsHandle, weaponFireModeSwitchSoundsHandle;
 
         protected enum ActiveViewModel { World, Virtual }
 
@@ -72,6 +72,12 @@ namespace HLProject
             {
                 weaponMovSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>("WeaponSounds/Movement", null);
                 weaponMovSoundsHandle.Completed += OnWeaponSoundsComplete;
+            }
+
+            if (!weaponFireModeSwitchSoundsHandle.IsValid())
+            {
+                weaponFireModeSwitchSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "switch_single", "switch_burst" }, null, Addressables.MergeMode.Union);
+                weaponFireModeSwitchSoundsHandle.Completed += OnWeaponSoundsComplete;
             }
         }
 
@@ -212,6 +218,12 @@ namespace HLProject
         public Animator GetCurrentViewmodelAnimator() => viewModels[(int) currentActiveViewModel].GetComponentInChildren<Animator>();
 
         public void SetPlayerTeam(int team) => currentPlayerTeam = team;
+
+        public virtual void ChangeFireMode(int fireMode)
+        {
+            if (fireMode >= weaponFireModeSwitchSoundsHandle.Result.Count) return;
+            virtualAudioSource.PlayOneShot(weaponFireModeSwitchSoundsHandle.Result[fireMode]);
+        }
 
 #if UNITY_EDITOR
         void OnDrawGizmosSelected()

@@ -19,13 +19,14 @@ namespace HLProject
 
         bool IsMelee => weaponData.weaponType == WeaponType.Melee;
 
-        bool clientWeaponInit, isReloading, onScope;
+        bool clientWeaponInit, isReloading, onScope, singleShootRecoil;
         int bulletsInMag, mags;
         float recoilMult = 1;
         double fireTime, scopeTime, holdingFireStartTime;
         RaycastHit rayHit;
 
         WeaponData weaponData;
+        FireModes currentFireMode;
 
         Player owningPlayer;
         BaseClientWeapon clientWeapon;
@@ -58,7 +59,14 @@ namespace HLProject
             mags = weaponData.mags;
             bulletsInMag = weaponData.bulletsPerMag;
 
-            GameObject weaponObj = Instantiate(weaponData.clientPrefab, MyTransform);
+            if ((weaponData.avaibleWeaponFireModes & FireModes.Single) == FireModes.Single)
+                currentFireMode = FireModes.Single;
+            else if ((weaponData.avaibleWeaponFireModes & FireModes.Burst) == FireModes.Burst)
+                currentFireMode = FireModes.Burst;
+            else
+                currentFireMode = FireModes.Auto;
+
+                GameObject weaponObj = Instantiate(weaponData.clientPrefab, MyTransform);
             BaseClientWeapon cWeapon = weaponObj.GetComponent<BaseClientWeapon>();
             if (cWeapon != null)
             {
@@ -116,13 +124,17 @@ namespace HLProject
                 owningPlayer.ApplyRecoil(new Vector3(weaponData.recoilPatternX.Evaluate((float) time), weaponData.recoilPatternY.Evaluate((float) time), weaponData.recoilPatternZ.Evaluate((float) time)) * recoilMult);
             });
 
-            if (weaponData.singleRecoilShoot) 
+            if (currentFireMode != FireModes.Auto)
                 LeanTween.delayedCall(weaponData.weaponAnimsTiming.initFire + .1f, () => owningPlayer.ResetRecoil());
 
             if (weaponData.weaponName == "Shotgun" && owningPlayer.GetPlayerTeam() > 1)
                 fireTime = NetworkTime.time + weaponData.weaponAnimsTiming.shotgunPumpFireMaxDelay;
             else
-                fireTime = NetworkTime.time + weaponData.weaponAnimsTiming.fireMaxDelay;
+                fireTime = NetworkTime.time + currentFireMode switch { 
+                    FireModes.Single => weaponData.weaponAnimsTiming.fireMaxDelay,
+                    FireModes.Auto => weaponData.weaponAnimsTiming.secondaryFireModeMaxDelay, 
+                    _ => weaponData.weaponAnimsTiming.thirdFireModeMaxDelay
+                };
         }
 
         [Server]
@@ -287,6 +299,12 @@ namespace HLProject
         #endregion
 
         #region Commands
+
+        [Command]
+        public void CmdRequestChangeFireMode(int newFireMode)
+        {
+            currentFireMode = (FireModes) newFireMode;
+        }
 
         [Command]
         public void CmdRequestFire(bool firstFire)

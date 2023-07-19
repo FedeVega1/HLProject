@@ -8,9 +8,9 @@ namespace HLProject
         [System.Serializable]
         public struct WeaponAnimationTimings
         {
-            public float initFire, fireMaxDelay, reload, holster, draw;
-            public float zoomInSpeed, zoomOutSpeed, meleeHitboxIn, meleeHitboxOut;
-            public float shotgunPumpFireMaxDelay, initReload;
+            public float initFire, fireMaxDelay, secondaryFireModeMaxDelay, thirdFireModeMaxDelay;
+            public float reload, holster, draw, zoomInSpeed, zoomOutSpeed, meleeHitboxIn;
+            public float meleeHitboxOut, shotgunPumpFireMaxDelay, initReload;
         }
 
         public string weaponName;
@@ -23,5 +23,6 @@ namespace HLProject
         public int bulletsPerMag, mags, pelletsPerShot = 1;
         public AnimationCurve recoilPatternX, recoilPatternY, recoilPatternZ;
         public bool singleRecoilShoot;
+        public FireModes avaibleWeaponFireModes = FireModes.Single;
     }
 }

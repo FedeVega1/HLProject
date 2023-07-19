@@ -1,4 +1,3 @@
-using System.Drawing.Printing;
 using UnityEditor;
 using UnityEngine;
 
@@ -9,7 +8,7 @@ namespace HLProject
     {
         SerializedProperty weaponName, clientPrefab, propPrefab, bulletData, maxBulletSpread, weaponWeight, meleeDamage,
             weaponType, weaponAnimsTiming, bulletsPerMag, mags, meleeDamageType, pelletsPerShot, recoilPatternX, 
-            recoilPatternY, recoilPatternZ, singleRecoilShoot;
+            recoilPatternY, recoilPatternZ, singleRecoilShoot, avaibleWeaponFireModes;
 
         void OnEnable()
         {
@@ -29,7 +28,8 @@ namespace HLProject
             recoilPatternX = serializedObject.FindProperty("recoilPatternX");
             recoilPatternY = serializedObject.FindProperty("recoilPatternY");
             recoilPatternZ = serializedObject.FindProperty("recoilPatternZ");
-            singleRecoilShoot = serializedObject.FindProperty("singleRecoilShoot"); 
+            singleRecoilShoot = serializedObject.FindProperty("singleRecoilShoot");
+            avaibleWeaponFireModes = serializedObject.FindProperty("avaibleWeaponFireModes"); 
         }
 
         public override void OnInspectorGUI()
@@ -73,6 +73,7 @@ namespace HLProject
                     GUILayout.EndHorizontal();
 
                     EditorGUILayout.PropertyField(singleRecoilShoot);
+                    EditorGUILayout.PropertyField(avaibleWeaponFireModes);
                     break;
             }
 

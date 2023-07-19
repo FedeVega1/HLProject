@@ -169,6 +169,7 @@ namespace HLProject
 
             if (Input.GetMouseButtonUp(1)) weaponsInvetoryOnClient[currentWeaponIndex].ScopeOut();
             if (Input.GetKeyDown(KeyCode.R)) weaponsInvetoryOnClient[currentWeaponIndex].Reload();
+            if (Input.GetKeyDown(KeyCode.V)) weaponsInvetoryOnClient[currentWeaponIndex].SwitchFireMode();
         }
 
         [Client]
@@ -208,6 +209,12 @@ namespace HLProject
                             currentCyclerIndex++;
                             break;
                         }
+
+                        /*if (weaponCyclerList.Count == 1)
+                        {
+                            weaponsInvetoryOnClient[currentWeaponIndex].SwitchFireMode();
+                            return false;
+                        }*/
 
                         currentCyclerIndex++;
                         if (currentCyclerIndex >= weaponCyclerList.Count) currentCyclerIndex = 0;

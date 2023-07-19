@@ -100,3 +100,4 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   singleRecoilShoot: 1
+  avaibleWeaponFireModes: 1
