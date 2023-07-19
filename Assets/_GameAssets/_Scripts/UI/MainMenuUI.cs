@@ -16,6 +16,7 @@ namespace HLProject
         [SerializeField] TMP_InputField txtConnectToServer;
         [SerializeField] HDAdditionalCameraData mainMenuCamera;
         [SerializeField] UIOptions optionsMenu;
+        [SerializeField] RectTransform errorPanel;
 
         UIState currentState;
 
@@ -62,6 +63,13 @@ namespace HLProject
         {
             mainMenuCamera.clearColorMode = HDAdditionalCameraData.ClearColorMode.Color;
             mainMenuCamera.backgroundColorHDR = new Color(0x11, 0x11, 0x11, 0xFF);
+        }
+
+        public void ToggleErrorPanel(bool toggle)
+        {
+            errorPanel.localScale = toggle ? Vector3.one : Vector3.zero;
+            rayCastBlocker.alpha = toggle ? 1 : 0;
+            rayCastBlocker.blocksRaycasts = rayCastBlocker.interactable = toggle;
         }
     }
 }

@@ -21,7 +21,8 @@ namespace HLProject
 
         bool clientWeaponInit, isReloading, onScope;
         int bulletsInMag, mags;
-        double fireTime, scopeTime;
+        float recoilMult = 1;
+        double fireTime, scopeTime, holdingFireStartTime;
         RaycastHit rayHit;
 
         WeaponData weaponData;
@@ -109,6 +110,15 @@ namespace HLProject
                     break;
             }
 
+            LeanTween.delayedCall(weaponData.weaponAnimsTiming.initFire, () =>
+            {
+                double time = NetworkTime.time - holdingFireStartTime;
+                owningPlayer.ApplyRecoil(new Vector3(weaponData.recoilPatternX.Evaluate((float) time), weaponData.recoilPatternY.Evaluate((float) time), weaponData.recoilPatternZ.Evaluate((float) time)) * recoilMult);
+            });
+
+            if (weaponData.singleRecoilShoot) 
+                LeanTween.delayedCall(weaponData.weaponAnimsTiming.initFire + .1f, () => owningPlayer.ResetRecoil());
+
             if (weaponData.weaponName == "Shotgun" && owningPlayer.GetPlayerTeam() > 1)
                 fireTime = NetworkTime.time + weaponData.weaponAnimsTiming.shotgunPumpFireMaxDelay;
             else
@@ -140,6 +150,7 @@ namespace HLProject
                 weaponRay = new Ray(firePivot.position, firePivot.forward + Random.onUnitSphere * Random.Range(.01f, weaponData.maxBulletSpread));
                 if (Physics.Raycast(weaponRay, out rayHit, bulletData.maxTravelDistance, weaponLayerMask))
                 {
+                    DoBulletFlyby(weaponRay, rayHit.distance);
                     hitVectors[i] = rayHit.point;
 
                     bool fallOffCheck = CheckBulletFallOff(ref weaponRay, ref rayHit, out float distance);
@@ -148,7 +159,6 @@ namespace HLProject
 
                     if (fallOffCheck)
                     {
-
                         StartCoroutine(ApplyDistanceToDamage(hitVectors[i], rayHit.distance));
                         Debug.DrawLine(weaponRay.origin, hitVectors[i], Color.green, 5);
 
@@ -165,6 +175,7 @@ namespace HLProject
                     //else RpcFireWeapon(weaponRay.origin + (weaponRay.direction * distance), false);
                 }
 
+                DoBulletFlyby(weaponRay, bulletData.maxTravelDistance);
                 Vector3 fallOff = Vector3.down * bulletData.fallOff;
                 hitVectors[i] = weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance);
                 didHit[i] = false;
@@ -247,6 +258,7 @@ namespace HLProject
         void ScopeIn()
         {
             if (IsMelee || owningPlayer.PlayerIsRunning() || isReloading || onScope) return;
+            recoilMult = .5f;
             owningPlayer.TogglePlayerScopeStatus(true);
             onScope = true;
             scopeTime = NetworkTime.time + weaponData.weaponAnimsTiming.zoomInSpeed;
@@ -257,6 +269,7 @@ namespace HLProject
         {
             if (IsMelee || !onScope) return;
             owningPlayer.TogglePlayerScopeStatus(false);
+            recoilMult = 1;
             onScope = false;
             scopeTime = NetworkTime.time + weaponData.weaponAnimsTiming.zoomOutSpeed;
         }
@@ -276,9 +289,16 @@ namespace HLProject
         #region Commands
 
         [Command]
-        public void CmdRequestFire()
+        public void CmdRequestFire(bool firstFire)
         {
+            if (firstFire) holdingFireStartTime = NetworkTime.time;
             Fire();
+        }
+
+        [Command]
+        public void CmdFireRelease()
+        {
+            owningPlayer.ResetRecoil();
         }
 
         [Command]

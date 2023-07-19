@@ -60,7 +60,7 @@ namespace HLProject
 
         [SyncVar] bool onScope, canRun;
         [SyncVar] float currentWeaponWeight;
-        [SyncVar] Vector3 shakeOffset;
+        [SyncVar] Vector3 shakeOffset, weaponRecoilOffset;
 
         bool jumped, canShakeCamera;
         InputFlag inputFlags;
@@ -101,7 +101,7 @@ namespace HLProject
 
             if (!isServer) return;
 
-            HandleSake();
+            HandleShake();
             Move();
             RotateServer();
             Lean();
@@ -262,7 +262,7 @@ namespace HLProject
         {
             if (!isLocalPlayer) return;
             yAxisRotation += cameraRotInput.y * verticalSens * CameraSensMult * Time.deltaTime;
-            yAxisRotation = Mathf.Clamp(yAxisRotation + shakeOffset.y, cameraYLimits.x, cameraYLimits.y);
+            yAxisRotation = Mathf.Clamp(yAxisRotation + shakeOffset.y + weaponRecoilOffset.y, cameraYLimits.x, cameraYLimits.y);
 
             playerVCam.transform.localEulerAngles = new Vector3(-yAxisRotation, 0, 0);
         }
@@ -271,12 +271,13 @@ namespace HLProject
         void RotateServer()
         {
             float rotationX = MyTransform.localEulerAngles.y + cameraRotInput.x * horizontalSens * CameraSensMult * Time.deltaTime;
-            MyTransform.rotation = Quaternion.AngleAxis(rotationX + shakeOffset.x, Vector3.up);
+            MyTransform.rotation = Quaternion.AngleAxis(rotationX + shakeOffset.x + weaponRecoilOffset.x, Vector3.up);
 
             yAxisRotation += cameraRotInput.y * verticalSens * Time.deltaTime;
-            yAxisRotation = Mathf.Clamp(yAxisRotation + shakeOffset.y, cameraYLimits.x, cameraYLimits.y);
+            yAxisRotation = Mathf.Clamp(yAxisRotation + shakeOffset.y + weaponRecoilOffset.y, cameraYLimits.x, cameraYLimits.y);
 
             fakeCameraPivot.localEulerAngles = new Vector3(-yAxisRotation, 0, 0);
+            //print(weaponRecoilOffset);
         }
 
         float CalculateSpeedByWeight(float maxSpeed) => (1 - (currentWeaponWeight / maxWeaponWeight)) * maxSpeed;
@@ -316,7 +317,7 @@ namespace HLProject
         }
 
         [Server]
-        void HandleSake()
+        void HandleShake()
         {
             if (!canShakeCamera) return;
             shakeEndTime -= Time.deltaTime;
@@ -330,6 +331,21 @@ namespace HLProject
 
             Vector3 noise = new Vector3(Random.Range(-.1f, .1f), Random.Range(-.1f, .1f), Random.Range(-.1f, .1f));
             shakeOffset = new Vector3(Mathf.Sin((float) shakeEndTime * shakeAmplitude.x * noise.x) * shakeIntensity, Mathf.Sin((float) shakeEndTime * shakeAmplitude.y * noise.y) * shakeIntensity, Mathf.Sin((float) shakeEndTime * shakeAmplitude.z * noise.z) * shakeIntensity);
+        }
+
+        [Server]
+        public void IncreaseCameraRecoil(Vector3 ammount)
+        {
+            weaponRecoilOffset = ammount;
+            RotateServer();
+            //Debug.LogFormat("Increase! {0}", ammount);
+        }
+
+        [Server]
+        public void ResetCameraRecoil()
+        {
+            weaponRecoilOffset = Vector3.zero;
+            //print("Reset!");
         }
     }
 }

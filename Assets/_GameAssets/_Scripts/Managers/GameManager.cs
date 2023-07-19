@@ -153,6 +153,16 @@ namespace HLProject
         [SerializeField] NetManager netManager;
         [SerializeField] UILoadingScreen loadingScreen;
 
+        MainMenuUI _MainMenuUI;
+        MainMenuUI MainMenuUI
+        {
+            get
+            {
+                if (_MainMenuUI == null) _MainMenuUI = FindObjectOfType<MainMenuUI>();
+                return _MainMenuUI;
+            }
+        }
+
         string _PlayerName = "";
         public string PlayerName
         {
@@ -183,7 +193,7 @@ namespace HLProject
 
         public VideoOptions VideoOptions { get; private set; }
 
-        bool returningtoMainMenu;
+        bool returningtoMainMenu, showErrorScreen;
         AsyncOperationHandle<IList<GameObject>> backgroundsLoadHandle;
 
         void Awake()
@@ -208,7 +218,8 @@ namespace HLProject
 
         void OnDestroy()
         {
-            Addressables.Release(backgroundsLoadHandle);
+            if (backgroundsLoadHandle.IsValid()) 
+                Addressables.Release(backgroundsLoadHandle);
         }
 
         void LoadAssets()
@@ -232,6 +243,12 @@ namespace HLProject
         {
             if (VideoOptions.EnableMainMenuBackgrounds)
                 Instantiate(backgroundsLoadHandle.Result[Random.Range(0, backgroundsLoadHandle.Result.Count)]);
+
+            if (showErrorScreen)
+            {
+                MainMenuUI.ToggleErrorPanel(true);
+                showErrorScreen = false;
+            }
         }
 
         public void QuitGame() => Application.Quit();
@@ -263,6 +280,13 @@ namespace HLProject
                 netManager.StopClient();
                 returningtoMainMenu = true;
             });
+        }
+
+        public void DisconnectFromServerByError(bool isServer)
+        {
+            if (isServer) StopServer();
+            else DisconnectFromServer();
+            showErrorScreen = true;
         }
 
         public void OnLoadedScene()

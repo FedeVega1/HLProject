@@ -24,7 +24,7 @@ MonoBehaviour:
   weaponAnimsTiming:
     initFire: 0
     fireMaxDelay: 0.071
-    reload: 2.71
+    reload: 2.68
     holster: 0.42
     draw: 1.33
     zoomInSpeed: 0.25
@@ -36,3 +36,85 @@ MonoBehaviour:
   bulletsPerMag: 45
   mags: 6
   pelletsPerShot: 1
+  recoilPatternX:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -0.0000000018626451
+      value: -0.00019925833
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: -0.00019925833
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  recoilPatternY:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0.027970344
+      value: 0.100185804
+      inSlope: 0.24722455
+      outSlope: 0.24722455
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.06938075
+    - serializedVersion: 3
+      time: 1.7533748
+      value: 0.30052447
+      inSlope: 0.06942924
+      outSlope: 0.06942924
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 6.333083
+      value: 0.4047007
+      inSlope: 0.0054585496
+      outSlope: 0.0054585496
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.20534407
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  recoilPatternZ:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  singleRecoilShoot: 0

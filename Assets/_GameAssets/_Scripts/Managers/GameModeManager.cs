@@ -32,7 +32,7 @@ namespace HLProject
 
         public float timeToChangeLevel = 15;
 
-        bool matchEnded, enableScoreboardUpdate;
+        bool matchEnded, enableScoreboardUpdate, localPlayerFound;
         double scoreBoardUpdateTimer;
         GameModeData currentGameModeData;
         //TeamClassData[] classData;
@@ -40,6 +40,7 @@ namespace HLProject
         List<PlayerTimer> playerTimerQueue;
         int currentDisconnPlayerIndex, currentConnPlayerIndex;
         AsyncOperationHandle<IList<TeamClassData>> classDataHandle;
+        Player localPlayer;
 
         public System.Action<int> OnMatchEnded;
 
@@ -54,6 +55,14 @@ namespace HLProject
             //classData = Resources.LoadAll<TeamClassData>("TeamClasses");
             classDataHandle = Addressables.LoadAssetsAsync<TeamClassData>("TeamClasses", null);
             classDataHandle.Completed += OnClassDataHandleCompleted;
+
+            //if (!isClient) return;
+            //int length = connectedPlayers.Count;
+            //for (int i = 0; i < length; i++)
+            //{
+            //    if (connectedPlayers[i].isLocalPlayer)
+            //        localPlayer = connectedPlayers[i];
+            //}
         }
 
         void OnClassDataHandleCompleted(AsyncOperationHandle<IList<TeamClassData>> operation)
@@ -64,6 +73,9 @@ namespace HLProject
 
         void Update()
         {
+            if (isClient && localPlayerFound && localPlayer == null)
+                GameManager.INS.DisconnectFromServerByError(isServer);
+
             if (!isServer) return;
 
             if (Input.GetKeyDown(KeyCode.O)) AddDummyPlayer();
@@ -405,6 +417,12 @@ namespace HLProject
 
         void PlayerConnectedEvent(Player player)
         {
+            if (isClient && !localPlayerFound && player.isLocalPlayer)
+            {
+                localPlayer = player;
+                localPlayerFound = true;
+            }
+
             int playerTeam = player.GetPlayerTeam() - 1;
             if (player.connectionToClient != null) player.RpcPlayerConnected(player.connectionToClient, connectedPlayers[currentConnPlayerIndex].GetPlayerScoreboardInfo(playerTeam));
         }

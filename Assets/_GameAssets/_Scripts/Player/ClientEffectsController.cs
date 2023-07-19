@@ -27,7 +27,7 @@ namespace HLProject
 
         public void Init(Player player, Volume localVolume)
         {
-            explosionTweenIDs = new List<int>();
+            //explosionTweenIDs = new List<int>();
 
             playerLocalVolume = localVolume;
             playerLocalVolume.profile.TryGet<Exposure>(out exposureComponent);

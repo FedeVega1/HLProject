@@ -21,7 +21,7 @@ namespace HLProject
 
         bool IsMelee => weaponData.weaponType == WeaponType.Melee;
 
-        bool isReloading, onScope, weaponDrawn;
+        bool isReloading, onScope, weaponDrawn, firstFire, isFiring;
         RaycastHit rayHit;
 
         Player owningPlayer;
@@ -104,7 +104,9 @@ namespace HLProject
                 wTime = NetworkTime.time + weaponData.weaponAnimsTiming.fireMaxDelay;
 
             //if (BulletsInMag == 0) ScopeOut();
-            netWeapon.CmdRequestFire();
+            netWeapon.CmdRequestFire(firstFire);
+            firstFire = false;
+            isFiring = true;
         }
 
         void HandleRaycast()
@@ -159,7 +161,7 @@ namespace HLProject
 
             bool hit = quantity > 0;
             clientWeapon.MeleeSwing(hit, playerHit, killHit);
-            netWeapon.CmdRequestFire();
+            netWeapon.CmdRequestFire(false);
             wTime = NetworkTime.time + weaponData.weaponAnimsTiming.fireMaxDelay;
         }
 
@@ -189,6 +191,18 @@ namespace HLProject
             }
 
             return true;
+        }
+
+        public void InitFire()
+        {
+            firstFire = true;
+        }
+
+        public void EndFire()
+        {
+            if (!isFiring) return;
+            netWeapon.CmdFireRelease();
+            isFiring = false;
         }
 
         public void AltFire()

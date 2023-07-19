@@ -153,8 +153,11 @@ namespace HLProject
 
             //print($"Down: {Input.GetMouseButtonDown(0)} Up: {Input.GetMouseButtonUp(0)} - Pressed: {Input.GetMouseButton(0)}");
 
+            if (Input.GetMouseButtonUp(0)) weaponsInvetoryOnClient[currentWeaponIndex].EndFire();
             if (!playerScript.PlayerIsRunning())
             {
+                if (Input.GetMouseButtonDown(0)) weaponsInvetoryOnClient[currentWeaponIndex].InitFire();
+
                 if (!Input.GetMouseButtonUp(0) && Input.GetMouseButton(0))
                 {
                     weaponsInvetoryOnClient[currentWeaponIndex].Fire();

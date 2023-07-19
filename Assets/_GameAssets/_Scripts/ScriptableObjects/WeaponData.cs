@@ -21,5 +21,7 @@ namespace HLProject
         public WeaponType weaponType;
         public WeaponAnimationTimings weaponAnimsTiming;
         public int bulletsPerMag, mags, pelletsPerShot = 1;
+        public AnimationCurve recoilPatternX, recoilPatternY, recoilPatternZ;
+        public bool singleRecoilShoot;
     }
 }

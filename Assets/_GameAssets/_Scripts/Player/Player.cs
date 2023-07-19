@@ -33,6 +33,10 @@ namespace HLProject
         protected PlayerInventory inventory;
         protected TeamClassData classData;
 
+        bool connectionCheck_WaitingForServer;
+        int connectionCheck_Tries;
+        double connectionCheck_Time;
+
         #region Hooks
 
         void OnTeamChange(int oldTeam, int newTeam) => print($"{playerName} Team is {newTeam}");
@@ -76,8 +80,7 @@ namespace HLProject
         {
             base.Update();
 
-            if (isLocalPlayer)
-                CheckInputs();
+            if (isLocalPlayer) CheckInputs();
 
             if (!isServer) return;
             PlayerWoundedUpdate();
@@ -104,6 +107,34 @@ namespace HLProject
 
         #region Client
 
+        /*[Client]
+        public void CheckPlayerConnection()
+        {
+            if (connectionCheck_WaitingForServer || NetworkTime.localTime < connectionCheck_Time) return;
+
+            Debug.LogFormat("Try {0}", connectionCheck_Tries);
+
+            if (connectionCheck_Tries > 5)
+            {
+                if (isClient && isServer) GameManager.INS.StopServer();
+                else GameManager.INS.DisconnectFromServer();
+                return;
+            }
+
+            try
+            {
+                RpcPingPlayerConnection();
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogErrorFormat("Error found on Player connection check: {0}", e.Message);
+                if (isClient && isServer) GameManager.INS.StopServer();
+                else GameManager.INS.DisconnectFromServer();
+            }
+
+            connectionCheck_WaitingForServer = true;
+            connectionCheck_Tries++;
+        }*/
 
         [Client]
         protected virtual void LoadAssets()
@@ -249,6 +280,12 @@ namespace HLProject
         #region Server
 
         [Server]
+        public virtual void ApplyRecoil(Vector3 ammount) => movementScript.IncreaseCameraRecoil(ammount);
+
+        [Server]
+        public virtual void ResetRecoil() => movementScript.ResetCameraRecoil();
+
+        [Server]
         protected virtual void ServerHandlePlayerSuppression()
         {
             if (suppressionAmmount > .45f) movementScript.CameraSensMult = .5f;
@@ -387,6 +424,12 @@ namespace HLProject
 
         #region ServerCommands
 
+        /*[Command]
+        void RpcPingPlayerConnection(NetworkConnectionToClient playerConnection = null)
+        {
+            RpcSendConnectionOkToPlayer(playerConnection);
+        }*/
+
         [Command]
         void CmdRequestPlayerInfo()
         {
@@ -430,6 +473,16 @@ namespace HLProject
         #endregion
 
         #region TargetRpc
+
+        /*[TargetRpc]
+        void RpcSendConnectionOkToPlayer(NetworkConnection target)
+        {
+            if (target.connectionId != connectionToServer.connectionId) return;
+            connectionCheck_Tries = 0;
+            connectionCheck_WaitingForServer = false;
+            connectionCheck_Time = NetworkTime.localTime + 2;
+            //Debug.LogWarning("Player ping Success");
+        }*/
 
         [TargetRpc]
         public void RpcShowScoreboard(NetworkConnection target, PlayerScoreboardInfo[] scoreboardInfo)
