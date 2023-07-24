@@ -7,6 +7,8 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace HLProject
 {
+    public enum BulletPhysicsType { Throw, Fire }
+
     public class NetWeapon : CachedNetTransform
     {
         public const int FallOffQuality = 5;
@@ -19,8 +21,8 @@ namespace HLProject
 
         bool IsMelee => weaponData.weaponType == WeaponType.Melee;
 
-        bool clientWeaponInit, isReloading, onScope, singleShootRecoil;
-        int bulletsInMag, mags, swapBullets, swapMags;
+        bool clientWeaponInit, isReloading, onScope;
+        int bulletsInMag, mags, swapBullets = -1, swapMags = -1;
         float recoilMult = 1;
         double fireTime, scopeTime, holdingFireStartTime;
         RaycastHit rayHit;
@@ -60,14 +62,9 @@ namespace HLProject
             mags = weaponData.mags;
             bulletsInMag = weaponData.bulletsPerMag;
 
-            if ((weaponData.avaibleWeaponFireModes & FireModes.Single) == FireModes.Single)
-                currentFireMode = FireModes.Single;
-            else if ((weaponData.avaibleWeaponFireModes & FireModes.Burst) == FireModes.Burst)
-                currentFireMode = FireModes.Burst;
-            else
-                currentFireMode = FireModes.Auto;
+            CheckAvaibleFireModes();
 
-                GameObject weaponObj = Instantiate(weaponData.clientPrefab, MyTransform);
+            GameObject weaponObj = Instantiate(weaponData.clientPrefab, MyTransform);
             BaseClientWeapon cWeapon = weaponObj.GetComponent<BaseClientWeapon>();
             if (cWeapon != null)
             {
@@ -82,6 +79,16 @@ namespace HLProject
 
             serverInitialized = true;
             RpcInitClientWeapon();
+        }
+
+        void CheckAvaibleFireModes()
+        {
+            if ((weaponData.avaibleWeaponFireModes & FireModes.Single) == FireModes.Single)
+                currentFireMode = FireModes.Single;
+            else if ((weaponData.avaibleWeaponFireModes & FireModes.Burst) == FireModes.Burst)
+                currentFireMode = FireModes.Burst;
+            else
+                currentFireMode = FireModes.Auto;
         }
 
         #region Server
@@ -99,7 +106,7 @@ namespace HLProject
 
             if (bulletsInMag <= 0) return;
 
-            MyTransform.eulerAngles = new Vector3(owningPlayer.GetPlayerCameraXAxis(), MyTransform.eulerAngles.y, MyTransform.eulerAngles.z);
+            //MyTransform.eulerAngles = new Vector3(owningPlayer.GetPlayerCameraXAxis(), MyTransform.eulerAngles.y, MyTransform.eulerAngles.z);
 
             switch (bulletData.type)
             {
@@ -108,14 +115,7 @@ namespace HLProject
                     break;
 
                 case BulletType.Physics:
-                    GameObject granade = Instantiate(bulletData.bulletPrefab, firePivot.position + firePivot.forward, firePivot.rotation);
-                    Bullet granadeBulletScript = granade.GetComponent<Bullet>();
-                    granadeBulletScript.Init(bulletData.initialSpeed, true);
-
-                    granadeBulletScript.PhysicsTravelTo(true, Vector3.Normalize(firePivot.forward + Vector3.up * .5f), bulletData.radius, false, bulletData.timeToExplode);
-                    granadeBulletScript.OnExplode += OnBulletExplode;
-                    NetworkServer.Spawn(granade);
-                    Reload();
+                    ShootPhysicsBullet();
                     break;
             }
 
@@ -136,6 +136,32 @@ namespace HLProject
                     FireModes.Auto => weaponData.weaponAnimsTiming.secondaryFireModeMaxDelay, 
                     _ => weaponData.weaponAnimsTiming.thirdFireModeMaxDelay
                 };
+        }
+
+        [Server]
+        void ShootPhysicsBullet()
+        {
+            GameObject granade = Instantiate(bulletData.bulletPrefab, firePivot.position + firePivot.forward, firePivot.rotation);
+            Bullet granadeBulletScript = granade.GetComponent<Bullet>();
+            granadeBulletScript.OnExplode += OnBulletExplode;
+            granadeBulletScript.Init(bulletData.initialSpeed, true);
+
+            Vector3 cross;
+            switch (bulletData.physType)
+            {
+                case BulletPhysicsType.Throw:
+                    cross = new Vector3(0, .5f, .5f);
+                    granadeBulletScript.PhysicsTravelTo(true, MyTransform.TransformDirection(cross), bulletData.radius, ForceMode.Force, true, false, bulletData.timeToExplode);
+                    Reload();
+                    break;
+
+                case BulletPhysicsType.Fire:
+                    cross = new Vector3(0, .2f, .8f);
+                    granadeBulletScript.PhysicsTravelTo(true, MyTransform.TransformDirection(cross), bulletData.radius, ForceMode.Impulse, false, true);
+                    break;
+            }
+
+            NetworkServer.Spawn(granade);
         }
 
         [Server]
@@ -247,11 +273,11 @@ namespace HLProject
         [Server]
         public void ToggleAltMode()
         {
+            int bullets = swapBullets;
+            int _mags = swapMags;
+
             if (swappedData != null)
             {
-                int bullets = swapBullets;
-                int _mags = swapMags;
-
                 swapBullets = bulletsInMag;
                 swapMags = mags;
 
@@ -259,6 +285,8 @@ namespace HLProject
                 mags = _mags;
 
                 weaponData = swappedData;
+                bulletData = weaponData.bulletData;
+                CheckAvaibleFireModes();
                 swappedData = null;
                 return;
             }
@@ -271,8 +299,11 @@ namespace HLProject
             swappedData = weaponData;
             weaponData = weaponData.alternateWeaponMode;
 
-            bulletsInMag = swapBullets == 0 ? weaponData.bulletsPerMag : swapBullets;
-            mags = swapMags == 0 ? weaponData.mags : swapMags;
+            bulletsInMag = bullets == -1? weaponData.bulletsPerMag : bullets;
+            mags = _mags == -1 ? weaponData.mags : _mags;
+
+            bulletData = weaponData.bulletData;
+            CheckAvaibleFireModes();
         }
 
         [Server]
@@ -380,7 +411,7 @@ namespace HLProject
             GameObject granade = Instantiate(bulletData.bulletPrefab, pos, rot);
             Bullet granadeBulletScript = granade.GetComponent<Bullet>();
             granadeBulletScript.Init(0, true);
-            granadeBulletScript.PhysicsTravelTo(false, Vector3.zero, bulletData.radius, false, 0);
+            granadeBulletScript.PhysicsTravelTo(false, Vector3.zero, bulletData.radius, ForceMode.Force, false, false, 0);
         }
 
         [ClientRpc(includeOwner = false)]

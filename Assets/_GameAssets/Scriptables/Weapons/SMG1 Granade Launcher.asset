@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: SMG1 Grenade launcher
   clientPrefab: {fileID: 0}
-  propPrefab: {fileID: 4628130916506816131, guid: da9a76bf3a9aeb3419ac06abe3139d50, type: 3}
-  bulletData: {fileID: 11400000, guid: 4eadb97707037ad4dacc66138da84899, type: 2}
+  propPrefab: {fileID: 5176777487416225291, guid: 4611bb62b404a1841b8b1c8aa13e6789, type: 3}
+  bulletData: {fileID: 11400000, guid: 9dba3a23447f3b24db5f7bfd85e6d574, type: 2}
   maxBulletSpread: 0
   weaponWeight: 1900
   meleeDamage: 0
@@ -23,10 +23,10 @@ MonoBehaviour:
   weaponType: 3
   weaponAnimsTiming:
     initFire: 0
-    fireMaxDelay: 0.3
-    secondaryFireModeMaxDelay: 0.071
+    fireMaxDelay: 0.38
+    secondaryFireModeMaxDelay: 0
     thirdFireModeMaxDelay: 0
-    reload: 2.68
+    reload: 0.72
     holster: 0.42
     draw: 1.33
     zoomInSpeed: 0.25

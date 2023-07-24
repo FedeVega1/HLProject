@@ -15,7 +15,7 @@ namespace HLProject
         Animator weaponAnim;
 
         int delayTweenID = -1;
-        bool lastWalkCheck, lastRunningCheck, isFiring;
+        bool lastWalkCheck, lastRunningCheck, isFiring, onAltMode;
         float randomInspectTime, movementSoundTime;
         Coroutine handleInspectionSoundsRoutine;
 
@@ -26,13 +26,13 @@ namespace HLProject
         {
             base.LoadAssets();
 
-            virtualShootSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "smg1_fire1", "smg1_fire2", "smg1_fire3" }, null, Addressables.MergeMode.Union);
+            virtualShootSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "smg1_fire1", "smg1_fire2", "smg1_fire3", "smg1_glauncher" }, null, Addressables.MergeMode.Union);
             virtualShootSoundsHandle.Completed += OnWeaponSoundsComplete;
 
             //worldShootSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "WeaponSounds/PistolWorld", "FireSound" }, null, Addressables.MergeMode.Intersection);
             //worldShootSoundsHandle.Completed += OnWeaponSoundsComplete;
 
-            reloadSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "smg1_reload" }, null, Addressables.MergeMode.Union);
+            reloadSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "smg1_reload", "smg1_cockback", "smg1_cockforward" }, null, Addressables.MergeMode.Union);
             reloadSoundsHandle.Completed += OnWeaponSoundsComplete;
 
             zoomInSoundHandle = Addressables.LoadAssetAsync<AudioClip>("ironsights_in");
@@ -115,7 +115,7 @@ namespace HLProject
             weaponAnim.SetTrigger("Fire");
             weaponAnim.SetInteger("RandomFire", Random.Range(0, 4));
 
-            virtualAudioSource.PlayOneShot(virtualShootSoundsHandle.Result[Random.Range(0, virtualShootSoundsHandle.Result.Count)]);
+            virtualAudioSource.PlayOneShot(virtualShootSoundsHandle.Result[Random.Range(0, 3)]);
 
             if (ammo < 5)
                 virtualAudioSource.PlayOneShot(lowAmmoSoundHandle.Result);
@@ -156,29 +156,60 @@ namespace HLProject
             weaponAnim.SetInteger("RandomFire", 4);*/
         }
 
-        public override void AltFire(Vector3 destination, bool didHit, int ammo) { }
+        public override void AltFire(Vector3 destination, bool didHit, int ammo) 
+        {
+            if (!isDrawn || doingScopeAnim) return;
+
+            /*LeanTween.delayedCall(weaponData.weaponAnimsTiming.initFire, () =>
+            {
+                GameObject bulletObject = Instantiate(bulletData.bulletPrefab, isServer ? worldBulletPivot : virtualBulletPivot);
+                Bullet bullet = bulletObject.GetComponent<Bullet>();
+
+                bullet.Init(bulletData.initialSpeed, didHit);
+                bullet.TravelTo(destination);
+                bullet.MyTransform.parent = null;
+            });*/
+
+            if (handleInspectionSoundsRoutine != null) StopCoroutine(handleInspectionSoundsRoutine);
+
+            weaponAnim.SetTrigger("Fire");
+            virtualAudioSource.PlayOneShot(virtualShootSoundsHandle.Result[3]);
+            isFiring = true;
+
+            if (delayTweenID != -1) LeanTween.cancel(delayTweenID);
+            delayTweenID = LeanTween.delayedCall(weaponData.weaponAnimsTiming.fireMaxDelay + .2f, () => { weaponAnim.SetBool("IsFiring", false); isFiring = false; }).uniqueId;
+            randomInspectTime = Time.time + Random.Range(20f, 40f);
+        }
 
         public override void OnAltMode(bool toggle) 
         {
-            virtualAudioSource.PlayOneShot(weaponFireModeSwitchSoundsHandle.Result[0]);
+            onAltMode = toggle;
+            virtualAudioSource.PlayOneShot(weaponFireModeSwitchSoundsHandle.Result[toggle ? 0 : 1]);
+            weaponAnim.SetInteger("RandomFire", 4);
         }
 
         public override void Reload(int bulletsToReload)
         {
-            LeanTween.delayedCall(.67f, SpawnMagazine);
-            /*if (currentActiveViewModel == ActiveViewModel.World)
+            if (onAltMode)
             {
-                worldAudioSource.PlayOneShot(reloadSoundsHandle.Result[4]);
-                return;
-            }*/
+                virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[1]);
+                LeanTween.delayedCall(.17f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[2]));
+            }
+            else
+            {
+                LeanTween.delayedCall(.67f, SpawnMagazine);
+                /*if (currentActiveViewModel == ActiveViewModel.World)
+                {
+                    worldAudioSource.PlayOneShot(reloadSoundsHandle.Result[4]);
+                    return;
+                }*/
 
-            virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[0]);
+                virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[0]);
 
-            /*LeanTween.delayedCall(.375f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[1]));
-            LeanTween.delayedCall(1, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[2]));
-            LeanTween.delayedCall(1.54f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[3]));*/
-
-            weaponAnim.SetBool("EmptyGun", false);
+                /*LeanTween.delayedCall(.375f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[1]));
+                LeanTween.delayedCall(1, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[2]));
+                LeanTween.delayedCall(1.54f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[3]));*/
+            }
 
             weaponAnim.SetTrigger("Reload");
             weaponAnim.SetBool("IsReloading", true);

@@ -235,17 +235,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 100
   m_TargetDisplay: 0
---- !u!114 &362950053 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6976938594019667577, guid: e7f8c864b3e4f424f88cd1a94a35b4de, type: 3}
-  m_PrefabInstance: {fileID: 8513474644756955236}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc0ed3302014efc43836bd03866e810f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &740094697
 GameObject:
   m_ObjectHideFlags: 0
@@ -783,7 +772,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   netManager: {fileID: 1035443923}
   loadingScreen: {fileID: 234449512}
-  mainMenuUI: {fileID: 362950053}
 --- !u!4 &1705009110
 Transform:
   m_ObjectHideFlags: 0

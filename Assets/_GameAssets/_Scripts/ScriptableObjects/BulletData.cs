@@ -10,6 +10,7 @@ namespace HLProject
     {
         public GameObject bulletPrefab;
         public BulletType type;
+        public BulletPhysicsType physType;
         public DamageType damageType;
         public float initialSpeed, damage, maxTravelDistance, radius, timeToExplode, fallOff;
     }

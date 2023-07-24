@@ -10,6 +10,8 @@ namespace HLProject
             weaponType, weaponAnimsTiming, bulletsPerMag, mags, meleeDamageType, pelletsPerShot, recoilPatternX, 
             recoilPatternY, recoilPatternZ, singleRecoilShoot, avaibleWeaponFireModes, alternateWeaponMode;
 
+        bool hasAltMode;
+
         void OnEnable()
         {
             weaponName = serializedObject.FindProperty("weaponName");
@@ -30,7 +32,9 @@ namespace HLProject
             recoilPatternZ = serializedObject.FindProperty("recoilPatternZ");
             singleRecoilShoot = serializedObject.FindProperty("singleRecoilShoot");
             avaibleWeaponFireModes = serializedObject.FindProperty("avaibleWeaponFireModes");
-            alternateWeaponMode = serializedObject.FindProperty("alternateWeaponMode"); 
+            alternateWeaponMode = serializedObject.FindProperty("alternateWeaponMode");
+
+            hasAltMode = PlayerPrefs.GetInt($"Editor_WeaponData_{name}_HasAltMode") == 1;
         }
 
         public override void OnInspectorGUI()
@@ -41,7 +45,11 @@ namespace HLProject
             EditorGUILayout.PropertyField(clientPrefab);
             EditorGUILayout.PropertyField(propPrefab);
             EditorGUILayout.PropertyField(weaponWeight);
-            EditorGUILayout.PropertyField(alternateWeaponMode);
+
+            hasAltMode = EditorGUILayout.Toggle("Is this data from an Alt Mode?", hasAltMode);
+            PlayerPrefs.SetInt($"Editor_WeaponData_{name}_HasAltMode", hasAltMode ? 1 : 0);
+            if (!hasAltMode) EditorGUILayout.PropertyField(alternateWeaponMode);
+
             EditorGUILayout.PropertyField(weaponAnimsTiming);
 
             EditorGUILayout.Space();

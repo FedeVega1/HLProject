@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1174933ccb941f147b63b7ed36c160c4, type: 3}
-  m_Name: Frag Grenade
+  m_Name: SMG1 Grenade
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 2918623712023293449, guid: e4096f00017b76848b93d369ef56f5fa, type: 3}
+  bulletPrefab: {fileID: 8305411144624299472, guid: 461ccaf111d4b0943b2d4f3dd9eaeee0, type: 3}
   type: 1
-  physType: 0
+  physType: 1
   damageType: 3
-  initialSpeed: 1500
-  damage: 125
+  initialSpeed: 40
+  damage: 100
   maxTravelDistance: 0
   radius: 7
-  timeToExplode: 5
+  timeToExplode: 0
   fallOff: 0

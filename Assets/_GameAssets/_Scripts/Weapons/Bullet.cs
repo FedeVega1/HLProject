@@ -15,7 +15,7 @@ namespace HLProject
         [SerializeField] MeshRenderer meshRenderer;
         [SerializeField] AudioClip greandeTickSound;
 
-        bool canTravel, canShowDecal, explodeOnHit, canExplode, isServer;
+        bool canTravel, canShowDecal, explodeOnHit, canExplode, isServer, canTick, hasExplosionTimer;
         float speed, timeToExplode, radius, grenadeTickTime, maxTimeToExplode;
         Vector3 startPosition;
         Vector3 destination;
@@ -76,11 +76,11 @@ namespace HLProject
 
         void Update()
         {
-            if (canExplode)
+            if (canExplode && hasExplosionTimer)
             {
                 if (Time.time < timeToExplode)
                 {
-                    if (Time.time >= grenadeTickTime)
+                    if (canTick && Time.time >= grenadeTickTime)
                     {
                         aSrc.PlayOneShot(greandeTickSound);
                         float remainingTime = (timeToExplode - Time.time) / maxTimeToExplode;
@@ -131,27 +131,47 @@ namespace HLProject
             Destroy(gameObject);
         }
 
-        public void PhysicsTravelTo(bool isServer, Vector3 direction, float explosionRadious, bool explodeOnTouch, float timeToExplode = 0)
+        public void PhysicsTravelTo(bool isServer, Vector3 direction, float explosionRadious, ForceMode physForceMode, bool hasTorque, bool explodeOnTouch, float timeToExplode = -1)
         {
-            rb.AddForce(direction * speed);
-            rb.AddTorque(direction * (speed / 2));
+            rb.AddForce(direction * speed, physForceMode);
+            if (hasTorque) rb.AddTorque(direction * (speed / 2), physForceMode);
             explodeOnHit = explodeOnTouch;
 
-            this.timeToExplode = Time.time + timeToExplode;
-            maxTimeToExplode = timeToExplode;
+            if (timeToExplode != -1)
+            {
+                this.timeToExplode = Time.time + timeToExplode;
+                maxTimeToExplode = timeToExplode;
+                hasExplosionTimer = true;
+            }
+
             this.isServer = isServer;
 
-            canExplode = true;
             radius = explosionRadious;
+
+            if (explodeOnHit)
+            {
+                canExplode = false;
+                LeanTween.delayedCall(.2f, () => canExplode = true);
+            }
+            else
+            {
+                canExplode = true;
+            }
+
             LoadAssets();
 
-            aSrc.PlayOneShot(greandeTickSound);
+            if (greandeTickSound != null)
+            {
+                aSrc.PlayOneShot(greandeTickSound);
+                grenadeTickTime = Time.time + 1;
+                canTick = true;
+            }
+
             //float remainingTime = (this.timeToExplode - Time.time) / maxTimeToExplode;
-            grenadeTickTime = Time.time + 1;
             //Debug.LogFormat("{0} - {1} - {2} - {3}", (this.timeToExplode - Time.time), remainingTime, Mathf.Pow(remainingTime, 4), grenadeTickTime);
         }
 
-        void OnCollisionEnter(Collision collision) { if (canExplode && explodeOnHit) Explode(); }
+        void OnCollisionStay(Collision collision) { if (canExplode && explodeOnHit) { Explode(); } }
 
         void Explode()
         {
@@ -199,6 +219,7 @@ namespace HLProject
             }
 
             canExplode = false;
+            hasExplosionTimer = false;
             meshRenderer.enabled = false;
             StartCoroutine(WaitForSound(() => Destroy(gameObject)));
         }

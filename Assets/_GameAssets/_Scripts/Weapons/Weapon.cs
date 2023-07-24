@@ -25,7 +25,7 @@ namespace HLProject
 
         bool isReloading, onScope, weaponDrawn, firstFire, isFiring;
         RaycastHit rayHit;
-        int fireModeCycler, swapBullets, swapMags;
+        int fireModeCycler, swapBullets = -1, swapMags = -1;
         int minValue, maxValue;
 
         Player owningPlayer;
@@ -124,9 +124,8 @@ namespace HLProject
                     break;
 
                 case BulletType.Physics:
-                    clientWeapon.Fire(Vector3.zero, true, BulletsInMag);
+                    Handlephysics();
                     BulletsInMag = 0;
-                    Reload();
                     break;
             }
 
@@ -206,6 +205,22 @@ namespace HLProject
             wTime = NetworkTime.time + weaponData.weaponAnimsTiming.fireMaxDelay;
         }
 
+        void Handlephysics()
+        {
+            if (OnAltMode) clientWeapon.AltFire(Vector3.zero, true, BulletsInMag);
+            else clientWeapon.Fire(Vector3.zero, true, BulletsInMag);
+
+            switch (bulletData.physType)
+            {
+                case BulletPhysicsType.Throw:
+                    Reload();
+                    break;
+
+                case BulletPhysicsType.Fire:
+                    break;
+            }
+        }
+
         bool CheckBulletFallOff(ref Ray weaponRay, ref RaycastHit rayHit, out float distance)
         {
             float fallStep = bulletData.maxTravelDistance / (float) NetWeapon.FallOffQuality;
@@ -248,19 +263,20 @@ namespace HLProject
 
         public double ToggleAltMode()
         {
+            int bullets = swapBullets;
+            int mags = swapMags;
+
             if (OnAltMode)
             {
-                int bullets = swapBullets;
-                int mags = swapMags;
-
                 swapBullets = BulletsInMag;
-                swapMags  = Mags;
+                swapMags = Mags;
 
                 BulletsInMag = bullets;
                 Mags = mags;
 
                 weaponData = swappedData;
                 swappedData = null;
+                bulletData = weaponData.bulletData;
                 clientWeapon.OnAltMode(false);
                 return .1f;
             }
@@ -273,9 +289,10 @@ namespace HLProject
             swappedData = weaponData;
             weaponData = weaponData.alternateWeaponMode;
 
-            BulletsInMag = swapBullets == 0 ? weaponData.bulletsPerMag : swapBullets;
-            Mags = swapMags == 0 ? weaponData.mags : swapMags;
+            BulletsInMag = bullets == -1 ? weaponData.bulletsPerMag : bullets;
+            Mags = mags == -1 ? weaponData.mags : mags;
 
+            bulletData = weaponData.bulletData;
             clientWeapon.OnAltMode(true);
             return .1f;
         }
