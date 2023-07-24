@@ -8,7 +8,7 @@ namespace HLProject
     {
         SerializedProperty weaponName, clientPrefab, propPrefab, bulletData, maxBulletSpread, weaponWeight, meleeDamage,
             weaponType, weaponAnimsTiming, bulletsPerMag, mags, meleeDamageType, pelletsPerShot, recoilPatternX, 
-            recoilPatternY, recoilPatternZ, singleRecoilShoot, avaibleWeaponFireModes;
+            recoilPatternY, recoilPatternZ, singleRecoilShoot, avaibleWeaponFireModes, alternateWeaponMode;
 
         void OnEnable()
         {
@@ -29,7 +29,8 @@ namespace HLProject
             recoilPatternY = serializedObject.FindProperty("recoilPatternY");
             recoilPatternZ = serializedObject.FindProperty("recoilPatternZ");
             singleRecoilShoot = serializedObject.FindProperty("singleRecoilShoot");
-            avaibleWeaponFireModes = serializedObject.FindProperty("avaibleWeaponFireModes"); 
+            avaibleWeaponFireModes = serializedObject.FindProperty("avaibleWeaponFireModes");
+            alternateWeaponMode = serializedObject.FindProperty("alternateWeaponMode"); 
         }
 
         public override void OnInspectorGUI()
@@ -40,6 +41,7 @@ namespace HLProject
             EditorGUILayout.PropertyField(clientPrefab);
             EditorGUILayout.PropertyField(propPrefab);
             EditorGUILayout.PropertyField(weaponWeight);
+            EditorGUILayout.PropertyField(alternateWeaponMode);
             EditorGUILayout.PropertyField(weaponAnimsTiming);
 
             EditorGUILayout.Space();

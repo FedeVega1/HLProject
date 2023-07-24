@@ -82,8 +82,9 @@ namespace HLProject
         public override void EmptyFire() { }
         public override void ScopeIn() { }
         public override void ScopeOut() { }
-        public override void AltFire(Vector3 destination, bool didHit) { }
+        public override void AltFire(Vector3 destination, bool didHit, int ammo) { }
         public override void Reload(int bulletsToReload) { }
+        public override void OnAltMode(bool toggle) { }
 
         public override void DrawWeapon()
         {

@@ -17,12 +17,99 @@ MonoBehaviour:
   propPrefab: {fileID: 7693782198007015193, guid: 37c607967db4e6941be3931e083ef1c9, type: 3}
   bulletData: {fileID: 11400000, guid: 97bafdf88dd66e949bf88cdbc46d3391, type: 2}
   maxBulletSpread: 0
-  rateOfFire: 1
-  weaponType: 3
+  weaponWeight: 0
+  meleeDamage: 0
+  meleeDamageType: 0
+  weaponType: 4
   weaponAnimsTiming:
-    fire: 0
+    initFire: 0
+    fireMaxDelay: 0
+    secondaryFireModeMaxDelay: 0
+    thirdFireModeMaxDelay: 0
     reload: 2
     holster: 0.5
     draw: 0.5
+    zoomInSpeed: 0
+    zoomOutSpeed: 0
+    meleeHitboxIn: 0
+    meleeHitboxOut: 0
+    shotgunPumpFireMaxDelay: 0
+    initReload: 0
   bulletsPerMag: 1
   mags: 5
+  pelletsPerShot: 1
+  recoilPatternX:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  recoilPatternY:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  recoilPatternZ:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  singleRecoilShoot: 0
+  avaibleWeaponFireModes: 1
+  alternateWeaponMode: {fileID: 0}

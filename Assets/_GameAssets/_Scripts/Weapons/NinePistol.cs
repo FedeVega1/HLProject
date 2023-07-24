@@ -170,7 +170,7 @@ namespace HLProject
             weaponAnim.SetInteger("RandomFire", 4);
         }
 
-        public override void AltFire(Vector3 destination, bool didHit) { }
+        public override void AltFire(Vector3 destination, bool didHit, int ammo) { }
 
         public override void Reload(int bulletsToReload)
         {
@@ -234,6 +234,8 @@ namespace HLProject
             base.HolsterWeapon();
             weaponAnim.SetTrigger("Holster");
         }
+
+        public override void OnAltMode(bool toggle) { }
 
         void RandomIdleAnim()
         {

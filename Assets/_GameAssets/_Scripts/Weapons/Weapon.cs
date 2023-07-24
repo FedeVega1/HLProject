@@ -6,12 +6,13 @@ using Mirror;
 namespace HLProject
 {
     public enum BulletType { RayCast, Physics }
-    public enum WeaponType { Melee, Secondary, Primary, Tools, BandAids }
+    public enum WeaponType { Melee, Secondary, Primary, AltMode, Tools, BandAids }
     [System.Flags] public enum FireModes { Single = 0b1, Auto = 0b10, Burst = 0b100 }
 
     public class Weapon : CachedTransform
     {
         public WeaponType WType => weaponData.weaponType;
+        public bool OnAltMode => swappedData != null;
 
         public Transform WeaponRootBone => clientWeapon.WeaponRootBone;
         public Transform ClientWeaponTransform => clientWeapon.MyTransform;
@@ -24,14 +25,14 @@ namespace HLProject
 
         bool isReloading, onScope, weaponDrawn, firstFire, isFiring;
         RaycastHit rayHit;
-        int fireModeCycler;
+        int fireModeCycler, swapBullets, swapMags;
         int minValue, maxValue;
 
         Player owningPlayer;
         BaseClientWeapon clientWeapon;
         LayerMask weaponLayerMask;
         FireModes currentWeaponFireMode;
-        WeaponData weaponData;
+        WeaponData weaponData, swappedData;
         BulletData bulletData;
         Transform firePivot;
         NetWeapon netWeapon;
@@ -156,14 +157,18 @@ namespace HLProject
                     bool fallOffCheck = CheckBulletFallOff(ref weaponRay, ref rayHit, out float distance);
 
                     if (!fallOffCheck) hitPos = rayHit.point;
-                    clientWeapon.Fire(hitPos, true, BulletsInMag);
+                    if (OnAltMode) clientWeapon.AltFire(hitPos, true, BulletsInMag);
+                    else clientWeapon.Fire(hitPos, true, BulletsInMag);
 
                     if (rayHit.collider != null) Debug.LogFormat("Client Fire! Range[{0}] - HitPoint: {1}|{2}", bulletData.maxTravelDistance, rayHit.point, rayHit.collider.name);
                 }
                 else
                 {
                     Vector3 fallOff = Vector3.down * bulletData.fallOff;
-                    clientWeapon.Fire(weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), false, BulletsInMag);
+                    Vector3 dest = weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance);
+
+                    if (OnAltMode) clientWeapon.AltFire(dest, false, BulletsInMag);
+                    else clientWeapon.Fire(dest, false, BulletsInMag);
 
                     Debug.DrawRay(weaponRay.origin, weaponRay.direction + fallOff, Color.red, 2);
                     Debug.DrawLine(weaponRay.origin, weaponRay.origin + ((weaponRay.direction + fallOff) * bulletData.maxTravelDistance), Color.red, 2);
@@ -241,9 +246,38 @@ namespace HLProject
             isFiring = false;
         }
 
-        public void AltFire()
+        public double ToggleAltMode()
         {
-            clientWeapon.AltFire(Vector3.zero, false);
+            if (OnAltMode)
+            {
+                int bullets = swapBullets;
+                int mags = swapMags;
+
+                swapBullets = BulletsInMag;
+                swapMags  = Mags;
+
+                BulletsInMag = bullets;
+                Mags = mags;
+
+                weaponData = swappedData;
+                swappedData = null;
+                clientWeapon.OnAltMode(false);
+                return .1f;
+            }
+
+            if (weaponData.alternateWeaponMode == null) return .1f;
+
+            swapBullets = BulletsInMag;
+            swapMags = Mags;
+
+            swappedData = weaponData;
+            weaponData = weaponData.alternateWeaponMode;
+
+            BulletsInMag = swapBullets == 0 ? weaponData.bulletsPerMag : swapBullets;
+            Mags = swapMags == 0 ? weaponData.mags : swapMags;
+
+            clientWeapon.OnAltMode(true);
+            return .1f;
         }
 
         public void ScopeIn()

@@ -10,11 +10,11 @@ namespace HLProject
     [RequireComponent(typeof(Player))]
     public class PlayerInventory : NetworkBehaviour
     {
-        static KeyCode[] WeaponCycleKeys = new KeyCode[5]
+        static KeyCode[] WeaponCycleKeys = new KeyCode[6]
         {
-        KeyCode.Alpha1, KeyCode.Alpha2,
-        KeyCode.Alpha3, KeyCode.Alpha4,
-        KeyCode.Alpha5,
+            KeyCode.Alpha1, KeyCode.Alpha2,
+            KeyCode.Alpha3, KeyCode.Alpha4,
+            KeyCode.Alpha5, KeyCode.Alpha6
         };
 
         [SerializeField] Transform wWeaponPivot;
@@ -181,14 +181,15 @@ namespace HLProject
             {
                 bool checkWeaponIndex = currentCyclerIndex < weaponCyclerList.Count && weaponCyclerList[currentCyclerIndex] != currentWeaponIndex;
                 bool success = false;
-                if (weaponsInvetoryOnClient[currentWeaponIndex].WType != currentCyclerType || checkWeaponIndex)
+                if ((weaponsInvetoryOnClient[currentWeaponIndex].WType != currentCyclerType) || checkWeaponIndex)
                 {
+                    if (currentCyclerType == WeaponType.AltMode || weaponsInvetoryOnClient[currentWeaponIndex].OnAltMode) CmdRequestWeaponModeChange();
+                    else CmdRequestWeaponChange(weaponCyclerList[currentCyclerIndex]);
                     isSwappingWeapons = true;
-                    CmdRequestWeaponChange(weaponCyclerList[currentCyclerIndex]);
                     success = true;
                 }
 
-                currentCyclerType = weaponsInvetoryOnClient[currentWeaponIndex].WType;
+                //currentCyclerType = weaponsInvetoryOnClient[currentWeaponIndex].WType;
                 currentCyclerIndex = -1;
                 weaponCyclerList.Clear();
                 return success;
@@ -201,20 +202,15 @@ namespace HLProject
             {
                 if (Input.GetKeyDown(WeaponCycleKeys[i]))
                 {
-                    if (currentCyclerType == (WeaponType) i)
+                    WeaponType currentType = (WeaponType) i;
+                    if (currentCyclerType == currentType)
                     {
-                        if (SearchForWeaponsType((WeaponType) i, out weaponIndex))
+                        if (SearchForWeaponsType(currentType, out weaponIndex))
                         {
                             weaponCyclerList.Add(weaponIndex);
                             currentCyclerIndex++;
                             break;
                         }
-
-                        /*if (weaponCyclerList.Count == 1)
-                        {
-                            weaponsInvetoryOnClient[currentWeaponIndex].SwitchFireMode();
-                            return false;
-                        }*/
 
                         currentCyclerIndex++;
                         if (currentCyclerIndex >= weaponCyclerList.Count) currentCyclerIndex = 0;
@@ -223,8 +219,15 @@ namespace HLProject
 
                     currentCyclerIndex = 0;
                     if (weaponCyclerList.Count > 0) weaponCyclerList.Clear();
-                    if (SearchForWeaponsType((WeaponType) i, out weaponIndex)) weaponCyclerList.Add(weaponIndex);
-                    currentCyclerType = (WeaponType) i;
+
+                    if (currentType == WeaponType.AltMode)
+                    {
+                        SearchForWeaponsType(WeaponType.Primary, out weaponIndex);
+                        if (weaponsInvetoryOnClient[weaponIndex].GetWeaponData().alternateWeaponMode == null) continue;
+                        weaponCyclerList.Add(weaponIndex);
+                    }
+                    else if (SearchForWeaponsType(currentType, out weaponIndex)) weaponCyclerList.Add(weaponIndex);
+                    currentCyclerType = currentType;
                     break;
                 }
             }
@@ -239,7 +242,7 @@ namespace HLProject
             int size = weaponsInvetoryOnClient.Count;
             for (int i = 0; i < size; i++)
             {
-                if (weaponsInvetoryOnClient[i].WType == TypeToSearch && !weaponCyclerList.Contains(i))
+                if ((weaponsInvetoryOnClient[i].OnAltMode && TypeToSearch == WeaponType.Primary || weaponsInvetoryOnClient[i].WType == TypeToSearch) && !weaponCyclerList.Contains(i))
                 {
                     weaponIndex = i;
                     return true;
@@ -258,6 +261,16 @@ namespace HLProject
         #endregion
 
         #region Commands
+
+        [Command]
+        public void CmdRequestWeaponModeChange()
+        {
+            isSwappingWeapons = true;
+            weaponsInventoryOnServer[currentWeaponIndex].ToggleAltMode();
+
+            RpcChangeWeaponMode(connectionToClient);
+            isSwappingWeapons = false;
+        }
 
         [Command]
         public void CmdRequestWeaponChange(int weaponIndex)
@@ -287,6 +300,13 @@ namespace HLProject
         #endregion
 
         #region RPCs
+
+        [TargetRpc]
+        public void RpcChangeWeaponMode(NetworkConnection target)
+        {
+            if (swapWeaponRoutine != null) StopCoroutine(swapWeaponRoutine);
+            swapWeaponRoutine = StartCoroutine(ChangeWeaponModeRoutine());
+        }
 
         [TargetRpc]
         public void RpcChangeWeapon(NetworkConnection target, int weaponIndex, int oldIndex)
@@ -422,6 +442,17 @@ namespace HLProject
             currentWeaponIndex = weaponIndex;
             isSwappingWeapons = false;
 
+            UpdateCurrenWeaponName();
+            UpdateWeaponAmmo();
+        }
+
+        [Client]
+        IEnumerator ChangeWeaponModeRoutine()
+        {
+            float timeToWait = (float) weaponsInvetoryOnClient[currentWeaponIndex].ToggleAltMode();
+            yield return new WaitForSeconds(timeToWait);
+
+            isSwappingWeapons = false;
             UpdateCurrenWeaponName();
             UpdateWeaponAmmo();
         }

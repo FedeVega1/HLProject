@@ -20,11 +20,12 @@ namespace HLProject
         bool IsMelee => weaponData.weaponType == WeaponType.Melee;
 
         bool clientWeaponInit, isReloading, onScope, singleShootRecoil;
-        int bulletsInMag, mags;
+        int bulletsInMag, mags, swapBullets, swapMags;
         float recoilMult = 1;
         double fireTime, scopeTime, holdingFireStartTime;
         RaycastHit rayHit;
 
+        WeaponData swappedData;
         WeaponData weaponData;
         FireModes currentFireMode;
 
@@ -244,9 +245,34 @@ namespace HLProject
         }
 
         [Server]
-        void AltFire()
+        public void ToggleAltMode()
         {
+            if (swappedData != null)
+            {
+                int bullets = swapBullets;
+                int _mags = swapMags;
 
+                swapBullets = bulletsInMag;
+                swapMags = mags;
+
+                bulletsInMag = bullets;
+                mags = _mags;
+
+                weaponData = swappedData;
+                swappedData = null;
+                return;
+            }
+
+            if (weaponData.alternateWeaponMode == null) return;
+
+            swapBullets = bulletsInMag;
+            swapMags = mags;
+
+            swappedData = weaponData;
+            weaponData = weaponData.alternateWeaponMode;
+
+            bulletsInMag = swapBullets == 0 ? weaponData.bulletsPerMag : swapBullets;
+            mags = swapMags == 0 ? weaponData.mags : swapMags;
         }
 
         [Server]
@@ -317,12 +343,6 @@ namespace HLProject
         public void CmdFireRelease()
         {
             owningPlayer.ResetRecoil();
-        }
-
-        [Command]
-        public void CmdRequestAltFire()
-        {
-            AltFire();
         }
 
         [Command]

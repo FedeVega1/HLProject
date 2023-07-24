@@ -155,7 +155,8 @@ namespace HLProject
             randomInspectTime = Time.time + Random.Range(20f, 40f);
         }
 
-        public override void AltFire(Vector3 destination, bool didHit) { }
+        public override void AltFire(Vector3 destination, bool didHit, int ammo) { }
+        public override void OnAltMode(bool toggle) { }
 
         public override void Reload(int bulletsToReload)
         {

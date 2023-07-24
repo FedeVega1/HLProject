@@ -142,7 +142,9 @@ namespace HLProject
 
         public abstract void EmptyFire();
 
-        public abstract void AltFire(Vector3 destination, bool didHit);
+        public abstract void AltFire(Vector3 destination, bool didHit, int ammo);
+
+        public abstract void OnAltMode(bool toggle);
 
         public virtual void ScopeIn()
         {

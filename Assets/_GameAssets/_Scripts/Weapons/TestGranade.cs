@@ -22,7 +22,7 @@ namespace HLProject
         public override void EmptyFire() { }
 
 
-        public override void AltFire(Vector3 destination, bool didHit)
+        public override void AltFire(Vector3 destination, bool didHit, int ammo)
         {
             if (!isDrawn) return;
 
@@ -59,6 +59,8 @@ namespace HLProject
             Instantiate(weaponPropPrefab, MyTransform.position, MyTransform.rotation);
             Destroy(gameObject);
         }
+
+        public override void OnAltMode(bool toggle) { }
 
         public override Transform GetVirtualPivot() => virtualBulletPivot;
         public override Transform GetWorldPivot() => worldBulletPivot;

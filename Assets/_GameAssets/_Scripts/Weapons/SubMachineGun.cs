@@ -156,7 +156,12 @@ namespace HLProject
             weaponAnim.SetInteger("RandomFire", 4);*/
         }
 
-        public override void AltFire(Vector3 destination, bool didHit) { }
+        public override void AltFire(Vector3 destination, bool didHit, int ammo) { }
+
+        public override void OnAltMode(bool toggle) 
+        {
+            virtualAudioSource.PlayOneShot(weaponFireModeSwitchSoundsHandle.Result[0]);
+        }
 
         public override void Reload(int bulletsToReload)
         {

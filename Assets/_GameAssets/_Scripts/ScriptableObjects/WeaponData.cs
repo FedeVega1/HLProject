@@ -24,5 +24,6 @@ namespace HLProject
         public AnimationCurve recoilPatternX, recoilPatternY, recoilPatternZ;
         public bool singleRecoilShoot;
         public FireModes avaibleWeaponFireModes = FireModes.Single;
+        public WeaponData alternateWeaponMode;
     }
 }

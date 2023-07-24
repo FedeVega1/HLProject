@@ -73,7 +73,7 @@ namespace HLProject
 
         void Update()
         {
-            if (isClient && localPlayerFound && localPlayer == null)
+            if (isClient && localPlayerFound && (localPlayer == null || !localPlayer.connectionToServer.isReady))
                 GameManager.INS.DisconnectFromServerByError(isServer);
 
             if (!isServer) return;

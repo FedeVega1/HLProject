@@ -20,10 +20,12 @@ MonoBehaviour:
   weaponWeight: 680
   meleeDamage: 0
   meleeDamageType: 0
-  weaponType: 3
+  weaponType: 4
   weaponAnimsTiming:
     initFire: 0
     fireMaxDelay: 1.5
+    secondaryFireModeMaxDelay: 0
+    thirdFireModeMaxDelay: 0
     reload: 0.5
     holster: 0.42
     draw: 1.5
@@ -110,3 +112,4 @@ MonoBehaviour:
     m_RotationOrder: 4
   singleRecoilShoot: 0
   avaibleWeaponFireModes: 1
+  alternateWeaponMode: {fileID: 0}
