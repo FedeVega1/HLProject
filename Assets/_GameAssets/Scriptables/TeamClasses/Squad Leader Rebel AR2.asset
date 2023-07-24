@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1195f7eb5de05504e9b544713461ba5e, type: 3}
+  m_Name: Squad Leader Rebel AR2
+  m_EditorClassIdentifier: 
+  className: AR2 Squad Leader
+  classSprite: {fileID: 21300000, guid: 8707101abb6c3034b979a387117555ae, type: 3}
+  teamSpecific: 2
+  classVHands: 1
+  classWeapons:
+  - {fileID: 11400000, guid: 6be69a8736ea8fc4d9eb346b3cd349ae, type: 2}
+  - {fileID: 11400000, guid: 2dce0be5ee7e2a94d9d928b29c3d2436, type: 2}
+  - {fileID: 11400000, guid: 755c9b19adc7320489f809e7c25a0bea, type: 2}
+  - {fileID: 11400000, guid: 980b792773e13124f861f1c51bf47757, type: 2}

@@ -24,7 +24,7 @@ namespace HLProject
             timeToExplode = serializedObject.FindProperty("timeToExplode");
             fallOff = serializedObject.FindProperty("fallOff");
 
-            isExplosive = PlayerPrefs.GetInt($"Editor_BulletData_{name}_IsExplosive") == 1;
+            isExplosive = PlayerPrefs.GetInt($"Editor_BulletData_{serializedObject.targetObject.name}_IsExplosive") == 1;
         }
 
         public override void OnInspectorGUI()
@@ -56,7 +56,7 @@ namespace HLProject
             EditorGUILayout.PropertyField(damage);
 
             isExplosive = EditorGUILayout.Toggle("Is Explosive?", isExplosive);
-            PlayerPrefs.SetInt($"Editor_BulletData_{name}_IsExplosive", isExplosive ? 1 : 0);
+            PlayerPrefs.SetInt($"Editor_BulletData_{serializedObject.targetObject.name}_IsExplosive", isExplosive ? 1 : 0);
 
             if (isExplosive)
             {

@@ -148,6 +148,54 @@ MonoBehaviour:
     m_SerializedLabels:
     - TeamClasses
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e416fa0304e875f489bf774cb5b045bd
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/Combine Elite.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4c3e7dbfa172ca742980f2b5bc9c24dd
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/CombineAR2.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d614dc3c52117cb4c917766c725a2cf5
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/RebelAR2.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6dd30663aa53bf041a69d3bae150dc79
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/Squad Leader Combine AR2.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b522736148ce66c40a0a0426866f4761
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/Squad Leader Combine Elite.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ac76a26dbde274c49a3c0f9ef0a842d2
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/Squad Leader Combine.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eaa67b9927923424e9d7393466e83509
+    m_Address: Assets/_GameAssets/Scriptables/TeamClasses/Squad Leader Rebel AR2.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - TeamClasses
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6be69a8736ea8fc4d9eb346b3cd349ae
+    m_Address: AR2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponScriptables
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 3cf91d3a9f4e16f4dbcc0b305a57378e, type: 2}
   m_SchemaSet:
