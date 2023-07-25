@@ -277,7 +277,7 @@ namespace HLProject
                 weaponData = swappedData;
                 swappedData = null;
                 bulletData = weaponData.bulletData;
-                clientWeapon.OnAltMode(false);
+                clientWeapon.OnAltMode(false, weaponData);
                 return .1f;
             }
 
@@ -293,7 +293,7 @@ namespace HLProject
             Mags = mags == -1 ? weaponData.mags : mags;
 
             bulletData = weaponData.bulletData;
-            clientWeapon.OnAltMode(true);
+            clientWeapon.OnAltMode(true, weaponData);
             return .1f;
         }
 

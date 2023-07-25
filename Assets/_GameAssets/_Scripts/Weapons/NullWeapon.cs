@@ -20,7 +20,7 @@ namespace HLProject
         public override void DrawWeapon() { }
         public override void HolsterWeapon() { }
         public override void DropProp() { }
-        public override void OnAltMode(bool toggle) { }
+        public override void OnAltMode(bool toggle, WeaponData newData) { }
 
         public override void CheckPlayerMovement(bool isMoving, bool isRunning) { }
     }

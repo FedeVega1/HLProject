@@ -181,9 +181,10 @@ namespace HLProject
             randomInspectTime = Time.time + Random.Range(20f, 40f);
         }
 
-        public override void OnAltMode(bool toggle) 
+        public override void OnAltMode(bool toggle, WeaponData newData)
         {
             onAltMode = toggle;
+            weaponData = newData;
             virtualAudioSource.PlayOneShot(weaponFireModeSwitchSoundsHandle.Result[toggle ? 0 : 1]);
             weaponAnim.SetInteger("RandomFire", 4);
         }

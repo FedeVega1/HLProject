@@ -196,6 +196,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - WeaponScriptables
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0c188525f143a3948941583c686cfc3d
+    m_Address: Assets/_GameAssets/Scriptables/Weapons/AR2 Launcher.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponScriptables
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 3cf91d3a9f4e16f4dbcc0b305a57378e, type: 2}
   m_SchemaSet:

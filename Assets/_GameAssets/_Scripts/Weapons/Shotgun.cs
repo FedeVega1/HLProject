@@ -195,7 +195,7 @@ namespace HLProject
             rb.AddTorque(Utilities.RandomVector3(Vector3.one, -1, 1) * 25);
         }
 
-        public override void OnAltMode(bool toggle) { }
+        public override void OnAltMode(bool toggle, WeaponData newData) { }
         public override void DrawWeapon()
         {
             base.DrawWeapon();

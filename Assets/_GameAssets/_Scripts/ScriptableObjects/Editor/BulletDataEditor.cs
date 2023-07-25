@@ -7,9 +7,7 @@ namespace HLProject
     public class BulletDataEditor : Editor
     {
         SerializedProperty bulletPrefab, type, physType, damageType, initialSpeed, damage, maxTravelDistance,
-            radious, timeToExplode, fallOff;
-
-        bool isExplosive;
+            radious, timeToExplode, fallOff, canExplode;
 
         void OnEnable()
         {
@@ -23,8 +21,7 @@ namespace HLProject
             radious = serializedObject.FindProperty("radius");
             timeToExplode = serializedObject.FindProperty("timeToExplode");
             fallOff = serializedObject.FindProperty("fallOff");
-
-            isExplosive = PlayerPrefs.GetInt($"Editor_BulletData_{serializedObject.targetObject.name}_IsExplosive") == 1;
+            canExplode = serializedObject.FindProperty("canExplode");
         }
 
         public override void OnInspectorGUI()
@@ -55,13 +52,14 @@ namespace HLProject
             EditorGUILayout.PropertyField(damageType);
             EditorGUILayout.PropertyField(damage);
 
-            isExplosive = EditorGUILayout.Toggle("Is Explosive?", isExplosive);
-            PlayerPrefs.SetInt($"Editor_BulletData_{serializedObject.targetObject.name}_IsExplosive", isExplosive ? 1 : 0);
+            canExplode.boolValue = EditorGUILayout.Toggle("Is Explosive?", canExplode.boolValue);
+            PlayerPrefs.SetInt($"Editor_BulletData_{serializedObject.targetObject.name}_IsExplosive", canExplode.boolValue ? 1 : 0);
 
-            if (isExplosive)
+            if (canExplode.boolValue)
             {
                 EditorGUILayout.PropertyField(radious);
-                EditorGUILayout.PropertyField(timeToExplode);
+                string label = (BulletPhysicsType) physType.enumValueIndex == BulletPhysicsType.FireBounce ? "Bounce Count" : "Time to Explode";
+                timeToExplode.floatValue = EditorGUILayout.FloatField(label, timeToExplode.floatValue);
             }
 
             serializedObject.ApplyModifiedProperties();

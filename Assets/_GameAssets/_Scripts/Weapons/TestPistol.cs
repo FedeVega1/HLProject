@@ -62,7 +62,7 @@ namespace HLProject
             Destroy(gameObject);
         }
 
-        public override void OnAltMode(bool toggle) { }
+        public override void OnAltMode(bool toggle, WeaponData newData) { }
         public override Transform GetVirtualPivot() => virtualBulletPivot;
         public override Transform GetWorldPivot() => worldBulletPivot;
 

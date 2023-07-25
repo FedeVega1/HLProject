@@ -7,7 +7,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace HLProject
 {
-    public enum BulletPhysicsType { Throw, Fire }
+    public enum BulletPhysicsType { Throw, Fire, FireBounce }
 
     public class NetWeapon : CachedNetTransform
     {
@@ -115,7 +115,7 @@ namespace HLProject
                     break;
 
                 case BulletType.Physics:
-                    ShootPhysicsBullet();
+                    LeanTween.delayedCall(weaponData.weaponAnimsTiming.initFire, ShootPhysicsBullet);
                     break;
             }
 
@@ -151,13 +151,17 @@ namespace HLProject
             {
                 case BulletPhysicsType.Throw:
                     cross = new Vector3(0, .5f, .5f);
-                    granadeBulletScript.PhysicsTravelTo(true, MyTransform.TransformDirection(cross), bulletData.radius, ForceMode.Force, true, false, bulletData.timeToExplode);
+                    granadeBulletScript.PhysicsTravelTo(true, MyTransform.TransformDirection(cross), ForceMode.Force, true, true, bulletData.radius, false, bulletData.timeToExplode);
                     Reload();
                     break;
 
                 case BulletPhysicsType.Fire:
                     cross = new Vector3(0, .2f, .8f);
-                    granadeBulletScript.PhysicsTravelTo(true, MyTransform.TransformDirection(cross), bulletData.radius, ForceMode.Impulse, false, true);
+                    granadeBulletScript.PhysicsTravelTo(true, MyTransform.TransformDirection(cross), ForceMode.Impulse, false, true, bulletData.radius, false);
+                    break;
+
+                case BulletPhysicsType.FireBounce:
+                    granadeBulletScript.PhysicsTravelTo(true, firePivot.forward, ForceMode.Impulse, false, true, bulletData.radius, true, bulletData.timeToExplode);
                     break;
             }
 
@@ -411,7 +415,7 @@ namespace HLProject
             GameObject granade = Instantiate(bulletData.bulletPrefab, pos, rot);
             Bullet granadeBulletScript = granade.GetComponent<Bullet>();
             granadeBulletScript.Init(0, true);
-            granadeBulletScript.PhysicsTravelTo(false, Vector3.zero, bulletData.radius, ForceMode.Force, false, false, 0);
+            granadeBulletScript.PhysicsTravelTo(false, Vector3.zero, ForceMode.Force, false, true, bulletData.radius, true, 0);
         }
 
         [ClientRpc(includeOwner = false)]

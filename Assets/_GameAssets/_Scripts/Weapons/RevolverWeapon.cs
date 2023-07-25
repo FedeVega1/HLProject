@@ -156,7 +156,7 @@ namespace HLProject
         }
 
         public override void AltFire(Vector3 destination, bool didHit, int ammo) { }
-        public override void OnAltMode(bool toggle) { }
+        public override void OnAltMode(bool toggle, WeaponData newData) { }
 
         public override void Reload(int bulletsToReload)
         {

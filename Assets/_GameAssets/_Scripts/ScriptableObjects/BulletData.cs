@@ -12,6 +12,7 @@ namespace HLProject
         public BulletType type;
         public BulletPhysicsType physType;
         public DamageType damageType;
+        public bool canExplode;
         public float initialSpeed, damage, maxTravelDistance, radius, timeToExplode, fallOff;
     }
 }

@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1174933ccb941f147b63b7ed36c160c4, type: 3}
-  m_Name: SMG1 Grenade
+  m_Name: AR2 EnergyBall
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 8305411144624299472, guid: 461ccaf111d4b0943b2d4f3dd9eaeee0, type: 3}
+  bulletPrefab: {fileID: 4015506629346928269, guid: 3549cd0817c5aa941a5a5d02b3f261f3, type: 3}
   type: 1
-  physType: 1
-  damageType: 3
+  physType: 2
+  damageType: 0
   canExplode: 1
-  initialSpeed: 40
-  damage: 100
+  initialSpeed: 50
+  damage: 1000
   maxTravelDistance: 0
   radius: 7
-  timeToExplode: 0
+  timeToExplode: 5
   fallOff: 0

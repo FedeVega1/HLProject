@@ -99,7 +99,7 @@ namespace HLProject
         public override void ScopeIn() { }
         public override void ScopeOut() { }
         public override void Reload(int bulletsToReload) { }
-        public override void OnAltMode(bool toggle) { }
+        public override void OnAltMode(bool toggle, WeaponData newData) { }
 
         public override void DrawWeapon()
         {

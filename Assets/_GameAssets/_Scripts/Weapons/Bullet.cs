@@ -9,13 +9,25 @@ namespace HLProject
 {
     public class Bullet : CachedTransform
     {
+        [SerializeField] bool alwaysFaceCamera;
         [SerializeField] DecalProjector bulletDecal;
         [SerializeField] ParticleSystem explosionPS;
         [SerializeField] AudioSource aSrc;
         [SerializeField] MeshRenderer meshRenderer;
         [SerializeField] AudioClip greandeTickSound;
 
-        bool canTravel, canShowDecal, explodeOnHit, canExplode, isServer, canTick, hasExplosionTimer;
+        Transform _MainCamera;
+        Transform MainCamera
+        {
+            get
+            {
+                if (_MainCamera == null) _MainCamera = Camera.main.transform;
+                return _MainCamera;
+            }
+        }
+
+        bool canTravel, canShowDecal, explodeOnHit, canExplode, isServer, canTick, hasExplosionTimer, isBouncingExplosive;
+        int bouncesToExplode, currentBounces;
         float speed, timeToExplode, radius, grenadeTickTime, maxTimeToExplode;
         Vector3 startPosition;
         Vector3 destination;
@@ -76,6 +88,8 @@ namespace HLProject
 
         void Update()
         {
+            if (alwaysFaceCamera) meshRenderer.transform.LookAt(MainCamera);
+
             if (canExplode && hasExplosionTimer)
             {
                 if (Time.time < timeToExplode)
@@ -131,7 +145,7 @@ namespace HLProject
             Destroy(gameObject);
         }
 
-        public void PhysicsTravelTo(bool isServer, Vector3 direction, float explosionRadious, ForceMode physForceMode, bool hasTorque, bool explodeOnTouch, float timeToExplode = -1)
+        public void PhysicsTravelTo(bool isServer, Vector3 direction, ForceMode physForceMode, bool hasTorque, bool _canExplode, float explosionRadious, bool explodeOnTouch, float timeToExplode = -1, int maxBouncesToExplode = -1)
         {
             rb.AddForce(direction * speed, physForceMode);
             if (hasTorque) rb.AddTorque(direction * (speed / 2), physForceMode);
@@ -146,16 +160,22 @@ namespace HLProject
 
             this.isServer = isServer;
 
+            if (maxBouncesToExplode != -1)
+            {
+                bouncesToExplode = maxBouncesToExplode;
+                isBouncingExplosive = true;
+            }
+
             radius = explosionRadious;
 
             if (explodeOnHit)
             {
                 canExplode = false;
-                LeanTween.delayedCall(.2f, () => canExplode = true);
+                LeanTween.delayedCall(.2f, () => canExplode = _canExplode);
             }
             else
             {
-                canExplode = true;
+                canExplode = _canExplode;
             }
 
             LoadAssets();
@@ -171,7 +191,29 @@ namespace HLProject
             //Debug.LogFormat("{0} - {1} - {2} - {3}", (this.timeToExplode - Time.time), remainingTime, Mathf.Pow(remainingTime, 4), grenadeTickTime);
         }
 
-        void OnCollisionStay(Collision collision) { if (canExplode && explodeOnHit) { Explode(); } }
+        void OnCollisionStay(Collision collision) 
+        {
+            if (!canExplode) return;
+
+            if (isBouncingExplosive)
+            {
+                currentBounces++;
+                if (currentBounces > bouncesToExplode) 
+                    Explode();
+                return;
+            }
+
+            if (explodeOnHit)
+            {
+                if (isBouncingExplosive)
+                {
+                    HitBox charHitBox = collision.transform.GetComponent<HitBox>();
+                    if (charHitBox == null) return;
+                }
+
+                Explode();
+            }
+        }
 
         void Explode()
         {

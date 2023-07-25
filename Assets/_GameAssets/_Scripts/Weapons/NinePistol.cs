@@ -235,7 +235,7 @@ namespace HLProject
             weaponAnim.SetTrigger("Holster");
         }
 
-        public override void OnAltMode(bool toggle) { }
+        public override void OnAltMode(bool toggle, WeaponData newData) { }
 
         void RandomIdleAnim()
         {

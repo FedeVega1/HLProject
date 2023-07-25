@@ -5,7 +5,7 @@ using Mirror;
 
 namespace HLProject
 {
-    public enum DamageType { Base, Bleed, Bullet, Explosion, Blunt, Shock }
+    public enum DamageType { Base, Bleed, Bullet, Explosion, Blunt, Shock, Energy }
 
     public class Character : CachedNetTransform
     {
@@ -91,6 +91,7 @@ namespace HLProject
 
             switch (damageType)
             {
+                case DamageType.Energy:
                 case DamageType.Base:
                     damageToArmor = 0;
                     ApplySuppression(.1f);

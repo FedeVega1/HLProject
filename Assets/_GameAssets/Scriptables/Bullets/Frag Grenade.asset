@@ -16,6 +16,7 @@ MonoBehaviour:
   type: 1
   physType: 0
   damageType: 3
+  canExplode: 1
   initialSpeed: 1500
   damage: 125
   maxTravelDistance: 0

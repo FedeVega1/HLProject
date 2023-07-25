@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cbc436bff5906864d8060ea6fbb33a4f, type: 3}
-  m_Name: AR2
+  m_Name: AR2 Launcher
   m_EditorClassIdentifier: 
-  weaponName: AR2 Rifle
-  clientPrefab: {fileID: 478631513024658733, guid: 6c82d381c8834024296130d92a45112f, type: 3}
+  weaponName: AR2 Launcher
+  clientPrefab: {fileID: 0}
   propPrefab: {fileID: 7938494525487091469, guid: 439af775d55d9b84283a38c703a2c851, type: 3}
-  bulletData: {fileID: 11400000, guid: 89955e5210120b5468358535766991bc, type: 2}
+  bulletData: {fileID: 11400000, guid: d282218ce840b544aaea8f2cc52d5510, type: 2}
   maxBulletSpread: 0
   weaponWeight: 3520
   meleeDamage: 0
   meleeDamageType: 0
-  weaponType: 2
+  weaponType: 3
   weaponAnimsTiming:
-    initFire: 0
-    fireMaxDelay: 0.38
-    secondaryFireModeMaxDelay: 0.1
+    initFire: 1.25
+    fireMaxDelay: 2
+    secondaryFireModeMaxDelay: 0
     thirdFireModeMaxDelay: 0
     reload: 2.83
     holster: 0.83
@@ -35,7 +35,7 @@ MonoBehaviour:
     meleeHitboxOut: 0
     shotgunPumpFireMaxDelay: 0
     initReload: 0
-  bulletsPerMag: 30
+  bulletsPerMag: 1
   mags: 3
   pelletsPerShot: 1
   recoilPatternX:
@@ -110,6 +110,6 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  singleRecoilShoot: 0
-  avaibleWeaponFireModes: 3
-  alternateWeaponMode: {fileID: 11400000, guid: 0c188525f143a3948941583c686cfc3d, type: 2}
+  singleRecoilShoot: 1
+  avaibleWeaponFireModes: 1
+  alternateWeaponMode: {fileID: 0}
