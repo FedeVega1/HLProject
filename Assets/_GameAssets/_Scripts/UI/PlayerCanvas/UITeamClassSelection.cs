@@ -25,9 +25,9 @@ namespace HLProject
 
         [SerializeField] CanvasGroup classSelectionCanvasGroup;
         //[SerializeField] GameObject classButtonsPrefab;
-        [SerializeField] Transform buttonsHolder;
+        [SerializeField] RectTransform buttonsHolder, classNameHolder;
         [SerializeField] Button spawnButton;
-        [SerializeField] TMP_Text lblRespawnTime;
+        [SerializeField] TMP_Text lblRespawnTime, lblClassName;
 
         UIClassSelectionButton currentSelectedClass;
         List<UIClassSelectionButton> spawnedButtons;
@@ -110,6 +110,8 @@ namespace HLProject
             {
                 UIClassSelectionButton classButton = Instantiate(btnClassSelectionHandle.Result, buttonsHolder).GetComponent<UIClassSelectionButton>();
                 classButton.Init(teamClassData[i].data, teamClassData[i].index, canvasScript.SelectClass);
+                classButton.OnShowName += ShowClassName;
+                classButton.OnHideName += HideClassName;
 
                 if (classButton != null) spawnedButtons.Add(classButton);
                 else Destroy(classButton.gameObject);
@@ -121,6 +123,18 @@ namespace HLProject
         public void ToggleSpawnButton(bool toggle)
         {
             spawnButton.interactable = toggle;
+        }
+
+        void ShowClassName(string className, Vector3 classButtonPosition)
+        {
+            lblClassName.text = className;
+            classNameHolder.position = classButtonPosition;
+            classNameHolder.localScale = Vector3.one;
+        }
+
+        void HideClassName()
+        {
+            classNameHolder.localScale = Vector3.zero;
         }
 
         public void ClassSelected(int classIndex)

@@ -382,6 +382,7 @@ namespace HLProject
             movementScript.MyTransform.position = spectPoint.position;
             movementScript.MyTransform.rotation = spectPoint.rotation;
 
+            inventory.HideWeapons();
             RpcMatchEndPlayerSetup(loosingTeam, GameModeManager.INS.timeToChangeLevel);
         }
 

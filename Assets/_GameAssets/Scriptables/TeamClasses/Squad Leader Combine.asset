@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   className: SMG1 Squad Leader
   classSprite: {fileID: 21300000, guid: 1e9bf401fa86d94419149597f104521a, type: 3}
-  teamSpecific: 2
+  teamSpecific: 1
   classVHands: 3
   classWeapons:
   - {fileID: 11400000, guid: 7e38726d4cf707e44b42e080d556f996, type: 2}

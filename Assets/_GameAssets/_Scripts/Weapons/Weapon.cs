@@ -354,6 +354,11 @@ namespace HLProject
             OnFinishedReload?.Invoke();
         }
 
+        public void ToggleWeaponVisibility(bool toggle)
+        {
+            clientWeapon.gameObject.SetActive(toggle);
+        }
+
         public double ToggleWeapon(bool toggle)
         {
             weaponDrawn = toggle;

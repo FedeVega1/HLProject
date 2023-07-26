@@ -30,8 +30,8 @@ namespace HLProject
             set
             {
                 _DisablePlayerInputs = value;
-                if (weaponsInvetoryOnClient != null && weaponsInvetoryOnClient.Count > 0 && currentWeaponIndex != -1)
-                    weaponsInvetoryOnClient[currentWeaponIndex].ToggleWeaponSway(!_DisablePlayerInputs);
+                if (weaponsInventoryOnClient != null && weaponsInventoryOnClient.Count > 0 && currentWeaponIndex != -1)
+                    weaponsInventoryOnClient[currentWeaponIndex].ToggleWeaponSway(!_DisablePlayerInputs);
             }
         }
 
@@ -44,7 +44,7 @@ namespace HLProject
 
         AsyncOperationHandle<GameObject> weaponPrefabHandle;
 
-        List<Weapon> weaponsInvetoryOnClient;
+        List<Weapon> weaponsInventoryOnClient;
         List<int> weaponCyclerList;
         List<NetWeapon> weaponsInventoryOnServer;
 
@@ -82,7 +82,7 @@ namespace HLProject
         void Start()
         {
             weaponsInventoryOnServer = new List<NetWeapon>();
-            weaponsInvetoryOnClient = new List<Weapon>();
+            weaponsInventoryOnClient = new List<Weapon>();
             weaponCyclerList = new List<int>();
             vWeaponPivot = GameModeManager.INS.GetClientCamera().GetChild(0);
             currentCyclerIndex = -1;
@@ -92,8 +92,8 @@ namespace HLProject
         {
             if (!isLocalPlayer) return;
 
-            if (weaponsInvetoryOnClient != null && currentWeaponIndex < weaponsInvetoryOnClient.Count && weaponsInvetoryOnClient[currentWeaponIndex] != null)
-                weaponsInvetoryOnClient[currentWeaponIndex].CheckPlayerMovement(playerScript.PlayerIsMoving(), playerScript.PlayerIsRunning());
+            if (weaponsInventoryOnClient != null && currentWeaponIndex < weaponsInventoryOnClient.Count && weaponsInventoryOnClient[currentWeaponIndex] != null)
+                weaponsInventoryOnClient[currentWeaponIndex].CheckPlayerMovement(playerScript.PlayerIsMoving(), playerScript.PlayerIsRunning());
 
             if (Utilities.MouseOverUI()) return;
             if (!DisablePlayerInputs) CheckInputs();
@@ -140,6 +140,14 @@ namespace HLProject
             RpcClearWeaponInventory();
         }
 
+        [Server]
+        public void HideWeapons()
+        {
+            int size = weaponsInventoryOnServer.Count;
+            for (int i = 0; i < size; i++) weaponsInventoryOnServer[i].HideWeapons();
+            RpcHideWeapons(connectionToClient);
+        }
+
         #endregion
 
         #region Client
@@ -147,29 +155,29 @@ namespace HLProject
         [Client]
         void CheckInputs()
         {
-            if (weaponsInvetoryOnClient == null || currentWeaponIndex >= weaponsInvetoryOnClient.Count || weaponsInvetoryOnClient[currentWeaponIndex] == null) return;
+            if (weaponsInventoryOnClient == null || currentWeaponIndex >= weaponsInventoryOnClient.Count || weaponsInventoryOnClient[currentWeaponIndex] == null) return;
 
             if (WeaponSelectorCycle() || isSwappingWeapons) return;
 
             //print($"Down: {Input.GetMouseButtonDown(0)} Up: {Input.GetMouseButtonUp(0)} - Pressed: {Input.GetMouseButton(0)}");
 
-            if (Input.GetMouseButtonUp(0)) weaponsInvetoryOnClient[currentWeaponIndex].EndFire();
+            if (Input.GetMouseButtonUp(0)) weaponsInventoryOnClient[currentWeaponIndex].EndFire();
             if (!playerScript.PlayerIsRunning())
             {
-                if (Input.GetMouseButtonDown(0)) weaponsInvetoryOnClient[currentWeaponIndex].InitFire();
+                if (Input.GetMouseButtonDown(0)) weaponsInventoryOnClient[currentWeaponIndex].InitFire();
 
                 if (!Input.GetMouseButtonUp(0) && Input.GetMouseButton(0))
                 {
-                    weaponsInvetoryOnClient[currentWeaponIndex].Fire();
+                    weaponsInventoryOnClient[currentWeaponIndex].Fire();
                     UpdateWeaponAmmo();
                 }
 
-                if (Input.GetMouseButtonDown(1)) weaponsInvetoryOnClient[currentWeaponIndex].ScopeIn();
+                if (Input.GetMouseButtonDown(1)) weaponsInventoryOnClient[currentWeaponIndex].ScopeIn();
             }
 
-            if (Input.GetMouseButtonUp(1)) weaponsInvetoryOnClient[currentWeaponIndex].ScopeOut();
-            if (Input.GetKeyDown(KeyCode.R)) weaponsInvetoryOnClient[currentWeaponIndex].Reload();
-            if (Input.GetKeyDown(KeyCode.V)) weaponsInvetoryOnClient[currentWeaponIndex].SwitchFireMode();
+            if (Input.GetMouseButtonUp(1)) weaponsInventoryOnClient[currentWeaponIndex].ScopeOut();
+            if (Input.GetKeyDown(KeyCode.R)) weaponsInventoryOnClient[currentWeaponIndex].Reload();
+            if (Input.GetKeyDown(KeyCode.V)) weaponsInventoryOnClient[currentWeaponIndex].SwitchFireMode();
         }
 
         [Client]
@@ -181,10 +189,10 @@ namespace HLProject
             {
                 bool checkWeaponIndex = currentCyclerIndex < weaponCyclerList.Count && weaponCyclerList[currentCyclerIndex] != currentWeaponIndex;
                 bool success = false;
-                if ((weaponsInvetoryOnClient[currentWeaponIndex].WType != currentCyclerType) || checkWeaponIndex)
+                if ((weaponsInventoryOnClient[currentWeaponIndex].WType != currentCyclerType) || checkWeaponIndex)
                 {
                     bool onAltMode = currentCyclerType == WeaponType.AltMode || 
-                        (currentCyclerType == WeaponType.Primary && weaponsInvetoryOnClient[currentWeaponIndex].OnAltMode);
+                        (currentCyclerType == WeaponType.Primary && weaponsInventoryOnClient[currentWeaponIndex].OnAltMode);
 
                     if (onAltMode) CmdRequestWeaponModeChange();
                     else CmdRequestWeaponChange(weaponCyclerList[currentCyclerIndex]);
@@ -242,10 +250,10 @@ namespace HLProject
         bool SearchForWeaponsType(WeaponType TypeToSearch, out int weaponIndex)
         {
             weaponIndex = -1;
-            int size = weaponsInvetoryOnClient.Count;
+            int size = weaponsInventoryOnClient.Count;
             for (int i = 0; i < size; i++)
             {
-                if ((weaponsInvetoryOnClient[i].OnAltMode && TypeToSearch == WeaponType.Primary || weaponsInvetoryOnClient[i].WType == TypeToSearch) && !weaponCyclerList.Contains(i))
+                if ((weaponsInventoryOnClient[i].OnAltMode && TypeToSearch == WeaponType.Primary || weaponsInventoryOnClient[i].WType == TypeToSearch) && !weaponCyclerList.Contains(i))
                 {
                     weaponIndex = i;
                     return true;
@@ -256,10 +264,10 @@ namespace HLProject
         }
 
         [Client]
-        void UpdateWeaponAmmo() => playerScript.PlayerCanvasScript.SetCurrentAmmo(weaponsInvetoryOnClient[currentWeaponIndex].BulletsInMag, weaponsInvetoryOnClient[currentWeaponIndex].Mags);
+        void UpdateWeaponAmmo() => playerScript.PlayerCanvasScript.SetCurrentAmmo(weaponsInventoryOnClient[currentWeaponIndex].BulletsInMag, weaponsInventoryOnClient[currentWeaponIndex].Mags);
 
         [Client]
-        void UpdateCurrenWeaponName() => playerScript.PlayerCanvasScript.SetCurrentWeapon(weaponsInvetoryOnClient[currentWeaponIndex].GetWeaponData().weaponName);
+        void UpdateCurrenWeaponName() => playerScript.PlayerCanvasScript.SetCurrentWeapon(weaponsInventoryOnClient[currentWeaponIndex].GetWeaponData().weaponName);
 
         #endregion
 
@@ -348,6 +356,14 @@ namespace HLProject
             swapWeaponRoutine = StartCoroutine(ChangeWeaponRoutine(weaponIndex, oldIndex));
         }
 
+        [TargetRpc]
+        public void RpcHideWeapons(NetworkConnection target)
+        {
+            int size = weaponsInventoryOnClient.Count;
+            for (int i = 0; i < size; i++) weaponsInventoryOnClient[i].ToggleWeaponVisibility(false);
+            currentClassHands.gameObject.SetActive(false);
+        }
+
         [ClientRpc]
         void RpcSetWeaponParent(uint weaponID, bool isCurrentWeapon)
         {
@@ -381,7 +397,7 @@ namespace HLProject
         void RpcSetupWeaponInventory(NetworkConnection target, int weaponsToSpawn, int defaultWeaponIndex, int clientHandType)
         {
             print("Player: Setup Weapon Inventory");
-            weaponsInvetoryOnClient.Clear();
+            weaponsInventoryOnClient.Clear();
 
             StartCoroutine(WaitForPlayerWeaponSync(() =>
             {
@@ -400,7 +416,7 @@ namespace HLProject
                         spawnedWeapon.Init(netWeapon.GetWeaponData(), netWeapon, playerScript);
                         spawnedWeapon.OnFinishedReload += UpdateWeaponAmmo;
                         Debug.LogFormat("Client: Spawn weapon {0} of type {1}", netWeapon.GetWeaponData().weaponName, netWeapon.GetWeaponData().weaponType);
-                        weaponsInvetoryOnClient.Add(spawnedWeapon);
+                        weaponsInventoryOnClient.Add(spawnedWeapon);
                     }
                 }
 
@@ -411,10 +427,10 @@ namespace HLProject
                 currentClassHands.MyTransform.localRotation = Quaternion.identity;
 
                 currentWeaponIndex = defaultWeaponIndex;
-                weaponsInvetoryOnClient[currentWeaponIndex].ToggleWeapon(true);
-                currentCyclerType = weaponsInvetoryOnClient[currentWeaponIndex].GetWeaponData().weaponType;
+                weaponsInventoryOnClient[currentWeaponIndex].ToggleWeapon(true);
+                currentCyclerType = weaponsInventoryOnClient[currentWeaponIndex].GetWeaponData().weaponType;
 
-                currentClassHands.GetWeaponHandBones(weaponsInvetoryOnClient[currentWeaponIndex].WeaponRootBone, weaponsInvetoryOnClient[currentWeaponIndex].ClientWeaponTransform);
+                currentClassHands.GetWeaponHandBones(weaponsInventoryOnClient[currentWeaponIndex].WeaponRootBone, weaponsInventoryOnClient[currentWeaponIndex].ClientWeaponTransform);
 
                 UpdateCurrenWeaponName();
                 UpdateWeaponAmmo();
@@ -427,14 +443,14 @@ namespace HLProject
         [ClientRpc]
         void RpcClearWeaponInventory()
         {
-            int size = weaponsInvetoryOnClient.Count;
+            int size = weaponsInventoryOnClient.Count;
             for (int i = 0; i < size; i++)
             {
-                weaponsInvetoryOnClient[i].DropWeapon();
-                Destroy(weaponsInvetoryOnClient[i].gameObject);
+                weaponsInventoryOnClient[i].DropWeapon();
+                Destroy(weaponsInventoryOnClient[i].gameObject);
             }
 
-            weaponsInvetoryOnClient.Clear();
+            weaponsInventoryOnClient.Clear();
             if (currentClassHands != null) Destroy(currentClassHands);
         }
 
@@ -467,12 +483,12 @@ namespace HLProject
         [Client]
         IEnumerator ChangeWeaponRoutine(int weaponIndex, int oldIndex)
         {
-            float timeToWait = (float) weaponsInvetoryOnClient[oldIndex].ToggleWeapon(false);
+            float timeToWait = (float) weaponsInventoryOnClient[oldIndex].ToggleWeapon(false);
             yield return new WaitForSeconds(timeToWait);
 
-            weaponsInvetoryOnClient[weaponIndex].ToggleWeapon(true);
+            weaponsInventoryOnClient[weaponIndex].ToggleWeapon(true);
 
-            currentClassHands.GetWeaponHandBones(weaponsInvetoryOnClient[weaponIndex].WeaponRootBone, weaponsInvetoryOnClient[weaponIndex].ClientWeaponTransform);
+            currentClassHands.GetWeaponHandBones(weaponsInventoryOnClient[weaponIndex].WeaponRootBone, weaponsInventoryOnClient[weaponIndex].ClientWeaponTransform);
             currentWeaponIndex = weaponIndex;
             isSwappingWeapons = false;
 
@@ -483,7 +499,7 @@ namespace HLProject
         [Client]
         IEnumerator ChangeWeaponModeRoutine()
         {
-            float timeToWait = (float) weaponsInvetoryOnClient[currentWeaponIndex].ToggleAltMode();
+            float timeToWait = (float) weaponsInventoryOnClient[currentWeaponIndex].ToggleAltMode();
             yield return new WaitForSeconds(timeToWait);
 
             isSwappingWeapons = false;
@@ -494,15 +510,15 @@ namespace HLProject
         [Client]
         IEnumerator ChangeWeaponAndModeRoutine(int weaponIndex, int oldIndex)
         {
-            float timeToWait = (float) weaponsInvetoryOnClient[oldIndex].ToggleWeapon(false);
+            float timeToWait = (float) weaponsInventoryOnClient[oldIndex].ToggleWeapon(false);
             yield return new WaitForSeconds(timeToWait);
 
-            weaponsInvetoryOnClient[weaponIndex].ToggleWeapon(true);
+            weaponsInventoryOnClient[weaponIndex].ToggleWeapon(true);
 
-            currentClassHands.GetWeaponHandBones(weaponsInvetoryOnClient[weaponIndex].WeaponRootBone, weaponsInvetoryOnClient[weaponIndex].ClientWeaponTransform);
+            currentClassHands.GetWeaponHandBones(weaponsInventoryOnClient[weaponIndex].WeaponRootBone, weaponsInventoryOnClient[weaponIndex].ClientWeaponTransform);
             currentWeaponIndex = weaponIndex;
 
-            timeToWait = (float) weaponsInvetoryOnClient[currentWeaponIndex].ToggleAltMode();
+            timeToWait = (float) weaponsInventoryOnClient[currentWeaponIndex].ToggleAltMode();
             yield return new WaitForSeconds(timeToWait);
 
             isSwappingWeapons = false;

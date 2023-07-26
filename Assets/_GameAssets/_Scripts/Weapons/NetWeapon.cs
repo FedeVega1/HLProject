@@ -344,6 +344,12 @@ namespace HLProject
         }
 
         [Server]
+        public void HideWeapons()
+        {
+            RpcToggleClientWeapon(false);
+        }
+
+        [Server]
         void ScopeIn()
         {
             if (IsMelee || owningPlayer.PlayerIsRunning() || isReloading || onScope) return;
