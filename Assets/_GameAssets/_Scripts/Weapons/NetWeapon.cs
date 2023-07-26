@@ -14,6 +14,7 @@ namespace HLProject
         public const int FallOffQuality = 5;
 
         public WeaponType WType => weaponData.weaponType;
+        public WeaponType LastWType => swappedData.weaponType;
 
         [SyncVar] bool serverInitialized;
 
@@ -38,8 +39,10 @@ namespace HLProject
         Transform firePivot;
         Collider[] raycastShootlastCollider;
         Coroutine meleeRoutine;
+        Queue<BulletData> lastShootPhysExplosion;
 
         AsyncOperationHandle<WeaponData> clientSyncWeaponData;
+        AsyncOperationHandle<IList<BulletData>> clientBulletData;
 
         public override void OnStartClient()
         {
@@ -54,6 +57,7 @@ namespace HLProject
             weaponData = data;
             RpcSyncWeaponData(weaponData.name);
 
+            lastShootPhysExplosion = new Queue<BulletData>();
             bulletData = data.bulletData;
             owningPlayer = owner;
 
@@ -144,6 +148,7 @@ namespace HLProject
             GameObject granade = Instantiate(bulletData.bulletPrefab, firePivot.position + firePivot.forward, firePivot.rotation);
             Bullet granadeBulletScript = granade.GetComponent<Bullet>();
             granadeBulletScript.OnExplode += OnBulletExplode;
+            granadeBulletScript.OnTouch += OnBulletTouch;
             granadeBulletScript.Init(bulletData.initialSpeed, true);
 
             Vector3 cross;
@@ -161,24 +166,35 @@ namespace HLProject
                     break;
 
                 case BulletPhysicsType.FireBounce:
-                    granadeBulletScript.PhysicsTravelTo(true, firePivot.forward, ForceMode.Impulse, false, true, bulletData.radius, true, bulletData.timeToExplode);
+                    granadeBulletScript.PhysicsTravelTo(true, firePivot.forward, ForceMode.Impulse, false, true, bulletData.radius, false, bulletData.timeToExplode, bulletData.bouncesToExplode);
                     break;
             }
 
+            lastShootPhysExplosion.Enqueue(bulletData);
             NetworkServer.Spawn(granade);
         }
 
         [Server]
         void OnBulletExplode(List<HitBox> hitBoxList, Vector3 finalPos, Quaternion finalRot)
         {
-            int size = hitBoxList.Count;
-            for (int i = 0; i < size; i++)
+            if (bulletData.explosionDamage != 0)
             {
-                float distance = Vector3.Distance(finalPos, hitBoxList[i].MyTransform.position);
-                float damageFalloff = Mathf.Clamp(bulletData.radius - distance, 0, bulletData.radius) / bulletData.radius;
-                hitBoxList[i].GetCharacterScript().TakeDamage(bulletData.damage * damageFalloff, bulletData.damageType);
+                int size = hitBoxList.Count;
+                for (int i = 0; i < size; i++)
+                {
+                    float distance = Vector3.Distance(finalPos, hitBoxList[i].MyTransform.position);
+                    float damageFalloff = Mathf.Clamp(bulletData.radius - distance, 0, bulletData.radius) / bulletData.radius;
+                    hitBoxList[i].GetCharacterScript().TakeDamage(bulletData.explosionDamage * damageFalloff, bulletData.damageType);
+                }
             }
-            RpcBulletExplosion(finalPos, finalRot);
+
+            RpcBulletExplosion(finalPos, finalRot, lastShootPhysExplosion.Dequeue().name);
+        }
+
+        [Server]
+        void OnBulletTouch(HitBox target)
+        {
+            target.GetCharacterScript().TakeDamage(bulletData.damage, bulletData.damageType);
         }
 
         [Server]
@@ -355,6 +371,8 @@ namespace HLProject
                 StopCoroutine(meleeRoutine);
                 meleeRoutine = null;
             }
+
+            if (swappedData != null) ToggleAltMode();
         }
 
         #endregion
@@ -410,12 +428,19 @@ namespace HLProject
         #region RPCs
 
         [ClientRpc]
-        public void RpcBulletExplosion(Vector3 pos, Quaternion rot)
+        public void RpcBulletExplosion(Vector3 pos, Quaternion rot, string bulletDataName)
         {
-            GameObject granade = Instantiate(bulletData.bulletPrefab, pos, rot);
+            int indx = SearchForBulletData(bulletDataName);
+            if (indx == -1)
+            {
+                Debug.LogErrorFormat("Couldn't find the requested bullet data: {0}", bulletDataName);
+                return;
+            }
+
+            GameObject granade = Instantiate(clientBulletData.Result[indx].bulletPrefab, pos, rot);
             Bullet granadeBulletScript = granade.GetComponent<Bullet>();
             granadeBulletScript.Init(0, true);
-            granadeBulletScript.PhysicsTravelTo(false, Vector3.zero, ForceMode.Force, false, true, bulletData.radius, true, 0);
+            granadeBulletScript.PhysicsTravelTo(false, Vector3.zero, ForceMode.Force, false, true, bulletData.radius, true);
         }
 
         [ClientRpc(includeOwner = false)]
@@ -427,9 +452,13 @@ namespace HLProject
             }));
         }
 
-        [ClientRpc(includeOwner = false)]
+        [ClientRpc]
         public void RpcInitClientWeapon()
         {
+            clientBulletData = Addressables.LoadAssetsAsync<BulletData>(new List<string> { "WeaponBulletScriptables" }, null, Addressables.MergeMode.Union);
+            clientBulletData.Completed += OnLoadBulletData;
+
+            if (hasAuthority) return;
             print("INIT CLIENT WEAPON");
             InitClientWeapon();
         }
@@ -468,6 +497,12 @@ namespace HLProject
             weaponData = clientSyncWeaponData.Result;
             if (bulletData == null) bulletData = weaponData.bulletData;
             if (serverInitialized && clientWeapon == null) InitClientWeapon();
+        }
+
+        void OnLoadBulletData(AsyncOperationHandle<IList<BulletData>> operation)
+        {
+            if (operation.Status == AsyncOperationStatus.Failed)
+                Debug.LogErrorFormat("Couldn't load bullet data: {0}", operation.OperationException);
         }
 
         [ClientRpc]
@@ -590,5 +625,30 @@ namespace HLProject
         }
 
         public WeaponData GetWeaponData() => weaponData;
+
+        [Client]
+        int SearchForBulletData(string dataName)
+        {
+            if (!clientBulletData.IsValid())
+            {
+                Debug.LogError("Client Bullet data List is not valid!");
+                return -1;
+            }
+
+            if (clientBulletData.Result == null)
+            {
+                Debug.LogError("Client Bullet data List is null!");
+                return -1;
+            }
+
+            int size = clientBulletData.Result.Count;
+            for (int i = 0; i < size; i++)
+            {
+                if (clientBulletData.Result[i].name == dataName)
+                    return i;
+            }
+
+            return -1;
+        }
     }
 }

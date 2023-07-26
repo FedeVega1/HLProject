@@ -5032,6 +5032,30 @@ MonoBehaviour:
   aSrc: {fileID: 6825808271965629865}
   meshRenderer: {fileID: 1724251227685858997}
   greandeTickSound: {fileID: 0}
+  explosionSounds:
+  - m_AssetGUID: 7c9c466beb577e44ba4714ba92acbd41
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  debrisSounds:
+  - m_AssetGUID: 5db80b3e5a37e5f47a166371dac8d13a
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 8b11a162297068a4589c7b5cdb8525c4
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  explosionBass: []
+  bounceSounds:
+  - m_AssetGUID: 3e133132d549d7547a5eb629db0b5344
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 6acd3582c1032504d8395b698e93d746
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
 --- !u!82 &6825808271965629865
 AudioSource:
   m_ObjectHideFlags: 0
@@ -5043,7 +5067,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -5053,9 +5077,9 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 500
+  MaxDistance: 100
   Pan2D: 0
-  rolloffMode: 0
+  rolloffMode: 2
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0
@@ -5074,11 +5098,11 @@ AudioSource:
     - serializedVersion: 3
       time: 1
       value: 0
-      inSlope: 0
-      outSlope: 0
+      inSlope: -2.7092562
+      outSlope: -2.7092562
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.33333334
+      inWeight: 0.07142866
       outWeight: 0.33333334
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -5088,7 +5112,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0

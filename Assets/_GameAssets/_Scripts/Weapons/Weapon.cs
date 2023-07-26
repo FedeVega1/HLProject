@@ -12,6 +12,7 @@ namespace HLProject
     public class Weapon : CachedTransform
     {
         public WeaponType WType => weaponData.weaponType;
+        public WeaponType LastWType => swappedData.weaponType;
         public bool OnAltMode => swappedData != null;
 
         public Transform WeaponRootBone => clientWeapon.WeaponRootBone;
@@ -359,6 +360,7 @@ namespace HLProject
 
             if (toggle)
             {
+                if (OnAltMode) ToggleAltMode();
                 clientWeapon.DrawWeapon();
                 wTime = NetworkTime.time + weaponData.weaponAnimsTiming.draw;
                 return weaponData.weaponAnimsTiming.draw;

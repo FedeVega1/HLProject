@@ -144,7 +144,7 @@ namespace HLProject
             RpcCharacterTookDamage(ammount, damageType);
 
             Debug.LogFormat("Character {0} took {1} of {2} damage - DamageToArmor: {3} - DamageToHealth: {4}", name, ammount, damageType, damageToArmor, dmgToHealth);
-            if (currentHealth <= 0) CharacterDies(damageType == DamageType.Base);
+            if (currentHealth <= 0) CharacterDies(damageType == DamageType.Base || currentHealth < 100);
         }
 
         [Server]

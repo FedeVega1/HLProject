@@ -15,6 +15,7 @@ namespace HLProject
         [SerializeField] AudioSource aSrc;
         [SerializeField] MeshRenderer meshRenderer;
         [SerializeField] AudioClip greandeTickSound;
+        [SerializeField] List<AssetReference> explosionSounds, debrisSounds, explosionBass, bounceSounds;
 
         Transform _MainCamera;
         Transform MainCamera
@@ -33,10 +34,11 @@ namespace HLProject
         Vector3 destination;
         Rigidbody rb;
 
-        AsyncOperationHandle<IList<AudioClip>> normalExplosionSounds, underwaterExplosionSound, explosionDebris, explosionBass;
+        AsyncOperationHandle<IList<AudioClip>> normalExplosionSounds, underwaterExplosionSound, explosionDebris, explosionBassHandle, bounceSoundsHandle;
         //AsyncOperationHandle<AudioClip> grenadeTickSoundHandle;
 
         public System.Action<List<HitBox>, Vector3, Quaternion> OnExplode;
+        public System.Action<HitBox> OnTouch;
 
         void Awake()
         {
@@ -48,15 +50,29 @@ namespace HLProject
 
         void LoadAssets()
         {
-            if (!canExplode) return;
-            normalExplosionSounds = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "explode0", "explode1", "explode2", "explode3", "explode4", "explode5", "explode6", "explode7", "explode8" }, null, Addressables.MergeMode.Union);
-            normalExplosionSounds.Completed += OnSoundsLoaded;
+            if (explosionSounds != null && explosionSounds.Count > 0)
+            {
+                normalExplosionSounds = Addressables.LoadAssetsAsync<AudioClip>(explosionSounds, null, Addressables.MergeMode.Union);
+                normalExplosionSounds.Completed += OnSoundsLoaded;
+            }
 
-            explosionDebris = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "debris1", "debris2", "debris3", "debris4", "debris5", "debris6" }, null, Addressables.MergeMode.Union);
-            explosionDebris.Completed += OnSoundsLoaded;
+            if (debrisSounds != null && debrisSounds.Count > 0)
+            {
+                explosionDebris = Addressables.LoadAssetsAsync<AudioClip>(debrisSounds, null, Addressables.MergeMode.Union);
+                explosionDebris.Completed += OnSoundsLoaded;
+            }
 
-            explosionBass = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "explosion_bass_1", "explosion_bass_2", "explosion_bass_3", "explosion_bass_4", "explosion_bass_5" }, null, Addressables.MergeMode.Union);
-            explosionBass.Completed += OnSoundsLoaded;
+            if (explosionBass != null && explosionBass.Count > 0)
+            {
+                explosionBassHandle = Addressables.LoadAssetsAsync<AudioClip>(explosionBass, null, Addressables.MergeMode.Union);
+                explosionBassHandle.Completed += OnSoundsLoaded;
+            }
+
+            if (bounceSounds != null && bounceSounds.Count > 0)
+            {
+                bounceSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(bounceSounds, null, Addressables.MergeMode.Union);
+                bounceSoundsHandle.Completed += OnSoundsLoaded;
+            }
 
             /*grenadeTickSoundHandle = Addressables.LoadAssetAsync<AudioClip>("tick1");
             grenadeTickSoundHandle.Completed += OnSoundLoaded;*/
@@ -171,7 +187,8 @@ namespace HLProject
             if (explodeOnHit)
             {
                 canExplode = false;
-                LeanTween.delayedCall(.2f, () => canExplode = _canExplode);
+                bool _exp = _canExplode;
+                LeanTween.delayedCall(.2f, () => canExplode = _exp);
             }
             else
             {
@@ -191,32 +208,40 @@ namespace HLProject
             //Debug.LogFormat("{0} - {1} - {2} - {3}", (this.timeToExplode - Time.time), remainingTime, Mathf.Pow(remainingTime, 4), grenadeTickTime);
         }
 
-        void OnCollisionStay(Collision collision) 
+        void OnCollisionEnter(Collision collision)
         {
+            if (bounceSoundsHandle.IsValid() && bounceSoundsHandle.Result != null) 
+                aSrc.PlayOneShot(bounceSoundsHandle.Result[Random.Range(0, bounceSoundsHandle.Result.Count)]);
+
             if (!canExplode) return;
 
+            HitBox charHitBox;
             if (isBouncingExplosive)
             {
+                if (isServer)
+                {
+                    charHitBox = collision.transform.GetComponent<HitBox>();
+                    if (charHitBox != null) OnTouch?.Invoke(charHitBox);
+                }
+
                 currentBounces++;
-                if (currentBounces > bouncesToExplode) 
-                    Explode();
+                if (currentBounces > bouncesToExplode) Explode();
                 return;
             }
 
-            if (explodeOnHit)
-            {
-                if (isBouncingExplosive)
-                {
-                    HitBox charHitBox = collision.transform.GetComponent<HitBox>();
-                    if (charHitBox == null) return;
-                }
+            if (explodeOnHit) Explode();
+        }
 
-                Explode();
-            }
+        void OnCollisionStay(Collision collision) 
+        {
+            if (!canExplode) return;
+            if (explodeOnHit) Explode();
         }
 
         void Explode()
         {
+            if (!canExplode) return;
+
             if (isServer)
             {
                 Collider[] possibleTargets = new Collider[30];
@@ -247,9 +272,9 @@ namespace HLProject
                     bulletDecal.transform.SetParent(null);
                 }
                 
-                aSrc.PlayOneShot(normalExplosionSounds.Result[Random.Range(0, normalExplosionSounds.Result.Count)]);
-                aSrc.PlayOneShot(explosionBass.Result[Random.Range(0, explosionBass.Result.Count)]);
-                LeanTween.delayedCall(.2f, () => aSrc.PlayOneShot(explosionDebris.Result[Random.Range(0, explosionDebris.Result.Count)]));
+                if (normalExplosionSounds.IsValid()) aSrc.PlayOneShot(normalExplosionSounds.Result[Random.Range(0, normalExplosionSounds.Result.Count)]);
+                if (explosionBassHandle.IsValid()) aSrc.PlayOneShot(explosionBassHandle.Result[Random.Range(0, explosionBassHandle.Result.Count)]);
+                if (explosionDebris.IsValid()) LeanTween.delayedCall(.2f, () => aSrc.PlayOneShot(explosionDebris.Result[Random.Range(0, explosionDebris.Result.Count)]));
                 //GameObject areaDebug = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 //areaDebug.layer = LayerMask.NameToLayer("Debug");
                 //areaDebug.transform.position = MyTransform.position;
@@ -263,6 +288,8 @@ namespace HLProject
             canExplode = false;
             hasExplosionTimer = false;
             meshRenderer.enabled = false;
+            rb.isKinematic = true;
+
             StartCoroutine(WaitForSound(() => Destroy(gameObject)));
         }
 

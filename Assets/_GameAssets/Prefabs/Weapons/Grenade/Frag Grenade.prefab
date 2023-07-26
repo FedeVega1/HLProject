@@ -29,6 +29,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2918623712023293449}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -38,7 +39,6 @@ Transform:
   - {fileID: 8706651982342917148}
   - {fileID: 335066448975132405}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &670551652023092188
 CapsuleCollider:
@@ -141,11 +141,108 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14120a5b2a2343346876696e4b6af9bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  alwaysFaceCamera: 0
   bulletDecal: {fileID: 8617560567586172561}
   explosionPS: {fileID: 6742584853937286690}
   aSrc: {fileID: 2474168874814496138}
   meshRenderer: {fileID: 4608820120636418339}
   greandeTickSound: {fileID: 8300000, guid: 5bc522dda904aec40aae88b36038e802, type: 3}
+  explosionSounds:
+  - m_AssetGUID: 08b9ac1fb441afc4981828ef91972d10
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: f4acaaf1b9785084fa841b3d423c9123
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 85808d384bd1377428e40b32e80ca7b6
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 4b65707c1cdbc394eb876d46f661c41b
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 9611721a921e9f446ab62e0e2687958b
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: bcc0a380ab781a545a49abd4c426d15a
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: cafc0ab0cd7466d479e4a3e1d0dda848
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 976eb8a1bfa936a49b34f3a4b5c2918c
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: abd44ff7870a5564f9161dea86e0ed82
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  debrisSounds:
+  - m_AssetGUID: bb82e14a87f82eb46b979f77a6663923
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: c91e4dad983594d42a4e57d50bb18d4d
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: b0dd12c7c2b8487409f3338f7207fc1a
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 91378c43d1b8137459ae924c2cbde6ba
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 95c47c9f441a1e74a86ddc30ae9c57bb
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 7ed5d059cd8e4cb4ca92b71ede1be17a
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  explosionBass:
+  - m_AssetGUID: 4e560cc17051c8b45bf5981a9f023a5c
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 58d0f6bf678a1dc4c8f92da64f9c3491
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 3938eec114bd9f141b44566902d53843
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: d16a10d8f2a7d33469669d3b61d08c4a
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: f0676e802f8a428489a3a9303d70b13c
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  bounceSounds:
+  - m_AssetGUID: ab3bdcaf93d376a49907de6978af8847
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: e0630c2caeb9fd542baaddc37c0132b4
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: a8e41b31ab734f74c928fa3279fa4ceb
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
 --- !u!82 &2474168874814496138
 AudioSource:
   m_ObjectHideFlags: 0
@@ -267,13 +364,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4713950267596041392}
+  serializedVersion: 2
   m_LocalRotation: {x: -0.70710576, y: -0, z: -0, w: 0.70710784}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6228004938490627258}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!198 &6742584853937286690
 ParticleSystem:

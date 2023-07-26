@@ -7,7 +7,7 @@ namespace HLProject
     public class BulletDataEditor : Editor
     {
         SerializedProperty bulletPrefab, type, physType, damageType, initialSpeed, damage, maxTravelDistance,
-            radious, timeToExplode, fallOff, canExplode;
+            radious, timeToExplode, fallOff, canExplode, bouncesToExplode, explosionDamage;
 
         void OnEnable()
         {
@@ -22,6 +22,8 @@ namespace HLProject
             timeToExplode = serializedObject.FindProperty("timeToExplode");
             fallOff = serializedObject.FindProperty("fallOff");
             canExplode = serializedObject.FindProperty("canExplode");
+            bouncesToExplode = serializedObject.FindProperty("bouncesToExplode");
+            explosionDamage = serializedObject.FindProperty("explosionDamage");
         }
 
         public override void OnInspectorGUI()
@@ -57,9 +59,17 @@ namespace HLProject
 
             if (canExplode.boolValue)
             {
+                EditorGUILayout.PropertyField(explosionDamage);
                 EditorGUILayout.PropertyField(radious);
-                string label = (BulletPhysicsType) physType.enumValueIndex == BulletPhysicsType.FireBounce ? "Bounce Count" : "Time to Explode";
-                timeToExplode.floatValue = EditorGUILayout.FloatField(label, timeToExplode.floatValue);
+
+                switch ((BulletPhysicsType) physType.enumValueIndex)
+                {
+                    case BulletPhysicsType.FireBounce:
+                        EditorGUILayout.PropertyField(bouncesToExplode);
+                        break;
+                }
+
+                EditorGUILayout.PropertyField(timeToExplode);
             }
 
             serializedObject.ApplyModifiedProperties();

@@ -15,11 +15,13 @@ MonoBehaviour:
   bulletPrefab: {fileID: 4015506629346928269, guid: 3549cd0817c5aa941a5a5d02b3f261f3, type: 3}
   type: 1
   physType: 2
-  damageType: 0
+  damageType: 6
   canExplode: 1
+  bouncesToExplode: 15
   initialSpeed: 50
   damage: 1000
   maxTravelDistance: 0
   radius: 7
   timeToExplode: 5
   fallOff: 0
+  explosionDamage: 0

@@ -1,0 +1,125 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: PhysicsSounds
+  m_EditorClassIdentifier: 
+  m_GroupName: PhysicsSounds
+  m_Data:
+    m_SerializedData: []
+  m_GUID: e49abd1717cf2754484f421b74b2af3a
+  m_SerializeEntries:
+  - m_GUID: 390b6f97738aba74b969678faa9da17f
+    m_Address: metal_box_impact_bullet1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ea7b638b000c8bf4b9f8c81d090de62b
+    m_Address: metal_box_impact_bullet2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6e6eb81554f4e9f488956fc1cd5e009d
+    m_Address: metal_box_impact_bullet3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c9780cd0c57d11b4180e3d511c0304fe
+    m_Address: metal_computer_impact_bullet1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0013e269c6ba11d45b26ca3093175620
+    m_Address: metal_computer_impact_bullet2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ed4e15d7da1f39c46bc00ac8dba0cf0e
+    m_Address: metal_computer_impact_bullet3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ab3bdcaf93d376a49907de6978af8847
+    m_Address: metal_grenade_impact_hard1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e0630c2caeb9fd542baaddc37c0132b4
+    m_Address: metal_grenade_impact_hard2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a8e41b31ab734f74c928fa3279fa4ceb
+    m_Address: metal_grenade_impact_hard3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9458b22c058971a4b9e4dd67b11f1b82
+    m_Address: metal_grenade_impact_soft1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 084370627ba8742438f31b2bb2db10b0
+    m_Address: metal_grenade_impact_soft2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 285ec5d6ee7b624438188410a64622f6
+    m_Address: metal_grenade_impact_soft3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cfa3f03671def7c408cdc39f5961fc26
+    m_Address: metal_grenade_scrape_rough_loop1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 89990bcdff3208e45816547e939a0985
+    m_Address: metal_grenade_scrape_smooth_loop1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 60f9e735f81b8414c8a0dd4ca384a473
+    m_Address: metal_sheet_impact_bullet1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 33dd796d29b2e9f4d80e1ab08cf9207a
+    m_Address: metal_sheet_impact_bullet2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f5e7130a69e3f0b4a87253ba97e13e0c
+    m_Address: metal_solid_impact_bullet1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c2cccde083116424a8b95cd5b191b954
+    m_Address: metal_solid_impact_bullet2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7e2c009e55c11a141b93de10a08bc612
+    m_Address: metal_solid_impact_bullet3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 119467994cb48b542a54f0eba2e49a7f
+    m_Address: metal_solid_impact_bullet4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 3cf91d3a9f4e16f4dbcc0b305a57378e, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 01b2b9bcdc19a4c468b3188fa8710a35, type: 2}
+    - {fileID: 11400000, guid: 2db78d74401312b499bb587d8074db05, type: 2}

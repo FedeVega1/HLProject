@@ -197,10 +197,70 @@ MonoBehaviour:
     - WeaponScriptables
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0c188525f143a3948941583c686cfc3d
-    m_Address: Assets/_GameAssets/Scriptables/Weapons/AR2 Launcher.asset
+    m_Address: AR2 Launcher
     m_ReadOnly: 0
     m_SerializedLabels:
     - WeaponScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0315e0cbc5d0b7b4bb9b8faf03c49dcc
+    m_Address: 4.6mm SMG Bullet
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponBulletScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4eadb97707037ad4dacc66138da84899
+    m_Address: 9mm Bullet
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponBulletScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8d82f2759c015a44d8f315e0e130bf0e
+    m_Address: 357 Bullet
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponBulletScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 89955e5210120b5468358535766991bc
+    m_Address: AR2 Bullet
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponBulletScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d282218ce840b544aaea8f2cc52d5510
+    m_Address: AR2 EnergyBall
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponBulletScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c850eadc633789f45bdf5f4e9a389765
+    m_Address: Frag Grenade
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponBulletScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eb260e7d56f888a47b176b40b4921359
+    m_Address: Shotgun Bullet
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponBulletScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9dba3a23447f3b24db5f7bfd85e6d574
+    m_Address: SMG1 Grenade
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponBulletScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cc396ea161d868d478424de1629e4a84
+    m_Address: Test Bullet
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponBulletScriptables
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 97bafdf88dd66e949bf88cdbc46d3391
+    m_Address: Test Granade
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponBulletScriptables
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 3cf91d3a9f4e16f4dbcc0b305a57378e, type: 2}

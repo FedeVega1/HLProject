@@ -217,6 +217,46 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3e133132d549d7547a5eb629db0b5344
+    m_Address: energy_bounce1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6acd3582c1032504d8395b698e93d746
+    m_Address: energy_bounce2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5db80b3e5a37e5f47a166371dac8d13a
+    m_Address: energy_disintegrate4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8b11a162297068a4589c7b5cdb8525c4
+    m_Address: energy_disintegrate5
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7c9c466beb577e44ba4714ba92acbd41
+    m_Address: energy_sing_explosion2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 39c5f0c8ae879d647b4b77efa27de5f1
+    m_Address: energy_sing_flyby1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2d45d024c6072e34697d832a49768a6c
+    m_Address: energy_sing_flyby2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 62e7400c776f2df49be3194c2bf34bac
+    m_Address: energy_sing_loop4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 3cf91d3a9f4e16f4dbcc0b305a57378e, type: 2}
   m_SchemaSet:

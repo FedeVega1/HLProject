@@ -197,8 +197,8 @@ namespace HLProject
         {
             if (onAltMode)
             {
-                //virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[1]);
-                //LeanTween.delayedCall(.17f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[2]));
+                /*virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[1]);
+                LeanTween.delayedCall(1.3f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[2]));*/
             }
             else
             {

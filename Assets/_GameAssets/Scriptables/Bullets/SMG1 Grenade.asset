@@ -17,9 +17,11 @@ MonoBehaviour:
   physType: 1
   damageType: 3
   canExplode: 1
+  bouncesToExplode: 0
   initialSpeed: 40
-  damage: 100
+  damage: 0
   maxTravelDistance: 0
   radius: 7
   timeToExplode: 0
   fallOff: 0
+  explosionDamage: 100

@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: 1e47929d279ff724eab76cbf2ee375b6
   m_currentHash:
     serializedVersion: 2
-    Hash: 2a8c1b16ff9f248ec0e5c898c7621550
+    Hash: c01c83d39cdd8da480025d71ff08e703
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 0
   m_BundleLocalCatalog: 0
@@ -49,6 +49,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e7a309c9fb89faf4fa066291e4b696d0, type: 2}
   - {fileID: 11400000, guid: 1fc63c9f8e1260a419764576445c49fa, type: 2}
   - {fileID: 11400000, guid: a6d53e32f51b010458845ca23808a7ca, type: 2}
+  - {fileID: 11400000, guid: dc6c63595ce2dab40a4dce05dd6a2c72, type: 2}
   m_BuildSettings:
     m_CompileScriptsInVirtualMode: 0
     m_CleanupStreamingAssetsAfterBuilds: 1
@@ -106,6 +107,7 @@ MonoBehaviour:
     - WeaponSounds/Stunstick
     - WeaponSounds/Shotgun
     - WeaponScriptables
+    - WeaponBulletScriptables
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: 504e4fa150fd28444925efc6824fe786, type: 2}

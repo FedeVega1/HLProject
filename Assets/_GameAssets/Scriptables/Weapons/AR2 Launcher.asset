@@ -26,7 +26,7 @@ MonoBehaviour:
     fireMaxDelay: 2
     secondaryFireModeMaxDelay: 0
     thirdFireModeMaxDelay: 0
-    reload: 2.83
+    reload: 1.08
     holster: 0.83
     draw: 1.04
     zoomInSpeed: 0.25
