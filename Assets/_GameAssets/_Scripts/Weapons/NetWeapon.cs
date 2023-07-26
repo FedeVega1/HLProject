@@ -162,7 +162,7 @@ namespace HLProject
 
                 case BulletPhysicsType.Fire:
                     cross = new Vector3(0, .2f, .8f);
-                    granadeBulletScript.PhysicsTravelTo(true, MyTransform.TransformDirection(cross), ForceMode.Impulse, false, true, bulletData.radius, false);
+                    granadeBulletScript.PhysicsTravelTo(true, MyTransform.TransformDirection(cross), ForceMode.Impulse, false, true, bulletData.radius, true);
                     break;
 
                 case BulletPhysicsType.FireBounce:

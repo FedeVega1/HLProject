@@ -31,7 +31,7 @@ namespace HLProject
         void Update()
         {
             if (showinName || !pointerOverButton || Time.time < timeToShowClassName) return;
-            OnShowName?.Invoke(className, new Vector3(MyRectTransform.position.x + 50, MyRectTransform.position.y, MyRectTransform.position.z));
+            OnShowName?.Invoke(className, new Vector3(MyRectTransform.position.x + 50, MyRectTransform.position.y + 25, MyRectTransform.position.z));
             showinName = true;
         }
 

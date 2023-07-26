@@ -8,7 +8,7 @@ namespace HLProject
 {
     public class UIOptions : CachedRectTransform
     {
-        [SerializeField] Toggle backgroundToggle, fullscreenToggle;
+        [SerializeField] Toggle backgroundToggle, fullscreenToggle, motionBlurToggle;
         [SerializeField] TMP_Dropdown resolutionDropdown, qualityPresetDropdown;
 
         public void Init()
@@ -27,6 +27,7 @@ namespace HLProject
             fullscreenToggle.isOn = GameManager.INS.VideoOptions.CurrentFullScreenMode == FullScreenMode.FullScreenWindow;
             resolutionDropdown.value = GameManager.INS.VideoOptions.CurrentResolution;
             qualityPresetDropdown.value = GameManager.INS.VideoOptions.CurrentQualityPreset;
+            //motionBlurToggle
         }
 
         public void Toggle(bool toggle)
@@ -52,6 +53,11 @@ namespace HLProject
         public void OnQualityPresetDropdownValue()
         {
             GameManager.INS.VideoOptions.CurrentQualityPreset = qualityPresetDropdown.value;
+        }
+
+        public void OnMotionBlurToggle()
+        {
+            //motionBlurToggle
         }
 
         void GetResolutionStrings(ref List<string> resStrings)

@@ -188,7 +188,7 @@ namespace HLProject
             {
                 canExplode = false;
                 bool _exp = _canExplode;
-                LeanTween.delayedCall(.2f, () => canExplode = _exp);
+                LeanTween.delayedCall(.05f, () => canExplode = _exp);
             }
             else
             {
