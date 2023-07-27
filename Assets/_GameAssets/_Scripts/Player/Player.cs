@@ -13,7 +13,7 @@ namespace HLProject
         [Header("Player")]
 
         [SerializeField] GameObject playerCamera, playerCanvasPrefab;
-        [SerializeField] protected MeshRenderer playerMesh;
+        [SerializeField] protected SkinnedMeshRenderer playerMesh;
         [SerializeField] protected PlayerMovement movementScript;
         [SerializeField] protected float woundedMaxTime;
         [SerializeField] ClientEffectsController effectsController;
@@ -670,6 +670,7 @@ namespace HLProject
                 PlayerCanvasScript.ToggleWeaponInfo(true);
                 movementScript.FreezeInputs = false;
                 inventory.DisablePlayerInputs = false;
+                playerMesh.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
                 //inventory.SetupWeaponInventory(classData.classWeapons, 0);
             }
 

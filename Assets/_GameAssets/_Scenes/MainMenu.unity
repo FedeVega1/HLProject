@@ -786,7 +786,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c56e1e904cca6b41930bed352908c2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  netManager: {fileID: 1035443923}
   loadingScreen: {fileID: 234449512}
   mainMenu: {fileID: 1249431827}
 --- !u!4 &1705009110
