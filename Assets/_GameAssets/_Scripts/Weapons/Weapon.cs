@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
+using HLProject.Scriptables;
 
-namespace HLProject
+namespace HLProject.Weapons
 {
     public enum BulletType { RayCast, Physics }
     public enum WeaponType { Melee, Secondary, Primary, AltMode, Tools, BandAids }

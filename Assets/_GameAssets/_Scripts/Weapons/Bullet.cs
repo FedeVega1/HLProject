@@ -5,7 +5,7 @@ using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-namespace HLProject
+namespace HLProject.Weapons
 {
     public class Bullet : CachedTransform
     {

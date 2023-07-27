@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using HLProject.Weapons;
 
-namespace HLProject
+namespace HLProject.Scriptables
 {
     [System.Serializable]
     [CreateAssetMenu(fileName = "BulletData", menuName = "Data/Bullet")]

@@ -1,6 +1,7 @@
 using UnityEngine;
+using HLProject.Weapons;
 
-namespace HLProject
+namespace HLProject.Scriptables
 {
     [CreateAssetMenu(fileName = "WeaponData", menuName = "Data/Weapon")]
     public class WeaponData : ScriptableObject

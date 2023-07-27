@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
 
-namespace HLProject
+namespace HLProject.Weapons
 {
     public enum ClientHandType { Citizen, Rebel, Metrocop, CombineSoldier, CombineElite }
 

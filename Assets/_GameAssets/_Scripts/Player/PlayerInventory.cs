@@ -4,6 +4,8 @@ using UnityEngine;
 using Mirror;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.AddressableAssets;
+using HLProject.Weapons;
+using HLProject.Scriptables;
 
 namespace HLProject
 {

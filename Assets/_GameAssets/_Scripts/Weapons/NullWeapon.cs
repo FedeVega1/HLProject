@@ -1,6 +1,7 @@
 using UnityEngine;
+using HLProject.Scriptables;
 
-namespace HLProject
+namespace HLProject.Weapons
 {
     public class NullWeapon : BaseClientWeapon
     {

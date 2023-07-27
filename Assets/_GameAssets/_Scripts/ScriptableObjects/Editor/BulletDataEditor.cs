@@ -1,7 +1,8 @@
 using UnityEditor;
 using UnityEngine;
+using HLProject.Weapons;
 
-namespace HLProject
+namespace HLProject.Scriptables
 {
     [CustomEditor(typeof(BulletData))]
     public class BulletDataEditor : Editor

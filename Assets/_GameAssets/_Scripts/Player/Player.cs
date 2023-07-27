@@ -5,6 +5,7 @@ using UnityEngine;
 using Mirror;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using HLProject.Scriptables;
 
 namespace HLProject
 {

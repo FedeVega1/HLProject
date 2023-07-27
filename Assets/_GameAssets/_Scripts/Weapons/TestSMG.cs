@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using HLProject.Scriptables;
 
-namespace HLProject
+namespace HLProject.Weapons
 {
     public class TestSMG : BaseClientWeapon
     {
