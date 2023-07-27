@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 using UnityEngine.AddressableAssets;
 using Mirror;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEditor;
 
 namespace HLProject
 {
@@ -13,18 +12,8 @@ namespace HLProject
     {
         public static GameManager INS;
 
-        [SerializeField] NetManager netManager;
         [SerializeField] UILoadingScreen loadingScreen;
-
-        MainMenuUI _MainMenuUI;
-        MainMenuUI MainMenuUI
-        {
-            get
-            {
-                if (_MainMenuUI == null) _MainMenuUI = FindObjectOfType<MainMenuUI>();
-                return _MainMenuUI;
-            }
-        }
+        [SerializeField] MainMenuUI mainMenu;
 
         string _PlayerName = "";
         public string PlayerName
@@ -54,10 +43,22 @@ namespace HLProject
             }
         }
 
+        NetManager _NetManager;
+        NetManager NetManager
+        {
+            get
+            {
+                if (_NetManager == null) _NetManager = FindObjectOfType<NetManager>();
+                return _NetManager;
+            }
+        }
+
         public VideoOptions VideoOptions { get; private set; }
         public AudioOptions AudioOptions { get; private set; }
 
-        bool returningtoMainMenu, showErrorScreen;
+        public bool IsMainMenuEnabled => mainMenu.IsMainMenuEnabled;
+
+        bool returningtoMainMenu, showErrorScreen, localPlayerIsHost;
         AsyncOperationHandle<IList<GameObject>> backgroundsLoadHandle;
 
         void Awake()
@@ -74,6 +75,11 @@ namespace HLProject
 
             DontDestroyOnLoad(gameObject);
             SceneManager.sceneLoaded += (_, __) => OnLoadedScene();
+            mainMenu.OnPlayerDisconnects += () =>
+            {
+                if (localPlayerIsHost) StopServer();
+                else DisconnectFromServer();
+            };
 
             VideoOptions = new VideoOptions();
             AudioOptions = new AudioOptions();
@@ -111,39 +117,54 @@ namespace HLProject
 
             if (showErrorScreen)
             {
-                MainMenuUI.ToggleErrorPanel(true);
+                mainMenu.ToggleErrorPanel(true);
                 showErrorScreen = false;
             }
         }
 
-        public void QuitGame() => Application.Quit();
+        public void QuitGame()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit(); 
+#endif
+        }
 
         public void CreateMatch()
         {
-            ShowLoadingScreen(netManager.StartHost);
+            ShowLoadingScreen(NetManager.StartHost);
+            localPlayerIsHost = true;
+            returningtoMainMenu = false;
         }
 
         public void ConnectToServerByIP(string serverIP)
         {
-            netManager.networkAddress = serverIP;
-            ShowLoadingScreen(netManager.StartClient);
+            NetManager.networkAddress = serverIP;
+            ShowLoadingScreen(NetManager.StartClient);
+            returningtoMainMenu = false;
         }
 
         public void StopServer()
         {
+            mainMenu.LocalPlayerExitsMatch();
             ShowLoadingScreen(() =>
             {
-                netManager.StopHost();
+                NetManager.StopHost();
+                localPlayerIsHost = false;
                 returningtoMainMenu = true;
+                mainMenu.ToggleMainMenu(true);
             });
         }
 
         public void DisconnectFromServer()
         {
+            mainMenu.LocalPlayerExitsMatch();
             ShowLoadingScreen(() =>
             {
-                netManager.StopClient();
+                NetManager.StopClient();
                 returningtoMainMenu = true;
+                mainMenu.ToggleMainMenu(true);
             });
         }
 
@@ -162,15 +183,18 @@ namespace HLProject
 
         void ShowLoadingScreen(System.Action OnLoadingScreenShown)
         {
+            mainMenu.ToggleMainMenu(false);
             if (loadingScreen != null) loadingScreen.ShowLoadingScreen();
             LeanTween.value(0, 1, .5f).setOnComplete(() => { OnLoadingScreenShown?.Invoke(); });
         }
 
         public void ServerChangeLevel()
         {
-            ShowLoadingScreen(() => { netManager.ServerChangeScene(netManager.onlineScene); });
+            ShowLoadingScreen(() => { NetManager.ServerChangeScene(NetManager.onlineScene); });
         }
 
         public string SetPlayerName(string newName) => PlayerName = newName;
+
+        public void ToggleMainMenu() => mainMenu.ToggleMainMenu(!IsMainMenuEnabled);
     }
 }

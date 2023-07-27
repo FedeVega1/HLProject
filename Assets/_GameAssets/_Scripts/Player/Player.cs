@@ -152,12 +152,22 @@ namespace HLProject
         [Client]
         protected virtual void CheckInputs()
         {
-            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Escape))
+            /*if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Escape))
             {
                 if (isServer && isClient) GameManager.INS.StopServer();
                 else GameManager.INS.DisconnectFromServer();
+            }*/
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                GameManager.INS.ToggleMainMenu();
+                movementScript.FreezeInputs = !movementScript.FreezeInputs;
+                inventory.DisablePlayerInputs = !inventory.DisablePlayerInputs;
+                PlayerCanvasScript.ToggleCursor(GameManager.INS.IsMainMenuEnabled);
+                return;
             }
 
+            if (GameManager.INS.IsMainMenuEnabled) return;
             if (Input.GetKeyDown(KeyCode.Delete)) GameModeManager.INS.KillPlayer(this);
             if (Input.GetKeyDown(KeyCode.F1)) GameModeManager.INS.EndMatch();
             if (Input.GetKeyDown(KeyCode.F3)) TakeDamage(0, DamageType.Shock);

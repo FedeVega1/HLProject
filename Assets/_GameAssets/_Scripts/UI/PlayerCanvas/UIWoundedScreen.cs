@@ -13,21 +13,22 @@ namespace HLProject
         [SerializeField] Image obscurer;
         [SerializeField] RectTransform lblPlayerOutBounds, btnPlayerGiveUp;
 
-        bool playerisWounded;
+        public bool IsPlayerWounded { get; private set; }
+
         int outOfBoundsTween;
         double woundTime;
         Coroutine OutOfBoundsRoutine;
 
         void Update()
         {
-            if (!playerisWounded) return;
+            if (!IsPlayerWounded) return;
 
             double time = woundTime - NetworkTime.time;
 
             if (time <= 0)
             {
                 time = 0;
-                playerisWounded = false;
+                IsPlayerWounded = false;
                 //lblWoundTime.text = "You can Respawn now";
                 return;
             }
@@ -63,7 +64,7 @@ namespace HLProject
             lblPlayerOutBounds.localScale = Vector3.zero;
         }
 
-        public void PlayerNotWounded() { playerisWounded = false; }
+        public void PlayerNotWounded() { IsPlayerWounded = false; }
 
         public void PlayerIsWounded(double woundTime)
         {
@@ -72,7 +73,7 @@ namespace HLProject
             lblWoundTime.rectTransform.localScale = Vector3.one;
 
             this.woundTime = woundTime;
-            playerisWounded = true;
+            IsPlayerWounded = true;
         }
 
         public void Hide()

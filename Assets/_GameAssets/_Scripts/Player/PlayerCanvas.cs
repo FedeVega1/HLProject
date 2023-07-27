@@ -46,7 +46,7 @@ namespace HLProject
             teamClassSelection.ToggleSpawnButton(false);
 
             teamTickets = new int[TeamManager.MAXTEAMS];
-            ToggleCursor(false);
+            InternalToggleCursor(false);
         }
 
         public void PlayerNotWounded()
@@ -58,19 +58,20 @@ namespace HLProject
         public void PlayerRespawn()
         {
             ResetHUD();
+            InternalToggleCursor(false);
         }
 
         public void PlayerIsWounded(double woundTime)
         {
             ResetHUD();
             woundedScreen.PlayerIsWounded(woundTime);
-            ToggleCursor(true);
+            InternalToggleCursor(true);
         }
 
         void ResetHUD()
         {
             PlayerInBounds();
-            Cursor.lockState = CursorLockMode.Locked;
+            //Cursor.lockState = CursorLockMode.Locked;
 
             teamSelection.ToggleTeamSelection(false);
             teamClassSelection.ToggleClassSelection(false);
@@ -88,7 +89,7 @@ namespace HLProject
             ResetHUD();
             woundedScreen.SetObscurerColor(new Color32(0x0, 0x0, 0x0, 0x43));
             gameOverScreen.ShowGameOverScreen(loosingTeam, teamTickets, levelChangeTime);
-            ToggleCursor(true);
+            InternalToggleCursor(true);
         }
 
         public void SetTeamTickets(int team, int tickets) => teamTickets[team] = tickets;
@@ -105,14 +106,14 @@ namespace HLProject
         public void ToggleTeamSelection(bool toggle)
         {
             teamSelection.ToggleTeamSelection(toggle);
-            ToggleCursor(toggle);
+            InternalToggleCursor(toggle);
             IsTeamSelectionMenuOpen = toggle;
         }
 
         public void ToggleClassSelection(bool toggle)
         {
             teamClassSelection.ToggleClassSelection(toggle);
-            ToggleCursor(toggle);
+            InternalToggleCursor(toggle);
             IsClassSelectionMenuOpen = toggle;
         }
 
@@ -123,8 +124,17 @@ namespace HLProject
             //Cursor.lockState = toggle ? CursorLockMode.Confined : CursorLockMode.Locked;
         }
 
-        void ToggleCursor(bool toggle)
+        public void ToggleCursor(bool toggle)
         {
+            if (!toggle && (IsClassSelectionMenuOpen || IsTeamSelectionMenuOpen || IsScoreboardMenuOpen || woundedScreen.IsPlayerWounded)) 
+                return;
+
+            InternalToggleCursor(toggle);
+        }
+
+        void InternalToggleCursor(bool toggle)
+        {
+            Debug.LogFormat("Cursor: {0}", toggle);
             Cursor.lockState = toggle ? CursorLockMode.Confined : CursorLockMode.Locked;
             Cursor.visible = toggle;
         }

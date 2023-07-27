@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 261.8913, g: 324.5009, b: 429.50955, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -450,6 +450,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1045299127}
   m_CullTransparentMesh: 1
+--- !u!224 &1249431825 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 424064794440748161, guid: e7f8c864b3e4f424f88cd1a94a35b4de, type: 3}
+  m_PrefabInstance: {fileID: 8513474644756955236}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1249431827 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6976938594019667577, guid: e7f8c864b3e4f424f88cd1a94a35b4de, type: 3}
+  m_PrefabInstance: {fileID: 8513474644756955236}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc0ed3302014efc43836bd03866e810f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1550077190
 GameObject:
   m_ObjectHideFlags: 0
@@ -772,6 +788,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   netManager: {fileID: 1035443923}
   loadingScreen: {fileID: 234449512}
+  mainMenu: {fileID: 1249431827}
 --- !u!4 &1705009110
 Transform:
   m_ObjectHideFlags: 0
@@ -786,6 +803,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 234449513}
+  - {fileID: 1249431825}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1705009111
@@ -1071,7 +1089,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 1705009110}
     m_Modifications:
     - target: {fileID: 424064794440748161, guid: e7f8c864b3e4f424f88cd1a94a35b4de, type: 3}
       propertyPath: m_Pivot.x
@@ -1205,18 +1223,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: MainMenuCanvas
       objectReference: {fileID: 0}
-    - target: {fileID: 5081732333981360178, guid: e7f8c864b3e4f424f88cd1a94a35b4de, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5081732333981360178, guid: e7f8c864b3e4f424f88cd1a94a35b4de, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5081732333981360178, guid: e7f8c864b3e4f424f88cd1a94a35b4de, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 5182149005658628454, guid: e7f8c864b3e4f424f88cd1a94a35b4de, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -1248,7 +1254,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 1562498525}
   - {fileID: 1820679823}
-  - {fileID: 8513474644756955236}
   - {fileID: 1550077193}
   - {fileID: 1035443921}
   - {fileID: 740094699}

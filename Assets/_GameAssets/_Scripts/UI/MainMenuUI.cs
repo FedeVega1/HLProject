@@ -11,14 +11,21 @@ namespace HLProject
     {
         enum UIState { MainMenu, ConnectToServer }
 
-        [SerializeField] CanvasGroup rayCastBlocker;
+        [SerializeField] CanvasGroup rayCastBlocker, mainCanvasGroup, onMatchBackground;
         [SerializeField] RectTransform connectToServerPanel;
         [SerializeField] TMP_InputField txtConnectToServer;
         [SerializeField] HDAdditionalCameraData mainMenuCamera;
         [SerializeField] UIOptions optionsMenu;
         [SerializeField] RectTransform errorPanel;
+        [SerializeField] TMP_Text lblPlay;
+        [SerializeField] Button btnPlay;
 
+        public bool IsMainMenuEnabled { get; private set; }
+
+        bool onMatch;
         UIState currentState;
+
+        public System.Action OnPlayerDisconnects;
 
         void Start()
         {
@@ -39,14 +46,24 @@ namespace HLProject
             Cursor.lockState = CursorLockMode.Confined;
         }
 
-        public void StartGameServer() => GameManager.INS.CreateMatch();
+        public void StartGameServer()
+        {
+            GameManager.INS.CreateMatch();
+            ToggleConnectPanel(false);
+            LocalPlayerOnMatch();
+        }
 
         public void CheckServerIP()
         {
 
         }
 
-        public void ConnectToServer() => GameManager.INS.ConnectToServerByIP(txtConnectToServer.text);
+        public void ConnectToServer()
+        {
+            GameManager.INS.ConnectToServerByIP(txtConnectToServer.text);
+            ToggleConnectPanel(false);
+            LocalPlayerOnMatch();
+        }
 
         public void ToggleConnectPanel(bool toggle)
         {
@@ -76,6 +93,38 @@ namespace HLProject
             ToggleConnectPanel(false);
             rayCastBlocker.alpha = toggle ? 1 : 0;
             rayCastBlocker.blocksRaycasts = rayCastBlocker.interactable = toggle;
+        }
+
+        public void ToggleMainMenu(bool toggle)
+        {
+            mainCanvasGroup.alpha = toggle ? 1 : 0;
+            mainCanvasGroup.blocksRaycasts = mainCanvasGroup.interactable = toggle;
+            IsMainMenuEnabled = toggle;
+        }
+
+        public void LocalPlayerOnMatch()
+        {
+            btnPlay.onClick.RemoveAllListeners();
+            btnPlay.onClick.AddListener(() => OnPlayerDisconnects?.Invoke());
+            btnPlay.interactable = true;
+            lblPlay.text = "Disconnect";
+            onMatch = true;
+
+            onMatchBackground.alpha = 1;
+            onMatchBackground.interactable = onMatchBackground.blocksRaycasts = true;
+        }
+
+        public void LocalPlayerExitsMatch()
+        {
+            lblPlay.text = "Play";
+            btnPlay.onClick.RemoveAllListeners();
+            btnPlay.onClick.AddListener(() => ToggleConnectPanel(true));
+            btnPlay.interactable = true;
+            ToggleConnectPanel(false);
+            onMatch = false;
+
+            onMatchBackground.alpha = 0;
+            onMatchBackground.interactable = onMatchBackground.blocksRaycasts = false;
         }
     }
 }

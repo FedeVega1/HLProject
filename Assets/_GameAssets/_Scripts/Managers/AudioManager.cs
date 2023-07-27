@@ -26,7 +26,7 @@ namespace HLProject
     public class AudioManager : MonoBehaviour
     {
         [System.Flags]
-        public enum AudioSourceTarget { LocalPlayer = 0b1, CurrentWeapon = 0b10, Other = 0b11 }
+        public enum AudioSourceTarget { LocalPlayer = 0b1, CurrentWeapon = 0b10, Other = 0b100 }
 
         public static AudioManager INS;
 
@@ -117,9 +117,8 @@ namespace HLProject
                 {
                     if (localPlayerSources[i].ASrc == null) continue;
                     localPlayerSources[i].ASrc.volume = localPlayerSources[i].MaxVolume * LocalPlayerVolume * GlobalVolume;
-                    //print(localPlayerSources[i].ASrc.volume);
+                    //Debug.LogFormat("LocalPlayer ASrc {0}: {1}", localPlayerSources[i].ASrc.name, localPlayerSources[i].ASrc.volume);
                 }
-                return;
             }
 
             if ((targets & AudioSourceTarget.Other) == AudioSourceTarget.Other)
@@ -128,10 +127,9 @@ namespace HLProject
                 for (int i = 0; i < size; i++)
                 {
                     if (otherAudioSources[i].ASrc == null) continue;
-                    otherAudioSources[i].ASrc.volume = otherAudioSources[i].MaxVolume * CurrentWeaponVolume * GlobalVolume;
-                    //print(otherAudioSources[i].ASrc.volume);
+                    otherAudioSources[i].ASrc.volume = otherAudioSources[i].MaxVolume * OtherVolume * GlobalVolume;
+                    //Debug.LogFormat("Other ASrc {0}: {1}", otherAudioSources[i].ASrc.name, otherAudioSources[i].ASrc.volume);
                 }
-                return;
             }
 
             if ((targets & AudioSourceTarget.CurrentWeapon) == AudioSourceTarget.CurrentWeapon)
@@ -140,10 +138,9 @@ namespace HLProject
                 for (int i = 0; i < size; i++)
                 {
                     if (currentWeaponSources[i].ASrc == null) continue;
-                    currentWeaponSources[i].ASrc.volume = currentWeaponSources[i].MaxVolume * OtherVolume * GlobalVolume;
-                    //print(currentWeaponSources[i].ASrc.volume);
+                    currentWeaponSources[i].ASrc.volume = currentWeaponSources[i].MaxVolume * CurrentWeaponVolume * GlobalVolume;
+                    //Debug.LogFormat("CurrentWeapon ASrc {0}: {1}", currentWeaponSources[i].ASrc.name, currentWeaponSources[i].ASrc.volume);
                 }
-                return;
             }
         }
 

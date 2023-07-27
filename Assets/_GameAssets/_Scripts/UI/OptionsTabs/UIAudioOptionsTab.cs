@@ -22,6 +22,7 @@ namespace HLProject
                     else
                     {
                         _MasterVolume = 1;
+                        AudioManager.INS.UpdateMasterVolume(_MasterVolume);
                         PlayerPrefs.SetFloat("MasterVolume", _MasterVolume);
                     }
                 }
@@ -32,6 +33,7 @@ namespace HLProject
             set
             {
                 _MasterVolume = value;
+                AudioManager.INS.UpdateMasterVolume(_MasterVolume);
                 PlayerPrefs.SetFloat("MasterVolume", _MasterVolume);
             }
         }

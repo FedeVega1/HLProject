@@ -294,7 +294,7 @@ MonoBehaviour:
   timeBetweenJumps: 0.2
   maxScopeSpeed: 3
   maxWeaponWeight: 16000
-  cameraYLimits: {x: -70, y: 70}
+  cameraYLimits: {x: -85, y: 85}
   playerVCam: {fileID: 2527544677063496800}
   fakeCameraPivot: {fileID: 5518355977838444584}
   freezePlayer: 0

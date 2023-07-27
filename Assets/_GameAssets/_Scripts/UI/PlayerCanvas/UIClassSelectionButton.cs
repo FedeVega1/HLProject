@@ -25,6 +25,7 @@ namespace HLProject
         {
             imgClassIcon.sprite = classData.classSprite;
             className = classData.className;
+            ClassIndex = classIndex;
             btnClassSelection.onClick.AddListener(() => { OnButtonClick?.Invoke(classIndex); });
         }
 
