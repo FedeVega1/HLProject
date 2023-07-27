@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEditor;
 using UnityEngine.EventSystems;
 using Mirror;
 
@@ -115,6 +117,45 @@ namespace HLProject
         public bool IsAffectedPlayer(ref Player playerToCheck) => playerToCheck == affectedPlayer;
         public bool OnTime() => NetworkTime.time >= timeToAction;
         public void PerformAction() => actionToPerform?.Invoke(affectedPlayer);
-
     }
+
+ /*   [System.Serializable]
+    public class SerializableType
+    {
+        public string type;
+
+        public static implicit operator string(SerializableType _type) => _type.type;
+    }
+
+#if UNITY_EDITOR
+    [CustomPropertyDrawer(typeof(SerializableType))]
+    public class SerializableTypeEditor : PropertyDrawer
+    {
+        List<string> types;
+        
+        public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
+        {
+            GetTypesList();
+            EditorGUI.BeginProperty(rect, label, property);
+            SerializedProperty prop = property.FindPropertyRelative("type");
+
+            int indx = EditorGUI.Popup(rect, label.text, types.FindIndex(x => prop.stringValue == x), types.ToArray());
+            if (indx >= 0 && indx < types.Count) prop.stringValue = types[indx];
+
+            EditorGUI.EndProperty();
+        }
+
+        void GetTypesList()
+        {
+            if (types == null) types = new List<string>();
+            else types.Clear();
+
+            System.Type[] allTypes = GetType().Assembly.GetTypes();
+
+            int size = allTypes.Length;
+            for (int i = 0; i < size; i++)
+                types.Add(allTypes[i].Name);
+        }
+    }
+#endif*/
 }

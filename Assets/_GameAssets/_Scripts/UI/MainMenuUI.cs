@@ -24,8 +24,6 @@ namespace HLProject
         {
             txtConnectToServer.text = "localhost";
             currentState = UIState.MainMenu;
-
-            optionsMenu.Init();
         }
 
         void Update()
@@ -68,6 +66,14 @@ namespace HLProject
         public void ToggleErrorPanel(bool toggle)
         {
             errorPanel.localScale = toggle ? Vector3.one : Vector3.zero;
+            rayCastBlocker.alpha = toggle ? 1 : 0;
+            rayCastBlocker.blocksRaycasts = rayCastBlocker.interactable = toggle;
+        }
+
+        public void ToggleOptionsPanel(bool toggle)
+        {
+            optionsMenu.TogglePanel(toggle);
+            ToggleConnectPanel(false);
             rayCastBlocker.alpha = toggle ? 1 : 0;
             rayCastBlocker.blocksRaycasts = rayCastBlocker.interactable = toggle;
         }

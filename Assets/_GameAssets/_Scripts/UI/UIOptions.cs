@@ -1,72 +1,58 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 
 namespace HLProject
 {
+    interface IOptionTab
+    {
+        public void Init();
+        public void ToggleTab(bool toggle);
+        public string TabType { get; set; }
+    }
+
     public class UIOptions : CachedRectTransform
     {
-        [SerializeField] Toggle backgroundToggle, fullscreenToggle, motionBlurToggle;
-        [SerializeField] TMP_Dropdown resolutionDropdown, qualityPresetDropdown;
+        [SerializeField] RectTransform tabsPivot;
 
-        public void Init()
+        IOptionTab currentTab;
+        List<IOptionTab> optionTabs;
+
+        void Start()
         {
-            List<string> resStrings = new List<string>();
-            GetResolutionStrings(ref resStrings);
+            optionTabs = new List<IOptionTab>();
 
-            resolutionDropdown.ClearOptions();
-            resolutionDropdown.AddOptions(resStrings);
+            foreach (Transform child in tabsPivot)
+            {
+                IOptionTab tab = child.GetComponent<IOptionTab>();
+                if (tab == null) continue;
+                tab.Init();
+                optionTabs.Add(tab);
+            }
 
-            List<string> presetStrings = new List<string>(QualitySettings.names);
-            qualityPresetDropdown.ClearOptions();
-            qualityPresetDropdown.AddOptions(presetStrings);
-
-            backgroundToggle.isOn = GameManager.INS.VideoOptions.EnableMainMenuBackgrounds;
-            fullscreenToggle.isOn = GameManager.INS.VideoOptions.CurrentFullScreenMode == FullScreenMode.FullScreenWindow;
-            resolutionDropdown.value = GameManager.INS.VideoOptions.CurrentResolution;
-            qualityPresetDropdown.value = GameManager.INS.VideoOptions.CurrentQualityPreset;
-            //motionBlurToggle
+            currentTab = optionTabs[0];
+            currentTab.ToggleTab(true);
         }
 
-        public void Toggle(bool toggle)
+        public void OpenTab(string tabType)
+        {
+            if (currentTab != null) currentTab.ToggleTab(false);
+
+            int size = optionTabs.Count;
+            for (int i = 0; i < size; i++)
+            {
+                if (optionTabs[i].TabType == tabType)
+                {
+                    currentTab = optionTabs[i];
+                    currentTab.ToggleTab(true);
+                    return;
+                }
+            }
+        }
+
+        public void TogglePanel(bool toggle)
         {
             MyRectTransform.localScale = toggle ? Vector3.one : Vector3.zero;
-        }
-
-        public void OnBackgroundToggle()
-        {
-            GameManager.INS.VideoOptions.EnableMainMenuBackgrounds = backgroundToggle.isOn;
-        }
-
-        public void OnFullscreenToggle()
-        {
-            GameManager.INS.VideoOptions.CurrentFullScreenMode = fullscreenToggle.isOn ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed;
-        }
-
-        public void OnResolutionDropdownValue()
-        {
-            GameManager.INS.VideoOptions.CurrentResolution = resolutionDropdown.value;
-        }
-
-        public void OnQualityPresetDropdownValue()
-        {
-            GameManager.INS.VideoOptions.CurrentQualityPreset = qualityPresetDropdown.value;
-        }
-
-        public void OnMotionBlurToggle()
-        {
-            //motionBlurToggle
-        }
-
-        void GetResolutionStrings(ref List<string> resStrings)
-        {
-            Resolution[] resolutions = Screen.resolutions;
-            int size = resolutions.Length;
-
-            for (int i = 0; i < size; i++)
-                resStrings.Add(resolutions[i].ToString());
         }
     }
 }

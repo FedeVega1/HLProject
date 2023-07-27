@@ -32,11 +32,13 @@ namespace HLProject
 
         List<AudioSourceHandler> localPlayerSources, otherAudioSources, currentWeaponSources;
 
+        float _MasterVolume = 1;
+
         float _GlobalVolume = 1;
         public float GlobalVolume
         {
             get { return _GlobalVolume; }
-            set { _GlobalVolume = Mathf.Clamp01(value); SyncVolumeValue(AudioSourceTarget.LocalPlayer | AudioSourceTarget.CurrentWeapon | AudioSourceTarget.Other); }
+            set { _GlobalVolume = Mathf.Clamp01(value * _MasterVolume); SyncVolumeValue(AudioSourceTarget.LocalPlayer | AudioSourceTarget.CurrentWeapon | AudioSourceTarget.Other); }
         }
 
         float _LocalPlayerVolume = 1;
@@ -71,6 +73,9 @@ namespace HLProject
             localPlayerSources = new List<AudioSourceHandler>();
             currentWeaponSources = new List<AudioSourceHandler>();
             otherAudioSources = new List<AudioSourceHandler>();
+
+            _MasterVolume = GameManager.INS.AudioOptions.MasterVolume;
+            GlobalVolume = GameManager.INS.AudioOptions.SFXVolume;
 
             INS = this;
             DontDestroyOnLoad(gameObject);
@@ -140,6 +145,16 @@ namespace HLProject
                 }
                 return;
             }
+        }
+
+        public void UpdateMasterVolume(float newValue)
+        {
+            _MasterVolume = newValue;
+        }
+
+        public void UpdateSFXVolume(float newValue)
+        {
+            GlobalVolume = newValue;
         }
     }
 }
