@@ -207,7 +207,7 @@ namespace HLProject
             for (int i = 0; i < weaponData.pelletsPerShot; i++)
             {
                 weaponRay = new Ray(firePivot.position, firePivot.forward + Random.onUnitSphere * Random.Range(.01f, weaponData.maxBulletSpread));
-                if (Physics.Raycast(weaponRay, out rayHit, bulletData.maxTravelDistance, weaponLayerMask))
+                if (Physics.Raycast(weaponRay, out rayHit, bulletData.maxTravelDistance, weaponLayerMask) && rayHit.transform.root != owningPlayer.MyTransform)
                 {
                     DoBulletFlyby(weaponRay, rayHit.distance);
                     hitVectors[i] = rayHit.point;
@@ -285,7 +285,7 @@ namespace HLProject
             for (int i = 0; i < size; i++)
             {
                 HitBox boxTarget = hits[i].transform.GetComponent<HitBox>();
-                if (boxTarget == null) continue;
+                if (boxTarget == null || boxTarget.GetCharacterScript().MyTransform == owningPlayer.MyTransform) continue;
                 boxTarget.GetCharacterScript().OnBulletFlyby(hits[i].point);
             }
         }
@@ -576,7 +576,7 @@ namespace HLProject
             for (int i = 0; i < quantity; i++)
             {
                 HitBox hitBoxToHit = raycastShootlastCollider[i].GetComponent<HitBox>();
-                if (hitBoxToHit == null) continue;
+                if (hitBoxToHit == null || hitBoxToHit.GetCharacterScript().MyTransform == owningPlayer.MyTransform) continue;
 
                 hitBoxToHit.GetCharacterScript().TakeDamage(bulletData.damage, DamageType.Bullet);
                 yield break;
