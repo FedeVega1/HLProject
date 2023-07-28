@@ -5,6 +5,7 @@ using Mirror;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using HLProject.Scriptables;
+using HLProject.Characters;
 
 namespace HLProject.Weapons
 {
@@ -15,7 +16,7 @@ namespace HLProject.Weapons
         public const int FallOffQuality = 5;
 
         public WeaponType WType => weaponData.weaponType;
-        public WeaponType LastWType => swappedData.weaponType;
+        public WeaponType LastWType => swappedData != null ? swappedData.weaponType : weaponData.weaponType;
 
         [SyncVar] bool serverInitialized;
 

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-namespace HLProject
+namespace HLProject.UI.HUD
 {
     public readonly struct PlayerScoreboardInfo
     {

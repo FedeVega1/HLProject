@@ -6,8 +6,9 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 using Mirror;
+using HLProject.Managers;
 
-namespace HLProject
+namespace HLProject.Characters
 {
     public class ClientEffectsController : CachedTransform
     {

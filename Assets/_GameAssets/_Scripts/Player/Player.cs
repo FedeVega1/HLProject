@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.Networking;
 using UnityEngine;
 using Mirror;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using HLProject.Scriptables;
+using HLProject.UI.HUD;
+using HLProject.Managers;
 
-namespace HLProject
+namespace HLProject.Characters
 {
     public class Player : Character
     {
@@ -18,6 +19,7 @@ namespace HLProject
         [SerializeField] protected PlayerMovement movementScript;
         [SerializeField] protected float woundedMaxTime;
         [SerializeField] ClientEffectsController effectsController;
+        [SerializeField] protected PlayerAnimationController animController;
 
         [SyncVar(hook = nameof(OnTeamChange))] protected int playerTeam;
         [SyncVar] protected bool isWounded, firstSpawn;
@@ -40,7 +42,7 @@ namespace HLProject
 
         #region Hooks
 
-        void OnTeamChange(int oldTeam, int newTeam) => print($"{playerName} Team is {newTeam}");
+        void OnTeamChange(int oldTeam, int newTeam) => Debug.LogFormat("{0} Team is {1}", playerName, newTeam);
 
         #endregion
 
@@ -671,7 +673,7 @@ namespace HLProject
                 PlayerCanvasScript.ToggleWeaponInfo(true);
                 movementScript.FreezeInputs = false;
                 inventory.DisablePlayerInputs = false;
-                playerMesh.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+                //playerMesh.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
                 //inventory.SetupWeaponInventory(classData.classWeapons, 0);
             }
 

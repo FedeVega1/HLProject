@@ -110,6 +110,8 @@ GameObject:
   - component: {fileID: -4497347803742756580}
   - component: {fileID: -7027478099048125744}
   - component: {fileID: 1225735766619204947}
+  - component: {fileID: 8139819528561989870}
+  - component: {fileID: 7142083008673587046}
   m_Layer: 10
   m_Name: Player
   m_TagString: Player
@@ -154,13 +156,13 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 5
+  m_Height: 4
   m_Radius: 0.85
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0
-  m_Center: {x: 0, y: 2, z: 0}
+  m_Center: {x: 0, y: 2.2, z: 0}
 --- !u!114 &4995908781376038965
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -187,6 +189,7 @@ MonoBehaviour:
   movementScript: {fileID: 8303033203183977524}
   woundedMaxTime: 10
   effectsController: {fileID: 8352914355361640594}
+  animController: {fileID: 7142083008673587046}
 --- !u!114 &8303033203183977524
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -214,6 +217,7 @@ MonoBehaviour:
   cameraYLimits: {x: -85, y: 85}
   playerVCam: {fileID: 2527544677063496800}
   fakeCameraPivot: {fileID: 5518355977838444584}
+  animController: {fileID: 7142083008673587046}
   freezePlayer: 0
   spectatorMov: 0
 --- !u!114 &-4497347803742756580
@@ -288,6 +292,35 @@ MonoBehaviour:
   showGizmos: 0
   showOverlay: 0
   overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+--- !u!114 &8139819528561989870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4337097435313233557}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f6f3bf89aa97405989c802ba270f815, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  clientAuthority: 0
+  animator: {fileID: 231908356051553184}
+--- !u!114 &7142083008673587046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4337097435313233557}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5ce2ee90a73bf345a6f8c7761559811, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerAnim: {fileID: 231908356051553184}
 --- !u!1 &5979957549666649720
 GameObject:
   m_ObjectHideFlags: 0

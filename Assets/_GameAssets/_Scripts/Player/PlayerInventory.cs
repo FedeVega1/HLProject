@@ -6,8 +6,9 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.AddressableAssets;
 using HLProject.Weapons;
 using HLProject.Scriptables;
+using HLProject.Managers;
 
-namespace HLProject
+namespace HLProject.Characters
 {
     [RequireComponent(typeof(Player))]
     public class PlayerInventory : NetworkBehaviour
@@ -42,6 +43,7 @@ namespace HLProject
         Player playerScript;
         Transform vWeaponPivot;
         PlayerClientHands currentClassHands;
+        PlayerAnimationController animController;
         Coroutine swapWeaponRoutine;
 
         AsyncOperationHandle<GameObject> weaponPrefabHandle;
@@ -50,7 +52,11 @@ namespace HLProject
         List<int> weaponCyclerList;
         List<NetWeapon> weaponsInventoryOnServer;
 
-        void Awake() => playerScript = GetComponent<Player>();
+        void Awake()
+        {
+            playerScript = GetComponent<Player>();
+            animController = GetComponent<PlayerAnimationController>();
+        }
 
         void LoadAsset()
         {
@@ -126,6 +132,7 @@ namespace HLProject
             currentWeaponIndex = defaultWeaponIndex;
             playerScript.UpdateCurrentWeaponWeight(weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponWeight);
             weaponsInventoryOnServer[currentWeaponIndex].RpcToggleClientWeapon(true);
+            animController.OnPlayerChangesWeapons(weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponName);
 
             Debug.LogFormat("Server: Default Weapon {0} of index {1}", weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponName, currentWeaponIndex);
             print("Finished server PlayerInventory Initialization");
@@ -303,6 +310,7 @@ namespace HLProject
             }
 
             weaponsInventoryOnServer[weaponIndex].ToggleAltMode();
+            animController.OnPlayerChangesWeapons(weaponsInventoryOnServer[weaponIndex].GetWeaponData().weaponName);
 
             RpcChangeWeaponMode(connectionToClient, changeWeapon, weaponIndex, oldIndex);
             isSwappingWeapons = false;
@@ -320,6 +328,7 @@ namespace HLProject
 
             RpcChangeWeapon(connectionToClient, weaponIndex, currentWeaponIndex);
             currentWeaponIndex = weaponIndex;
+            animController.OnPlayerChangesWeapons(weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponName);
             isSwappingWeapons = false;
 
             playerScript.UpdateCurrentWeaponWeight(weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponWeight);

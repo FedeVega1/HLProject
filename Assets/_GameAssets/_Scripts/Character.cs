@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-namespace HLProject
+namespace HLProject.Characters
 {
     public enum DamageType { Base, Bleed, Bullet, Explosion, Blunt, Shock, Energy }
 

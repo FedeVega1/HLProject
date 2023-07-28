@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 
-namespace HLProject
+namespace HLProject.Managers
 {
     public class GameEffectsManager : MonoBehaviour
     {

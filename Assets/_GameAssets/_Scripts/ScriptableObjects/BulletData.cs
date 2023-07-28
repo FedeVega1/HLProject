@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using HLProject.Weapons;
+using HLProject.Characters;
 
 namespace HLProject.Scriptables
 {

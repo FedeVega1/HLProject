@@ -1,7 +1,7 @@
 using UnityEngine;
 using TMPro;
 
-namespace HLProject
+namespace HLProject.UI.HUD
 {
     [RequireComponent(typeof(CanvasGroup))]
     public class UIAmmoCounter : MonoBehaviour

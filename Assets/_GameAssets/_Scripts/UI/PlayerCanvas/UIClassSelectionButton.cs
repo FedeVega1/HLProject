@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine.EventSystems;
 using HLProject.Scriptables;
 
-namespace HLProject
+namespace HLProject.UI.HUD
 {
     public class UIClassSelectionButton : CachedRectTransform, IPointerEnterHandler, IPointerExitHandler
     {

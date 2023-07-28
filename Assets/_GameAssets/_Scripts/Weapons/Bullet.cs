@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using HLProject.Managers;
+using HLProject.Characters;
 
 namespace HLProject.Weapons
 {

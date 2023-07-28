@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 using HLProject.Scriptables;
+using HLProject.Characters;
 
 namespace HLProject.Weapons
 {

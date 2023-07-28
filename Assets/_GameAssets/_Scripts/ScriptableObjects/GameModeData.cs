@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace HLProject
+namespace HLProject.Scriptables
 {
     [CreateAssetMenu(fileName = "GameModeData", menuName = "Data/GameMode")]
     public class GameModeData : ScriptableObject

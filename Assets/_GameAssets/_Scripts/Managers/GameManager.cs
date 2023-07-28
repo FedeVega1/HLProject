@@ -5,8 +5,9 @@ using UnityEngine.SceneManagement;
 using UnityEngine.AddressableAssets;
 using Mirror;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using HLProject.UI;
 
-namespace HLProject
+namespace HLProject.Managers
 {
     public class GameManager : MonoBehaviour
     {

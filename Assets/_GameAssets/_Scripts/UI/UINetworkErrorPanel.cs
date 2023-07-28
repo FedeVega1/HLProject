@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace HLProject
+namespace HLProject.UI
 {
     public class UINetworkErrorPanel : CachedRectTransform
     {

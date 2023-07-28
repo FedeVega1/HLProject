@@ -5,7 +5,7 @@ using Cinemachine;
 using Mirror;
 using UnityEngine.Rendering;
 
-namespace HLProject
+namespace HLProject.Characters
 {
     [RequireComponent(typeof(CharacterController))]
     public class PlayerMovement : CachedNetTransform
@@ -69,6 +69,7 @@ namespace HLProject
         Quaternion currentShakeRotationTarget;
         Vector2 playerMovInput, lastPlayerMovInput, cameraRotInput, lastCameraRotInput;
         Vector3 velocity, shakeAmplitude;
+        PlayerAnimationController animController;
 
         void OnFreezePlayerSet(bool oldValue, bool newValue)
         {
@@ -88,6 +89,8 @@ namespace HLProject
             CameraSensMult = 1;
             canRun = true;
             ToggleCharacterController(false);
+
+            if (isServer) animController = GetComponent<PlayerAnimationController>();
         }
 
         void Update()
@@ -162,6 +165,8 @@ namespace HLProject
             rotAxis.x = Mathf.Clamp(rotAxis.x, -1, 1);
 
             playerMovInput = movAxis;
+            if (animController != null) animController.SetPlayerDirectionMovement(playerMovInput);
+
             cameraRotInput = rotAxis;
             //xAxisRotaion = Mathf.Clamp(rotAxis.y, -70, 70);
             inputFlags = _inputFlags;
@@ -220,6 +225,7 @@ namespace HLProject
             {
                 velocity.y += Mathf.Sqrt(jumpHeight * -2 * Physics.gravity.y);
                 jumped = true;
+                animController.OnPlayerJumps();
             }
 
             velocity.y += Physics.gravity.y * Time.deltaTime;
@@ -240,6 +246,7 @@ namespace HLProject
             {
                 playerSpeed = maxCrouchSpeed;
                 newHeight = crouchAmmount * startHeight;
+                animController.OnPlayerCrouches();
             }
             else
             {

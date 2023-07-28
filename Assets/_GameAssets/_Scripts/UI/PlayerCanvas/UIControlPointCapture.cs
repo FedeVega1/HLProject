@@ -1,7 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
+using HLProject.Managers;
 
-namespace HLProject
+namespace HLProject.UI.HUD
 {
     public class UIControlPointCapture : MonoBehaviour
     {

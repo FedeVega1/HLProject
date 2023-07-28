@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace HLProject
+namespace HLProject.Characters
 {
     public enum HitBoxType { Generic, Head, Torso, Leg, Arm }
 

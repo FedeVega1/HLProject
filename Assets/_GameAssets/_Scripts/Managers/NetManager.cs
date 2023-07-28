@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-namespace HLProject
+namespace HLProject.Managers
 {
     public struct AddCustomPlayerMessage : NetworkMessage
     {

@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 using HLProject.Scriptables;
+using HLProject.Managers;
 
-namespace HLProject
+namespace HLProject.Characters
 {
     public class DummyPlayer : Player
     {

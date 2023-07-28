@@ -4,8 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Rendering.HighDefinition;
+using HLProject.Managers;
 
-namespace HLProject
+namespace HLProject.UI
 {
     public class MainMenuUI : MonoBehaviour
     {

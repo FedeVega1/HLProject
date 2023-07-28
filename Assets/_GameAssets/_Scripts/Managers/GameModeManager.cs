@@ -6,8 +6,10 @@ using Mirror;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.AddressableAssets;
 using HLProject.Scriptables;
+using HLProject.UI.HUD;
+using HLProject.Characters;
 
-namespace HLProject
+namespace HLProject.Managers
 {
     public class GameModeManager : NetworkBehaviour
     {

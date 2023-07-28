@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-namespace HLProject
+namespace HLProject.UI.HUD
 {
     public class UIControlPointNotice : MonoBehaviour
     {

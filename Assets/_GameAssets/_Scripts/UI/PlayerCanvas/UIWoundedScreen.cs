@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using Mirror;
 
-namespace HLProject
+namespace HLProject.UI.HUD
 {
     public class UIWoundedScreen : MonoBehaviour
     {

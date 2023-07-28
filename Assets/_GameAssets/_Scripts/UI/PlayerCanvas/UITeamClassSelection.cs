@@ -7,8 +7,9 @@ using Mirror;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.AddressableAssets;
 using HLProject.Scriptables;
+using HLProject.Characters;
 
-namespace HLProject
+namespace HLProject.UI.HUD
 {
     public class UITeamClassSelection : MonoBehaviour
     {

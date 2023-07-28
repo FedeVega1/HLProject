@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using HLProject.Managers;
 
-namespace HLProject
+namespace HLProject.UI
 {
     public class VideoOptions
     {

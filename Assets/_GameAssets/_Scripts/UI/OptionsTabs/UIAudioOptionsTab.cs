@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using HLProject.Managers;
 
-namespace HLProject
+namespace HLProject.UI
 {
     public class AudioOptions
     {

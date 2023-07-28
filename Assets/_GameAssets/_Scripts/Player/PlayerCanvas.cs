@@ -5,8 +5,10 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 using Mirror;
+using HLProject.Managers;
+using HLProject.Characters;
 
-namespace HLProject
+namespace HLProject.UI.HUD
 {
     public class PlayerCanvas : MonoBehaviour
     {

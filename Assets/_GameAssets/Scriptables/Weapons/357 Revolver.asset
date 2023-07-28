@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbc436bff5906864d8060ea6fbb33a4f, type: 3}
   m_Name: 357 Revolver
   m_EditorClassIdentifier: 
-  weaponName: 357 Revolver
+  weaponName: .357 Magnum Revolver
   clientPrefab: {fileID: 8733090252300111770, guid: 27fc54b408c68054c82ab6417161c09f, type: 3}
   propPrefab: {fileID: 3871419687768676768, guid: e9b7edc46f553da4695a4de3f1caa2bd, type: 3}
   bulletData: {fileID: 11400000, guid: 8d82f2759c015a44d8f315e0e130bf0e, type: 2}

@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
+using HLProject.Scriptables;
+using HLProject.Characters;
 
-namespace HLProject
+namespace HLProject.Managers
 {
     public class TeamManager : NetworkBehaviour
     {

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.EventSystems;
 using Mirror;
+using HLProject.Characters;
 
 namespace HLProject
 {
@@ -99,6 +100,10 @@ namespace HLProject
             EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
             return results.Count > 0;
         }
+
+        public static Vector3 OnlyXZ(this Vector3 main) => new Vector3(main.x, 0, main.z);
+        public static Vector3 OnlyXY(this Vector3 main) => new Vector3(main.x, main.y, 0);
+        public static Vector3 OnlyYZ(this Vector3 main) => new Vector3(0, main.y, main.z);
     }
 
     public class PlayerTimer

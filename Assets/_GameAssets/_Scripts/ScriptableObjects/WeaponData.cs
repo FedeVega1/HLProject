@@ -1,5 +1,6 @@
 using UnityEngine;
 using HLProject.Weapons;
+using HLProject.Characters;
 
 namespace HLProject.Scriptables
 {
