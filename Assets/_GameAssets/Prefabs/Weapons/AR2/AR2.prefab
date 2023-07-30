@@ -59,8 +59,8 @@ MonoBehaviour:
   worldAudioSource: {fileID: 8168101855332926624}
   virtualMovementSource: {fileID: 7317996139075074511}
   deploySound: {fileID: 8300000, guid: f9d4545295de1014b971ed8b373602b1, type: 3}
-  aimPosition: {x: -0.404, y: 0.056, z: 0.016}
-  aimRotation: {x: 0, y: 0.036818124, z: 0, w: 0.999322}
+  aimPosition: {x: -0.27, y: 0.06, z: 0.02}
+  aimRotation: {x: 0.00021661753, y: 0.0008466701, z: 0.001710749, w: -0.99999815}
   magazinePivot: {fileID: 6272393563922770811}
   bulletEffectPivot: {fileID: 4827385078208342327}
   weaponAnimators:
@@ -156,15 +156,15 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3671685544305591987}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.013081608, y: -0.034896597, z: -0.000456821, w: 0.99930525}
-  m_LocalPosition: {x: -0.098, y: 0.027, z: -0.951}
+  m_LocalRotation: {x: -0.013066851, y: -0.017454237, z: 0.0005118097, w: 0.9997622}
+  m_LocalPosition: {x: -0.23, y: 0.03, z: -0.95}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 213823864314292938}
   - {fileID: 5800623188352230252}
   m_Father: {fileID: 2812881970555229586}
-  m_LocalEulerAnglesHint: {x: -1.5, y: -4, z: 0}
+  m_LocalEulerAnglesHint: {x: -1.496, y: -2.001, z: 0.085}
 --- !u!1 &5814414234180039245
 GameObject:
   m_ObjectHideFlags: 0

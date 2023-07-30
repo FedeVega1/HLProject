@@ -20,7 +20,7 @@ namespace HLProject.Weapons
         float randomInspectTime, movementSoundTime;
         Coroutine handleInspectionSoundsRoutine;
 
-        AsyncOperationHandle<IList<AudioClip>> virtualShootSoundsHandle, reloadSoundsHandle;
+        AsyncOperationHandle<IList<AudioClip>> virtualShootSoundsHandle, reloadSoundsHandle, inspectionSoundsHandle;
         AsyncOperationHandle<AudioClip> lowAmmoSoundHandle, zoomInSoundHandle, zoomOutSoundHandle;
 
         protected override void LoadAssets()
@@ -33,8 +33,11 @@ namespace HLProject.Weapons
             //worldShootSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "WeaponSounds/PistolWorld", "FireSound" }, null, Addressables.MergeMode.Intersection);
             //worldShootSoundsHandle.Completed += OnWeaponSoundsComplete;
 
-            reloadSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "smg1_reload", "smg1_cockback", "smg1_cockforward" }, null, Addressables.MergeMode.Union);
+            reloadSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "smg1_clipout", "smg1_clipin", "smg1_cockback", "smg1_cockforward" }, null, Addressables.MergeMode.Union);
             reloadSoundsHandle.Completed += OnWeaponSoundsComplete;
+
+            inspectionSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "weapon_movement1", "smg1_boltback", "smg1_boltforward", "weapon_movement2", "weapon_movement3", "smg1_gripfold", "weapon_movement4", "smg1_gripunfold" }, null, Addressables.MergeMode.Union);
+            inspectionSoundsHandle.Completed += OnWeaponSoundsComplete;
 
             zoomInSoundHandle = Addressables.LoadAssetAsync<AudioClip>("ironsights_in");
             zoomInSoundHandle.Completed += OnWeaponSoundComplete;
@@ -81,6 +84,7 @@ namespace HLProject.Weapons
             if (!isDrawn) return;
             base.Update();
 
+            if (Input.GetKeyDown(KeyCode.I)) RandomIdleAnim();
             if (lastWalkCheck && Time.time >= movementSoundTime)
             {
                 if (lastRunningCheck)
@@ -194,8 +198,8 @@ namespace HLProject.Weapons
         {
             if (onAltMode)
             {
-                virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[1]);
-                LeanTween.delayedCall(.17f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[2]));
+                virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[2]);
+                LeanTween.delayedCall(.17f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[3]));
             }
             else
             {
@@ -206,11 +210,9 @@ namespace HLProject.Weapons
                     return;
                 }*/
 
-                virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[0]);
-
-                /*LeanTween.delayedCall(.375f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[1]));
-                LeanTween.delayedCall(1, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[2]));
-                LeanTween.delayedCall(1.54f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[3]));*/
+                LeanTween.delayedCall(.46f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[0]));
+                LeanTween.delayedCall(1.04f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[1]));
+                LeanTween.delayedCall(1.46f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[3]));
             }
 
             weaponAnim.SetTrigger("Reload");
@@ -298,12 +300,45 @@ namespace HLProject.Weapons
 
         IEnumerator HanldeInspectionSound(int randomIdle)
         {
-            if (randomIdle != 1) yield break;
-            /*yield return new WaitForSeconds(.875f);
-            virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[0]);
+            if (randomIdle != 1)
+            {
 
-            yield return new WaitForSeconds(1.285f); // 2.16f
-            virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[3]);*/
+                virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[0]);
+
+                yield return new WaitForSeconds(.75f);
+                virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[5]);
+
+                yield return new WaitForSeconds(.375f); // 1.125f
+                virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[6]);
+
+                yield return new WaitForSeconds(2.625f); // 3.75f
+                virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[3]);
+
+                yield return new WaitForSeconds(2.58f); // 6.33f
+                virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[7]);
+
+                yield return new WaitForSeconds(.295f); // 6.625f
+                virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[4]);
+
+                yield break; 
+            }
+
+            virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[0]);
+
+            yield return new WaitForSeconds(1f);
+            virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[1]);
+
+            yield return new WaitForSeconds(.3f); // 1.3f
+            virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[2]);
+
+            yield return new WaitForSeconds(.15f); // 1.45f
+            virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[3]);
+
+            yield return new WaitForSeconds(1.26f); // 2.71f
+            virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[3]);
+
+            yield return new WaitForSeconds(.12f); // 2.83f
+            virtualAudioSource.PlayOneShot(inspectionSoundsHandle.Result[4]);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace HLProject.Weapons
         float randomInspectTime, movementSoundTime;
         Coroutine handleInspectionSoundsRoutine;
 
-        AsyncOperationHandle<IList<AudioClip>> virtualShootSoundsHandle, reloadSoundsHandle;
+        AsyncOperationHandle<IList<AudioClip>> virtualShootSoundsHandle, reloadSoundsHandle, inspectionSoundsHandle;
         AsyncOperationHandle<AudioClip> lowAmmoSoundHandle, zoomInSoundHandle, zoomOutSoundHandle, emptyFireHandle;
 
         protected override void LoadAssets()
@@ -33,7 +33,10 @@ namespace HLProject.Weapons
             //worldShootSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "WeaponSounds/PistolWorld", "FireSound" }, null, Addressables.MergeMode.Intersection);
             //worldShootSoundsHandle.Completed += OnWeaponSoundsComplete;
 
-            reloadSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "ar2_reload", "ar2_magout", "ar2_magin" }, null, Addressables.MergeMode.Union);
+            reloadSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "ar2_reload_rotate", "ar2_magout", "ar2_magin", "ar2_reload_push", "ar2_boltpull" }, null, Addressables.MergeMode.Union);
+            reloadSoundsHandle.Completed += OnWeaponSoundsComplete;
+
+            inspectionSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "ar2_rotate", "ar2_push" }, null, Addressables.MergeMode.Union); ;
             reloadSoundsHandle.Completed += OnWeaponSoundsComplete;
 
             zoomInSoundHandle = Addressables.LoadAssetAsync<AudioClip>("ironsights_in");
@@ -198,15 +201,25 @@ namespace HLProject.Weapons
         {
             if (onAltMode)
             {
-                /*virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[1]);
-                LeanTween.delayedCall(1.3f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[2]));*/
+                LeanTween.delayedCall(.5f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[4]));
+                LeanTween.delayedCall(.625f, () => 
+                {
+                    virtualAudioSource.pitch = .95f;
+                    virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[4]);
+                });
+
+                LeanTween.delayedCall(1f, () => virtualAudioSource.pitch = 1f);
             }
             else
             {
                 LeanTween.delayedCall(1, SpawnMagazine);
                 virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[0]);
                 LeanTween.delayedCall(.5f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[1]));
-                LeanTween.delayedCall(1.8f, () => virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[2]));
+                LeanTween.delayedCall(1.8f, () =>
+                {
+                    virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[2]);
+                    virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[3]);
+                });
             }
 
             weaponAnim.SetBool("MidEmpty", midEmpty);
@@ -302,12 +315,21 @@ namespace HLProject.Weapons
 
         IEnumerator HanldeInspectionSound(int randomIdle)
         {
-            if (randomIdle != 1) yield break;
-            /*yield return new WaitForSeconds(.875f);
+            if (randomIdle != 1)
+            {
+                yield return new WaitForSeconds(.33f);
+                virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[0]);
+
+                yield return new WaitForSeconds(2.34f);
+                virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[3]);
+                yield break;
+            }
+
+            yield return new WaitForSeconds(1.15f);
             virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[0]);
 
-            yield return new WaitForSeconds(1.285f); // 2.16f
-            virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[3]);*/
+            yield return new WaitForSeconds(.3f);
+            virtualAudioSource.PlayOneShot(reloadSoundsHandle.Result[3]);
         }
     }
 }
