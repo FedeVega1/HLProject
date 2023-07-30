@@ -15,10 +15,10 @@ namespace HLProject.Weapons
 
         int delayTweenID = -1;
         bool lastWalkCheck, lastRunningCheck, isFiring;
-        float randomInspectTime, movementSoundTime;
+        float movementSoundTime;
         Coroutine handleInspectionSoundsRoutine;
 
-        AsyncOperationHandle<IList<AudioClip>> virtualShootSoundsHandle, inspectionSoundsHandle;
+        AsyncOperationHandle<IList<AudioClip>> virtualShootSoundsHandle;
 
         protected override void LoadAssets()
         {
@@ -26,29 +26,18 @@ namespace HLProject.Weapons
 
             virtualShootSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "pin_pull", "grenade_throw" }, null, Addressables.MergeMode.Union);
             virtualShootSoundsHandle.Completed += OnWeaponSoundsComplete;
-
-            inspectionSoundsHandle = Addressables.LoadAssetsAsync<AudioClip>(new List<string> { "shotgun_bolt_back", "shotgun_bolt_forward" }, null, Addressables.MergeMode.Union);
-            inspectionSoundsHandle.Completed += OnWeaponSoundsComplete;
         }
 
         protected override void OnDestroy()
         {
             base.OnDestroy();
-
             Addressables.Release(virtualShootSoundsHandle);
-            Addressables.Release(inspectionSoundsHandle);
         }
 
         public override void Init(bool isServer, WeaponData wData, BulletData data, GameObject propPrefab)
         {
             base.Init(isServer, wData, data, propPrefab);
             weaponAnim = weaponAnimators[isServer ? 0 : 1];
-        }
-
-        protected override void OnEnable()
-        {
-            base.OnEnable();
-            randomInspectTime = Time.time + Random.Range(20f, 40f);
         }
 
         protected override void Update()
@@ -68,9 +57,6 @@ namespace HLProject.Weapons
                 virtualMovementSource.PlayOneShot(weaponWalkSoundsHandle.Result[Random.Range(0, weaponWalkSoundsHandle.Result.Count)]);
                 movementSoundTime = Time.time + .5f;
             }
-
-            /*if (weaponAnim == null || Time.time < randomInspectTime) return;
-            RandomIdleAnim();*/
         }
 
         public override void Fire(Vector3 destination, bool didHit, int ammo)
@@ -82,25 +68,37 @@ namespace HLProject.Weapons
             weaponAnim.SetTrigger("Fire");
 
             virtualAudioSource.PlayOneShot(virtualShootSoundsHandle.Result[1]);
-            //virtualAudioSource.PlayOneShot(virtualShootSoundsHandle.Result[1]);
 
             weaponAnim.ResetTrigger("Walk");
             weaponAnim.ResetTrigger("Idle");
             weaponAnim.SetBool("IsWalking", false);
             weaponAnim.SetBool("IsFiring", true);
+            weaponAnim.SetBool("IsEmpty", true);
             isFiring = true;
 
             if (delayTweenID != -1) LeanTween.cancel(delayTweenID);
             delayTweenID = LeanTween.delayedCall(weaponData.weaponAnimsTiming.fireMaxDelay, () => { weaponAnim.SetBool("IsFiring", false); isFiring = false; }).uniqueId;
-            randomInspectTime = Time.time + Random.Range(20f, 40f);
         }
 
         public override void EmptyFire() { }
         public override void AltFire(Vector3 destination, bool didHit, int ammo) { }
         public override void ScopeIn() { }
         public override void ScopeOut() { }
-        public override void Reload(int bulletsToReload) { }
         public override void OnAltMode(bool toggle, WeaponData newData) { }
+
+        public override void Reload(int bulletsToReload) 
+        {
+            weaponAnim.SetTrigger("Reload");
+            weaponAnim.SetBool("IsReloading", true);
+            weaponAnim.SetBool("IsEmpty", false);
+            virtualAudioSource.PlayOneShot(deploySound);
+
+            LeanTween.cancel(gameObject);
+            LeanTween.delayedCall(weaponData.weaponAnimsTiming.reload, () =>
+            {
+                weaponAnim.SetBool("IsReloading", false);
+            });
+        }
 
         public override void DrawWeapon()
         {
@@ -129,7 +127,6 @@ namespace HLProject.Weapons
                 {
                     weaponAnim.SetTrigger("Idle");
                     weaponAnim.SetBool("IsWalking", false);
-                    randomInspectTime = Time.time + Random.Range(20f, 40f);
                 }
             }
 

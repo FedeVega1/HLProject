@@ -137,11 +137,11 @@ namespace HLProject.Weapons
             if (weaponData.weaponName == "Shotgun" && owningPlayer.GetPlayerTeam() > 1)
                 fireTime = NetworkTime.time + weaponData.weaponAnimsTiming.shotgunPumpFireMaxDelay;
             else
-                fireTime = NetworkTime.time + currentFireMode switch { 
+                fireTime = NetworkTime.time + (currentFireMode switch { 
                     FireModes.Single => weaponData.weaponAnimsTiming.fireMaxDelay,
                     FireModes.Auto => weaponData.weaponAnimsTiming.secondaryFireModeMaxDelay, 
                     _ => weaponData.weaponAnimsTiming.thirdFireModeMaxDelay
-                };
+                });
         }
 
         [Server]
@@ -157,9 +157,10 @@ namespace HLProject.Weapons
             switch (bulletData.physType)
             {
                 case BulletPhysicsType.Throw:
-                    cross = new Vector3(0, .5f, .5f);
+                    cross = new Vector3(0, .1f, .9f);
                     granadeBulletScript.PhysicsTravelTo(true, MyTransform.TransformDirection(cross), ForceMode.Force, true, true, bulletData.radius, false, bulletData.timeToExplode);
-                    Reload();
+                    bulletsInMag--;
+                    Reload(true);
                     break;
 
                 case BulletPhysicsType.Fire:
@@ -172,6 +173,7 @@ namespace HLProject.Weapons
                     break;
             }
 
+            if (bulletsInMag > 0) bulletsInMag--;
             lastShootPhysExplosion.Enqueue(bulletData);
             NetworkServer.Spawn(granade);
         }
@@ -329,12 +331,17 @@ namespace HLProject.Weapons
         }
 
         [Server]
-        void Reload()
+        void Reload(bool forceReload)
         {
-            if (IsMelee || isReloading || onScope || bulletsInMag >= weaponData.bulletsPerMag || mags <= 0) return;
+            if (IsMelee || isReloading || onScope || bulletsInMag >= weaponData.bulletsPerMag || mags <= 0)
+            {
+                Debug.LogFormat("Reload order failed: {0} - {1} - {2} - {3} - {4}", IsMelee, isReloading, onScope, bulletsInMag >= weaponData.bulletsPerMag, mags <= 0);
+                return;
+            }
+
             owningPlayer.TogglePlayerRunAbility(false);
             isReloading = true;
-            RpcReloadWeapon(bulletsInMag - weaponData.bulletsPerMag);
+            RpcReloadWeapon(bulletsInMag - weaponData.bulletsPerMag, forceReload);
             StartCoroutine(ReloadRoutine(weaponData.weaponName == "Shotgun" ? (weaponData.bulletsPerMag - bulletsInMag) : 1));
         }
 
@@ -409,7 +416,7 @@ namespace HLProject.Weapons
         [Command]
         public void CmdRequestReload()
         {
-            Reload();
+            Reload(false);
         }
 
         [Command(requiresAuthority = false)]
@@ -448,7 +455,7 @@ namespace HLProject.Weapons
             GameObject granade = Instantiate(clientBulletData.Result[indx].bulletPrefab, pos, rot);
             Bullet granadeBulletScript = granade.GetComponent<Bullet>();
             granadeBulletScript.Init(0, true);
-            granadeBulletScript.PhysicsTravelTo(false, Vector3.zero, ForceMode.Force, false, true, bulletData.radius, true);
+            granadeBulletScript.PhysicsTravelTo(false, Vector3.zero, ForceMode.Force, false, true, bulletData.radius, true, Mathf.Epsilon);
         }
 
         [ClientRpc(includeOwner = false)]
@@ -479,9 +486,15 @@ namespace HLProject.Weapons
                 clientWeapon.Fire(destinations[i], didHit[i], -1);
         }
 
-        [ClientRpc(includeOwner = false)]
-        public void RpcReloadWeapon(int bullets)
+        [ClientRpc]
+        public void RpcReloadWeapon(int bullets, bool forceOwnerReload)
         {
+            if (hasAuthority)
+            {
+                if (forceOwnerReload) 
+                    owningPlayer.ForceClientReload();
+                return;
+            }
             clientWeapon.Reload(bullets);
         }
 
@@ -593,6 +606,7 @@ namespace HLProject.Weapons
             mags -= bulletsToReload;
             isReloading = false;
             owningPlayer.TogglePlayerRunAbility(true);
+            print("Server finish Reload!");
         }
 
         [Client]

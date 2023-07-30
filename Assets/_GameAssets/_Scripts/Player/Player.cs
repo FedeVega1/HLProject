@@ -140,6 +140,12 @@ namespace HLProject.Characters
         }*/
 
         [Client]
+        public virtual void ForceClientReload()
+        {
+            inventory.ForceReload();
+        }
+
+        [Client]
         protected virtual void LoadAssets()
         {
             effectsController.LoadAssets();

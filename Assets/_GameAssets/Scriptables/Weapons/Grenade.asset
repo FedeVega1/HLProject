@@ -23,7 +23,7 @@ MonoBehaviour:
   weaponType: 4
   weaponAnimsTiming:
     initFire: 0
-    fireMaxDelay: 1.5
+    fireMaxDelay: 0
     secondaryFireModeMaxDelay: 0
     thirdFireModeMaxDelay: 0
     reload: 0.5

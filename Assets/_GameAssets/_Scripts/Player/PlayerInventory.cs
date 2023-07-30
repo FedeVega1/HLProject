@@ -162,6 +162,12 @@ namespace HLProject.Characters
         #region Client
 
         [Client]
+        public void ForceReload()
+        {
+            weaponsInventoryOnClient[currentWeaponIndex].ForceReload();
+        }
+
+        [Client]
         void CheckInputs()
         {
             if (weaponsInventoryOnClient == null || currentWeaponIndex >= weaponsInventoryOnClient.Count || weaponsInventoryOnClient[currentWeaponIndex] == null) return;

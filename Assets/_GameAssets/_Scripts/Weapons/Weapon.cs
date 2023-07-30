@@ -127,8 +127,8 @@ namespace HLProject.Weapons
                     break;
 
                 case BulletType.Physics:
+                    BulletsInMag--;
                     Handlephysics();
-                    BulletsInMag = 0;
                     break;
             }
 
@@ -212,16 +212,6 @@ namespace HLProject.Weapons
         {
             if (OnAltMode) clientWeapon.AltFire(Vector3.zero, true, BulletsInMag);
             else clientWeapon.Fire(Vector3.zero, true, BulletsInMag);
-
-            switch (bulletData.physType)
-            {
-                case BulletPhysicsType.Throw:
-                    Reload();
-                    break;
-
-                case BulletPhysicsType.Fire:
-                    break;
-            }
         }
 
         bool CheckBulletFallOff(ref Ray weaponRay, ref RaycastHit rayHit, out float distance)
@@ -354,6 +344,15 @@ namespace HLProject.Weapons
             BulletsInMag = weaponData.bulletsPerMag;
             Mags -= bullets;
             OnFinishedReload?.Invoke();
+            print("Client finish Reload!");
+        }
+
+        public void ForceReload()
+        {
+            isReloading = true;
+            int diff = weaponData.bulletsPerMag - BulletsInMag;
+            clientWeapon.Reload(diff);
+            StartCoroutine(ReloadRoutine(weaponData.weaponName == "Shotgun" ? diff : 1));
         }
 
         public void ToggleWeaponVisibility(bool toggle)

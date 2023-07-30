@@ -89,11 +89,19 @@ namespace HLProject.Weapons
 
             LeanTween.delayedCall(weaponData.weaponAnimsTiming.initFire, () =>
             {
-                virtualAudioSource.pitch = Random.Range(.85f, .95f);
                 AudioClip soundToPlay;
 
-                if (!didHit) soundToPlay = virtualSwingSoundsHandle.Result[Random.Range(0, virtualSwingSoundsHandle.Result.Count)];
-                else soundToPlay = virtualHitSoundsHandle.Result[Random.Range(0, virtualHitSoundsHandle.Result.Count)];
+                if (!didHit)
+                {
+                    virtualAudioSource.pitch = Random.Range(1f, 1.1f);
+                    soundToPlay = virtualSwingSoundsHandle.Result[Random.Range(0, virtualSwingSoundsHandle.Result.Count)];
+                }
+                else
+                { 
+                    virtualAudioSource.pitch = Random.Range(.85f, .95f);
+                    soundToPlay = virtualHitSoundsHandle.Result[Random.Range(0, virtualHitSoundsHandle.Result.Count)]; 
+                }
+
                 virtualAudioSource.PlayOneShot(soundToPlay);
             });
 
