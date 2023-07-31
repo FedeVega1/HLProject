@@ -39,7 +39,6 @@ namespace HLProject.Characters
             owningPlayer = GetComponent<Player>();
         }
 
-        [Server]
         void Update()
         {
             if (!isServer) return;
@@ -76,9 +75,10 @@ namespace HLProject.Characters
         }
 
         [Server]
-        public void OnPlayerShoots()
+        public void OnPlayerShoots(bool onAltMode)
         {
             playerAnim.SetTrigger("Shoot");
+            playerAnim.animator.SetBool("IsAltFire", onAltMode);
         }
 
         [Server]

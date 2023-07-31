@@ -19,7 +19,6 @@ namespace HLProject.Characters
         [SerializeField] protected PlayerMovement movementScript;
         [SerializeField] protected float woundedMaxTime;
         [SerializeField] ClientEffectsController effectsController;
-        [SerializeField] protected PlayerAnimationController animController;
 
         [SyncVar(hook = nameof(OnTeamChange))] protected int playerTeam;
         [SyncVar] protected bool isWounded, firstSpawn;
@@ -29,6 +28,7 @@ namespace HLProject.Characters
         public float MaxRespawnTime { get; set; }
         public float BonusWoundTime { get; set; }
         public PlayerCanvas PlayerCanvasScript { get; private set; }
+        public PlayerAnimationController AnimController { get; private set; }
 
         protected bool onControlPoint;
         protected int currentClassIndex, kills, deaths, revives, score;
@@ -51,6 +51,7 @@ namespace HLProject.Characters
             base.OnStartServer();
             movementScript.freezePlayer = true;
             firstSpawn = true;
+            AnimController = GetComponent<PlayerAnimationController>();
         }
 
         public override void OnStartLocalPlayer()

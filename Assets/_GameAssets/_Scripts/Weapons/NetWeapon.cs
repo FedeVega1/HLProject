@@ -107,6 +107,7 @@ namespace HLProject.Weapons
             if (IsMelee)
             {
                 meleeRoutine = StartCoroutine(MeleeSwing());
+                owningPlayer.AnimController.OnPlayerShoots(swappedData != null);
                 return;
             }
 
@@ -124,6 +125,8 @@ namespace HLProject.Weapons
                     LeanTween.delayedCall(weaponData.weaponAnimsTiming.initFire, ShootPhysicsBullet);
                     break;
             }
+
+            owningPlayer.AnimController.OnPlayerShoots(swappedData != null);
 
             LeanTween.delayedCall(weaponData.weaponAnimsTiming.initFire, () =>
             {
@@ -342,6 +345,7 @@ namespace HLProject.Weapons
             owningPlayer.TogglePlayerRunAbility(false);
             isReloading = true;
             RpcReloadWeapon(bulletsInMag - weaponData.bulletsPerMag, forceReload);
+            owningPlayer.AnimController.OnPlayerReloads();
             StartCoroutine(ReloadRoutine(weaponData.weaponName == "Shotgun" ? (weaponData.bulletsPerMag - bulletsInMag) : 1));
         }
 
@@ -501,6 +505,7 @@ namespace HLProject.Weapons
         [ClientRpc]
         void RpcSyncWeaponData(string weaponAssetName)//(int weaponID)
         {
+            print("Client Sync!");
             if (weaponData != null) return;
             clientSyncWeaponData = Addressables.LoadAssetAsync<WeaponData>(weaponAssetName + ".asset");
             clientSyncWeaponData.Completed += OnClientSyncWeaponLoaded;

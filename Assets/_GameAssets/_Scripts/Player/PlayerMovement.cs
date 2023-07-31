@@ -88,9 +88,10 @@ namespace HLProject.Characters
             playerSpeed = maxWalkSpeed;
             CameraSensMult = 1;
             canRun = true;
-            ToggleCharacterController(false);
 
-            if (isServer) animController = GetComponent<PlayerAnimationController>();
+            if (!isServer) return;
+            animController = GetComponent<PlayerAnimationController>();
+            ToggleCharacterController(false);
         }
 
         void Update()

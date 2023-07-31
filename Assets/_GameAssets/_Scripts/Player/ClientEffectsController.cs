@@ -22,6 +22,7 @@ namespace HLProject.Characters
         DepthOfField depthOfFieldComponent;
         Vignette vignetteComponent;
 
+        float lastDepthValue;
         Player localPlayer;
 
         AsyncOperationHandle<IList<AudioClip>> hearingLossSoundHandle, bulletFlyBySoundsHandle;
@@ -90,6 +91,10 @@ namespace HLProject.Characters
 
             depthOfFieldComponent.nearFocusEnd.value = localPlayer.SuppressionAmmount * 10;
             depthOfFieldComponent.farFocusEnd.value = invert * 80000;
+
+            if (lastDepthValue == depthOfFieldComponent.nearFocusEnd.value) depthOfFieldComponent.active = false;
+            else depthOfFieldComponent.active = true;
+            lastDepthValue = depthOfFieldComponent.nearFocusEnd.value;
         }
 
         public void OnPlayerTakesDamage(DamageType type)
@@ -117,6 +122,7 @@ namespace HLProject.Characters
                     motionBlurComponent.active = true;
                     motionBlurComponent.intensity.value = 150;
 
+                    depthOfFieldComponent.active = true;
                     depthOfFieldComponent.nearFocusEnd.value = 10;
                     depthOfFieldComponent.farFocusEnd.value = 0;
 
