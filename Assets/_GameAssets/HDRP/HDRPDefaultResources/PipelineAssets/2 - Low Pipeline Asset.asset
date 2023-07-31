@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0cf1dab834d4ec34195b920ea7bbf9ec, type: 3}
-  m_Name: 1 - Very Low Pipeline Asset
+  m_Name: 2 - Low Pipeline Asset
   m_EditorClassIdentifier: 
   m_RenderPipelineSettings:
-    supportShadowMask: 0
+    supportShadowMask: 1
     supportSSR: 0
     supportSSRTransparent: 0
-    supportSSAO: 0
+    supportSSAO: 1
     supportSSGI: 0
-    supportSubsurfaceScattering: 0
+    supportSubsurfaceScattering: 1
     sssSampleBudget:
       m_Values: 140000002800000050000000
       m_SchemaId:
@@ -33,16 +33,16 @@ MonoBehaviour:
     supportTransparentBackface: 1
     supportTransparentDepthPrepass: 1
     supportTransparentDepthPostpass: 1
-    colorBufferFormat: 74
+    colorBufferFormat: 48
     supportCustomPass: 1
     customBufferFormat: 12
     supportedLitShaderMode: 2
     planarReflectionResolution:
-      m_Values: 400000004000000040000000
+      m_Values: 000100000004000000080000
       m_SchemaId:
         m_Id: With3Levels
     cubeReflectionResolution:
-      m_Values: 800000008000000080000000
+      m_Values: 000100000002000000040000
       m_SchemaId:
         m_Id: With3Levels
     supportDecals: 1
@@ -51,6 +51,7 @@ MonoBehaviour:
     decalNormalBufferHP: 0
     msaaSampleCount: 1
     supportMotionVectors: 1
+    supportDataDrivenLensFlare: 1
     supportRuntimeAOVAPI: 0
     supportDitheringCrossFade: 1
     supportTerrainHole: 0
@@ -72,11 +73,11 @@ MonoBehaviour:
       maxEnvLightsOnScreen: 64
       reflectionCacheCompressed: 0
       reflectionProbeFormat: 74
-      reflectionProbeTexCacheSize: 512
+      reflectionProbeTexCacheSize: 1073750016
       reflectionProbeTexLastValidCubeMip: 3
       reflectionProbeTexLastValidPlanarMip: 0
       reflectionProbeDecreaseResToFit: 1
-      skyReflectionSize: 128
+      skyReflectionSize: 256
       skyLightingOverrideLayerMask:
         serializedVersion: 2
         m_Bits: 0
@@ -93,7 +94,7 @@ MonoBehaviour:
     hdShadowInitParams:
       maxShadowRequests: 128
       directionalShadowsDepthBits: 32
-      shadowFilteringQuality: 0
+      shadowFilteringQuality: 1
       areaShadowFilteringQuality: 0
       punctualLightShadowAtlas:
         shadowAtlasResolution: 4096
@@ -182,7 +183,7 @@ MonoBehaviour:
       ChromaticAberrationMaxSamples: 03000000060000000c000000
     lightSettings:
       useContactShadow:
-        m_Values: 010000
+        m_Values: 000001
         m_SchemaId:
           m_Id: With3Levels
     maximumLODLevel:
@@ -288,11 +289,13 @@ MonoBehaviour:
     m_ObsoleteSupportRuntimeDebugDisplay: 0
   allowShaderVariantStripping: 1
   enableSRPBatcher: 1
-  availableMaterialQualityLevels: 1
-  m_DefaultMaterialQualityLevel: 1
+  availableMaterialQualityLevels: -1
+  m_DefaultMaterialQualityLevel: 4
   diffusionProfileSettings: {fileID: 0}
   virtualTexturingSettings:
     streamingCpuCacheSizeInMegaBytes: 256
+    streamingMipPreloadTexturesPerFrame: 0
+    streamingPreloadMipCount: 1
     streamingGpuCacheSettings:
     - format: 0
       sizeInMegaBytes: 128

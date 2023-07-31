@@ -9,12 +9,18 @@ namespace HLProject.Managers
     public class GameEffectsManager : MonoBehaviour
     {
         [SerializeField] Volume mainVolume;
+        [SerializeField] VolumeProfile defaultGlobalProfile;
 
         MotionBlur mainMotionBlur;
+        RenderPipelineSettings pipelineSettings;
 
         void Awake()
         {
-            mainVolume.profile.TryGet<MotionBlur>(out mainMotionBlur);
+            HDRenderPipelineAsset renderAsset = GraphicsSettings.currentRenderPipeline as HDRenderPipelineAsset;
+            pipelineSettings = renderAsset.currentPlatformRenderPipelineSettings;
+
+            //mainVolume.profile.TryGet<MotionBlur>(out mainMotionBlur);
+            defaultGlobalProfile.TryGet<MotionBlur>(out mainMotionBlur);
             mainMotionBlur.intensity.value = GameManager.INS.VideoOptions.EnableMotionBlur ? 1 : 0;
         }
     }
