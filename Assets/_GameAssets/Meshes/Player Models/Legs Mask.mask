@@ -14,7 +14,7 @@ AvatarMask:
   - m_Path: Metrocop
     m_Weight: 0
   - m_Path: Metrocop/ValveBiped.Bip01_Pelvis
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Metrocop/ValveBiped.Bip01_Pelvis/ValveBiped.Bip01_L_Thigh
     m_Weight: 1
   - m_Path: Metrocop/ValveBiped.Bip01_Pelvis/ValveBiped.Bip01_L_Thigh/ValveBiped.Bip01_L_Calf
