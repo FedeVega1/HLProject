@@ -12,7 +12,7 @@ namespace HLProject.Characters
     {
         [System.Flags] enum InputFlag { Empty = 0b0, Crouch = 0b1, Jump = 0b10, Sprint = 0b100 }
 
-        [SerializeField] float maxWalkSpeed, maxCrouchSpeed, crouchAmmount, maxRunSpeed, jumpHeight, horizontalSens, verticalSens, timeBetweenJumps, maxScopeSpeed;
+        [SerializeField] float maxWalkSpeed, maxCrouchSpeed, crouchAmmount, maxRunSpeed, jumpHeight, horizontalSens, verticalSens, timeBetweenJumps, maxScopeSpeed, crouchingSpeed;
         [SerializeField] float maxWeaponWeight;
         [SerializeField] Vector2 cameraYLimits;
         [SerializeField] CinemachineVirtualCamera playerVCam;
@@ -55,6 +55,7 @@ namespace HLProject.Characters
         public float CameraXAxis => cameraRotInput.x;
         public bool PlayerIsMoving => playerMovInput.magnitude > 0;
         public bool PlayerIsRunning => canRun && CheckInput(inputFlags, InputFlag.Sprint);
+        public bool PlayerIsCrouched => CheckInput(inputFlags, InputFlag.Crouch);
 
         public float CameraSensMult { get; set; }
 
@@ -64,12 +65,13 @@ namespace HLProject.Characters
 
         bool jumped, canShakeCamera;
         InputFlag inputFlags;
-        float startHeight, playerSpeed, yAxisRotation, shakeIntensity, shakeEndTime;
+        float startHeight, startYOffset, playerSpeed, yAxisRotation, shakeIntensity, shakeEndTime, targetHeight, startClientOffset, targetClientOffset;
         double jumpTimer;
         Quaternion currentShakeRotationTarget;
         Vector2 playerMovInput, lastPlayerMovInput, cameraRotInput, lastCameraRotInput;
-        Vector3 velocity, shakeAmplitude;
+        Vector3 velocity, shakeAmplitude, targetCenter;
         PlayerAnimationController animController;
+        CinemachineTransposer clientVCamTransposer;
 
         void OnFreezePlayerSet(bool oldValue, bool newValue)
         {
@@ -84,10 +86,19 @@ namespace HLProject.Characters
 
         void Start()
         {
-            startHeight = CharCtrl.height;
+            targetHeight = startHeight = CharCtrl.height;
+            startYOffset = CharCtrl.center.y;
+            targetCenter = CharCtrl.center;
+
             playerSpeed = maxWalkSpeed;
             CameraSensMult = 1;
             canRun = true;
+
+            if (isLocalPlayer)
+            {
+                clientVCamTransposer = playerVCam.GetCinemachineComponent<CinemachineTransposer>();
+                targetClientOffset = startClientOffset = clientVCamTransposer.m_FollowOffset.y;
+            }
 
             if (!isServer) return;
             animController = GetComponent<PlayerAnimationController>();
@@ -101,6 +112,10 @@ namespace HLProject.Characters
             {
                 CheckForInput();
                 RotateClient();
+
+                if (PlayerIsCrouched) targetClientOffset = startClientOffset - crouchAmmount;
+                else targetClientOffset = startClientOffset;
+                clientVCamTransposer.m_FollowOffset.y = Mathf.MoveTowards(clientVCamTransposer.m_FollowOffset.y, targetClientOffset, Time.deltaTime * crouchingSpeed);
             }
 
             if (!isServer) return;
@@ -186,12 +201,6 @@ namespace HLProject.Characters
 
             if (CharCtrl.isGrounded)
             {
-                if (jumped)
-                {
-                    jumped = false;
-                    jumpTimer = NetworkTime.time + timeBetweenJumps;
-                }
-
                 if (velocity.y < 0) velocity.y = -.5f;
                 if (PlayerIsRunning) playerSpeed = maxRunSpeed;
             }
@@ -222,11 +231,22 @@ namespace HLProject.Characters
             }
 
             if (onScope || NetworkTime.time < jumpTimer) return;
-            if (CheckInput(inputFlags, InputFlag.Jump) && CharCtrl.isGrounded)
+
+            if (CharCtrl.isGrounded)
             {
-                velocity.y += Mathf.Sqrt(jumpHeight * -2 * Physics.gravity.y);
-                jumped = true;
-                animController.OnPlayerJumps();
+                if (jumped)
+                {
+                    jumped = false;
+                    jumpTimer = NetworkTime.time + timeBetweenJumps;
+                    animController.OnPlayerLands();
+                }
+                else if (CheckInput(inputFlags, InputFlag.Jump))
+                {
+                    LeanTween.delayedCall(.15f, () => velocity.y += Mathf.Sqrt(jumpHeight * -2 * Physics.gravity.y));
+                    jumped = true;
+                    jumpTimer = NetworkTime.time + .4f;
+                    animController.OnPlayerJumps();
+                }
             }
 
             velocity.y += Physics.gravity.y * Time.deltaTime;
@@ -241,23 +261,25 @@ namespace HLProject.Characters
                 return;
             }
 
-            float newHeight = startHeight;
-
             if (CheckInput(inputFlags, InputFlag.Crouch))
             {
                 playerSpeed = maxCrouchSpeed;
-                newHeight = crouchAmmount * startHeight;
-                animController.OnPlayerCrouches();
+                animController.TogglePlayerCrouch(true);
+
+                targetHeight = startHeight - crouchAmmount;
+                targetCenter.y = startYOffset - (crouchAmmount * .5f);
             }
-            else
+            else if (playerSpeed != maxWalkSpeed)
             {
+                animController.TogglePlayerCrouch(false);
                 playerSpeed = maxWalkSpeed;
+
+                targetHeight = startHeight;
+                targetCenter.y = startYOffset;
             }
 
-            float lastHeight = CharCtrl.height;
-
-            CharCtrl.height = Mathf.Lerp(CharCtrl.height, newHeight, 5.0f * Time.deltaTime);
-            MyTransform.position += new Vector3(0, (CharCtrl.height - lastHeight) * crouchAmmount, 0);
+            CharCtrl.height = Mathf.MoveTowards(CharCtrl.height, targetHeight, Time.deltaTime * crouchingSpeed);
+            CharCtrl.center = Vector3.MoveTowards(CharCtrl.center, targetCenter, Time.deltaTime * crouchingSpeed);
         }
 
         void Lean()

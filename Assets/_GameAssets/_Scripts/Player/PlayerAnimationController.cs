@@ -30,7 +30,7 @@ namespace HLProject.Characters
         NetworkAnimator playerAnim;
         Player owningPlayer;
 
-        float movThreshold, runThreshold;
+        float movThreshold, runThreshold, crouchThreshold;
         Vector2 lerpedPlayerDir, playerDirTarget;
 
         public override void OnStartServer()
@@ -44,10 +44,11 @@ namespace HLProject.Characters
             if (!isServer) return;
             movThreshold += (owningPlayer.PlayerIsMoving() ? 4 : -4) * Time.deltaTime;
             runThreshold += (owningPlayer.PlayerIsRunning() ? 4 : -4) * Time.deltaTime;
+            crouchThreshold += (owningPlayer.PlayerIsCrouched() ? 4 : -.8f) * Time.deltaTime;
 
             playerAnim.animator.SetFloat("Movement", movThreshold = Mathf.Clamp01(movThreshold));
-            //playerAnim.animator.SetLayerWeight(1, movThreshold);
             playerAnim.animator.SetFloat("Run", runThreshold = Mathf.Clamp01(runThreshold));
+            playerAnim.animator.SetFloat("CrouchAmmount", crouchThreshold = Mathf.Clamp01(crouchThreshold));
 
             lerpedPlayerDir = Vector2.Lerp(lerpedPlayerDir, playerDirTarget, Time.deltaTime * 4);
             playerAnim.animator.SetFloat("XMovement", lerpedPlayerDir.x);
@@ -63,15 +64,22 @@ namespace HLProject.Characters
         }
 
         [Server]
-        public void OnPlayerCrouches()
+        public void TogglePlayerCrouch(bool toggle)
         {
-            playerAnim.SetTrigger("IsCrouched");
+            playerAnim.animator.SetBool("IsCrouched", toggle);
+            playerAnim.SetTrigger("Idle");
         }
 
         [Server]
         public void OnPlayerJumps()
         {
             playerAnim.SetTrigger("Jump");
+        }
+
+        [Server]
+        public void OnPlayerLands()
+        {
+            playerAnim.SetTrigger("Landed");
         }
 
         [Server]

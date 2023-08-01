@@ -106,6 +106,7 @@ namespace HLProject.Characters
 
         public bool PlayerIsMoving() => movementScript.PlayerIsMoving;
         public bool PlayerIsRunning() => movementScript.PlayerIsRunning;
+        public bool PlayerIsCrouched() => movementScript.PlayerIsCrouched;
 
         #endregion
 
