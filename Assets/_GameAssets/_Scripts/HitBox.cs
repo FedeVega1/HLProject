@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace HLProject.Characters
@@ -6,9 +7,29 @@ namespace HLProject.Characters
 
     public class HitBox : CachedTransform
     {
+        static readonly Dictionary<HitBoxType, float> damageMultTable = new Dictionary<HitBoxType, float>()
+        {
+            { HitBoxType.Head, 2 },
+            { HitBoxType.Torso, 1 },
+            { HitBoxType.Arm, .6f },
+            { HitBoxType.Leg, .5f },
+            { HitBoxType.Generic, 1 },
+        };
+
         [SerializeField] HitBoxType type;
         [SerializeField] Character characterScript;
 
-        public Character GetCharacterScript() => characterScript;
+        public Transform CharacterTransform => characterScript.MyTransform;
+        public bool CharacterIsDead => characterScript.IsDead;
+
+        //public Character GetCharacterScript() => characterScript;
+
+        public void TakeDamage(float ammount, DamageType damageType = DamageType.Base)
+        {
+            if (CharacterIsDead) return;
+            characterScript.TakeDamage(ammount * damageMultTable[type], damageType);
+        }
+
+        public void OnBulletFlyby(Vector3 origin) => characterScript.OnBulletFlyby(origin);
     }
 }

@@ -187,9 +187,9 @@ namespace HLProject.Weapons
             {
                 HitBox hitBox = meleeCollider[i].GetComponent<HitBox>();
                 if (hitBox == null) continue;
-                if (hitBox.GetCharacterScript().MyTransform != owningPlayer.MyTransform)
+                if (hitBox.CharacterTransform != owningPlayer.MyTransform)
                 {
-                    if (hitBox.GetCharacterScript().IsDead)
+                    if (hitBox.CharacterIsDead)
                     {
                         killHit = true;
                         break;

@@ -487,9 +487,17 @@ namespace HLProject.Characters
         [Client]
         IEnumerator WaitForPlayerWeaponSync(System.Action OnWeaponSync)
         {
-            int debug = 0;
-            while (wWeaponPivot.childCount == 0)
+            int debug = 0, dataFoundCount = 0;
+            while (wWeaponPivot.childCount == 0 || dataFoundCount != wWeaponPivot.childCount)
             {
+                int size = wWeaponPivot.childCount;
+                for (int i = 0; i < size; i++)
+                {
+                    NetWeapon nW = wWeaponPivot.GetChild(i).GetComponent<NetWeapon>();
+                    if (nW == null || nW.GetWeaponData() == null) continue;
+                    dataFoundCount++;
+                }
+
                 Debug.LogFormat("Player waiting for weaponSync {0}", debug++);
                 yield return new WaitForSeconds(.1f);
             }

@@ -191,7 +191,7 @@ namespace HLProject.Weapons
                 {
                     float distance = Vector3.Distance(finalPos, hitBoxList[i].MyTransform.position);
                     float damageFalloff = Mathf.Clamp(bulletData.radius - distance, 0, bulletData.radius) / bulletData.radius;
-                    hitBoxList[i].GetCharacterScript().TakeDamage(bulletData.explosionDamage * damageFalloff, bulletData.damageType);
+                    hitBoxList[i].TakeDamage(bulletData.explosionDamage * damageFalloff, bulletData.damageType);
                 }
             }
 
@@ -201,7 +201,7 @@ namespace HLProject.Weapons
         [Server]
         void OnBulletTouch(HitBox target)
         {
-            target.GetCharacterScript().TakeDamage(bulletData.damage, bulletData.damageType);
+            target.TakeDamage(bulletData.damage, bulletData.damageType);
         }
 
         [Server]
@@ -292,8 +292,8 @@ namespace HLProject.Weapons
             for (int i = 0; i < size; i++)
             {
                 HitBox boxTarget = hits[i].transform.GetComponent<HitBox>();
-                if (boxTarget == null || boxTarget.GetCharacterScript().MyTransform == owningPlayer.MyTransform) continue;
-                boxTarget.GetCharacterScript().OnBulletFlyby(hits[i].point);
+                if (boxTarget == null || boxTarget.CharacterTransform == owningPlayer.MyTransform) continue;
+                boxTarget.OnBulletFlyby(hits[i].point);
             }
         }
 
@@ -567,9 +567,9 @@ namespace HLProject.Weapons
                 for (int i = 0; i < quantity; i++)
                 {
                     HitBox hitBoxToHit = raycastShootlastCollider[i].GetComponent<HitBox>();
-                    if (hitBoxToHit == null || hitBoxToHit.GetCharacterScript().MyTransform == owningPlayer.MyTransform) continue;
+                    if (hitBoxToHit == null || hitBoxToHit.CharacterTransform == owningPlayer.MyTransform) continue;
 
-                    hitBoxToHit.GetCharacterScript().TakeDamage(weaponData.meleeDamage, DamageType.Base);
+                    hitBoxToHit.TakeDamage(weaponData.meleeDamage, DamageType.Base);
                     meleeRoutine = null;
                     yield break;
                 }
@@ -596,9 +596,9 @@ namespace HLProject.Weapons
             for (int i = 0; i < quantity; i++)
             {
                 HitBox hitBoxToHit = raycastShootlastCollider[i].GetComponent<HitBox>();
-                if (hitBoxToHit == null || hitBoxToHit.GetCharacterScript().MyTransform == owningPlayer.MyTransform) continue;
+                if (hitBoxToHit == null || hitBoxToHit.CharacterTransform == owningPlayer.MyTransform) continue;
 
-                hitBoxToHit.GetCharacterScript().TakeDamage(bulletData.damage, DamageType.Bullet);
+                hitBoxToHit.TakeDamage(bulletData.damage, DamageType.Bullet);
                 yield break;
             }
         }

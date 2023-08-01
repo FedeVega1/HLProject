@@ -23,6 +23,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2856569349585932381}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -31,7 +32,6 @@ Transform:
   - {fileID: 3723062442505697510}
   - {fileID: 4167508967951794395}
   m_Father: {fileID: 5336186267242268680}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3470236661702184069
 GameObject:
@@ -58,13 +58,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3470236661702184069}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5336186267242268680}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &1691260210518874963
 BoxCollider:
@@ -124,13 +124,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3912780771923759840}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.296, y: -0.669, z: 0.435}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4167508967951794395}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7440038043530195110
 GameObject:
@@ -157,13 +157,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7440038043530195110}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2444599955857941622}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &3972824693908070559
 MeshFilter:
@@ -238,6 +238,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7612707791662685999}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.669, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -245,7 +246,6 @@ Transform:
   m_Children:
   - {fileID: 866803925164608400}
   m_Father: {fileID: 2444599955857941622}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &9207269670975588337
 GameObject:
@@ -276,6 +276,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9207269670975588337}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -284,7 +285,6 @@ Transform:
   - {fileID: 2444599955857941622}
   - {fileID: 2211842675165556038}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!143 &5088527183315509588
 CharacterController:
@@ -330,12 +330,14 @@ MonoBehaviour:
   maxArmor: 0
   maxBleedTime: 0
   bleedThreshold: 0
+  maxShockTime: 2
   isInvencible: 0
-  playerCamera: {fileID: 0}
+  playerCamera: {fileID: 7612707791662685999}
   playerCanvasPrefab: {fileID: 0}
   playerMesh: {fileID: 8642612960159134589}
   movementScript: {fileID: 3516450856430869840}
   woundedMaxTime: 10
+  effectsController: {fileID: 0}
 --- !u!114 &3516450856430869840
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -350,17 +352,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  maxWalkSpeed: 500
-  maxCrouchSpeed: 150
-  crouchAmmount: 0.7
-  maxRunSpeed: 800
-  jumpHeight: 1
-  horizontalSens: 100
-  verticalSens: 0
-  timeBetweenJumps: 0
-  maxScopeSpeed: 0
-  maxWeaponWeight: 0
-  cameraYLimits: {x: 0, y: 0}
+  maxWalkSpeed: 5
+  maxCrouchSpeed: 1
+  crouchAmmount: 1.125
+  maxRunSpeed: 8.5
+  jumpHeight: 3.5
+  horizontalSens: 470
+  verticalSens: 250
+  timeBetweenJumps: 0.2
+  maxScopeSpeed: 3
+  crouchingSpeed: 3
+  maxWeaponWeight: 16000
+  cameraYLimits: {x: -85, y: 85}
   playerVCam: {fileID: 0}
   fakeCameraPivot: {fileID: 4167508967951794395}
   freezePlayer: 0
