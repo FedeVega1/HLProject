@@ -45,6 +45,7 @@ namespace HLProject.Characters
         PlayerClientHands currentClassHands;
         PlayerAnimationController animController;
         Coroutine swapWeaponRoutine;
+        RaycastHit[] sphrCastHits;
 
         AsyncOperationHandle<GameObject> weaponPrefabHandle;
 
@@ -56,6 +57,7 @@ namespace HLProject.Characters
         {
             playerScript = GetComponent<Player>();
             animController = GetComponent<PlayerAnimationController>();
+            sphrCastHits = new RaycastHit[5];
         }
 
         void LoadAsset()
@@ -155,6 +157,28 @@ namespace HLProject.Characters
             int size = weaponsInventoryOnServer.Count;
             for (int i = 0; i < size; i++) weaponsInventoryOnServer[i].HideWeapons();
             RpcHideWeapons(connectionToClient);
+        }
+
+        [Server]
+        public Transform GetObjectFromPlayerAim()
+        {
+            Ray ray = new Ray(wWeaponPivot.position + wWeaponPivot.forward * 2, wWeaponPivot.forward);
+            int quantity = Physics.SphereCastNonAlloc(ray, .35f, sphrCastHits);
+
+            int closestIndex = -1;
+            float closestDistance = 99999;
+            for (int i = 0; i < quantity; i++)
+            {
+                float dist = Vector3.Distance(wWeaponPivot.position, sphrCastHits[i].point);
+                if (dist < closestDistance)
+                {
+                    closestDistance = dist;
+                    closestIndex = i;
+                }
+            }
+
+            if (closestIndex == -1) return null;
+            return sphrCastHits[closestIndex].transform;
         }
 
         #endregion

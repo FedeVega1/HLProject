@@ -39,6 +39,7 @@ namespace HLProject.Characters
         bool connectionCheck_WaitingForServer;
         int connectionCheck_Tries;
         double connectionCheck_Time;
+        DummyPlayer controlledDummy;
 
         #region Hooks
 
@@ -183,8 +184,9 @@ namespace HLProject.Characters
             if (Input.GetKeyDown(KeyCode.F1)) GameModeManager.INS.EndMatch();
             if (Input.GetKeyDown(KeyCode.F3)) TakeDamage(0, DamageType.Shock);
             if (Input.GetKeyDown(KeyCode.F4)) TakeDamage(0, DamageType.Explosion);
-            if (Input.GetKeyDown(KeyCode.F5)) TakeDamage(0, DamageType.Base);
+            if (Input.GetKeyDown(KeyCode.F5)) movementScript.spectatorMov = !movementScript.spectatorMov;
             if (Input.GetKeyDown(KeyCode.F6)) OnBulletFlyby(MyTransform.position + MyTransform.right * Random.Range(-1f, 1f));
+            if (Input.GetKeyDown(KeyCode.F7)) CmdRequestCommandToDummyPlayer();
 
             //if (!PlayerCanvasScript.IsScoreboardMenuOpen && !PlayerCanvasScript.IsScoreboardMenuOpen && !PlayerCanvasScript.IsScoreboardMenuOpen && Input.GetKeyDown(KeyCode.Escape))
             //{
@@ -327,7 +329,7 @@ namespace HLProject.Characters
         }
 
         [Server]
-        public void PlayerWoundedUpdate()
+        protected virtual void PlayerWoundedUpdate()
         {
             if (isDead || isInvencible || !isWounded || NetworkTime.time < woundedTime) return;
             isWounded = false;
@@ -337,8 +339,11 @@ namespace HLProject.Characters
             MyTransform.position = specPoint.position;
             MyTransform.rotation = specPoint.rotation;
 
-            RpcWoundedCanGiveUp(connectionToClient);
-            RpcCharacterDied();
+            if (connectionToClient != null)
+            {
+                RpcWoundedCanGiveUp(connectionToClient);
+                RpcCharacterDied();
+            }
         }
 
         [Server]
@@ -380,7 +385,7 @@ namespace HLProject.Characters
 
             deaths++;
             isWounded = true;
-            RpcShowWoundedHUD(connectionToClient, woundedTime, timeToRespawn);
+            if (connectionToClient != null) RpcShowWoundedHUD(connectionToClient, woundedTime, timeToRespawn);
             movementScript.freezePlayer = true;
             OnPlayerDead?.Invoke();
             //movementScript.RpcToggleFreezePlayer(connectionToClient, true);
@@ -451,6 +456,20 @@ namespace HLProject.Characters
         {
             RpcSendConnectionOkToPlayer(playerConnection);
         }*/
+
+        [Command] 
+        void CmdRequestCommandToDummyPlayer()
+        {
+            if (controlledDummy != null) return;
+
+            Transform targetObject = inventory.GetObjectFromPlayerAim();
+            if (targetObject == null) return;
+            HitBox dummyHitBox = targetObject.GetComponent<HitBox>();
+            if (dummyHitBox == null) return;
+
+            controlledDummy = dummyHitBox.GetCharacterComponent() as DummyPlayer;
+            controlledDummy.RpcOnPlayerControl(connectionToClient);
+        }
 
         [Command]
         void CmdRequestPlayerInfo()
@@ -681,7 +700,7 @@ namespace HLProject.Characters
                 PlayerCanvasScript.ToggleWeaponInfo(true);
                 movementScript.FreezeInputs = false;
                 inventory.DisablePlayerInputs = false;
-                //playerMesh.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+                playerMesh.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
                 //inventory.SetupWeaponInventory(classData.classWeapons, 0);
             }
 
@@ -709,5 +728,4 @@ namespace HLProject.Characters
 
         #endregion
     }
-
 }

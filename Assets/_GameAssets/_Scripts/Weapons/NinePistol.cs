@@ -86,6 +86,8 @@ namespace HLProject.Weapons
             if (!isDrawn) return;
             base.Update();
 
+            if (isServer) return;
+
             if (lastWalkCheck && Time.time >= movementSoundTime)
             {
                 //int random = Random.Range(0, 101);

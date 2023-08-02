@@ -953,12 +953,12 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.01
+  near clip plane: 0.2
   far clip plane: 1000
   field of view: 90
   orthographic: 0
   orthographic size: 5
-  m_Depth: 0
+  m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 64
@@ -968,7 +968,7 @@ Camera:
   m_TargetEye: 3
   m_HDR: 0
   m_AllowMSAA: 0
-  m_AllowDynamicResolution: 1
+  m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
@@ -3202,7 +3202,7 @@ GameObject:
   - component: {fileID: 1804207198}
   - component: {fileID: 1804207197}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Custom Pass Volume
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3224,17 +3224,17 @@ MonoBehaviour:
   fadeRadius: 0
   priority: 0
   customPasses:
-  - rid: 5006368526332592149
+  - rid: 7344414475559370752
   injectionPoint: 1
   m_TargetCamera: {fileID: 0}
   useTargetCamera: 0
   references:
     version: 2
     RefIds:
-    - rid: 5006368526332592149
-      type: {class: FPSForeground, ns: , asm: Assembly-CSharp}
+    - rid: 7344414475559370752
+      type: {class: FPSForeground, ns: , asm: HLAssembly}
       data:
-        m_Name: FPS Foreground Custom Pass
+        m_Name: Virtual Weapon Foreground
         enabled: 1
         targetColorBuffer: 0
         targetDepthBuffer: 0
@@ -3253,12 +3253,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1804207196}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1869416524}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1822703222
 PrefabInstance:
@@ -3396,7 +3396,7 @@ MonoBehaviour:
   clientCamera: {fileID: 1896322421}
   scoreBoardUpdateTime: 2
   dummyPlayerPrefab: {fileID: 9207269670975588337, guid: e36ad72cf8383934585fcdd72b0cca96, type: 3}
-  clientVCamera: {fileID: 214959680}
+  clientPassVolume: {fileID: 1804207197}
   timeToChangeLevel: 15
 --- !u!4 &1869416524
 Transform:
@@ -3410,7 +3410,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1804207198}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1869416525
@@ -4466,4 +4467,3 @@ SceneRoots:
   - {fileID: 1946785879}
   - {fileID: 6044552126579899525}
   - {fileID: 2027028245}
-  - {fileID: 1804207198}

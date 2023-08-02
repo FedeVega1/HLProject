@@ -12,8 +12,8 @@ namespace HLProject.Characters
     {
         [System.Flags] enum InputFlag { Empty = 0b0, Crouch = 0b1, Jump = 0b10, Sprint = 0b100 }
 
-        [SerializeField] float maxWalkSpeed, maxCrouchSpeed, crouchAmmount, maxRunSpeed, jumpHeight, horizontalSens, verticalSens, timeBetweenJumps, maxScopeSpeed, crouchingSpeed;
-        [SerializeField] float maxWeaponWeight;
+        [SerializeField] float maxWalkSpeed, maxCrouchSpeed, crouchAmmount, maxRunSpeed, jumpHeight, horizontalSens, verticalSens, timeBetweenJumps;
+        [SerializeField] float maxWeaponWeight, maxScopeSpeed, crouchingSpeed, spectatorSpeedMult = 1;
         [SerializeField] Vector2 cameraYLimits;
         [SerializeField] CinemachineVirtualCamera playerVCam;
         [SerializeField] Transform fakeCameraPivot;
@@ -176,6 +176,12 @@ namespace HLProject.Characters
         [Command]
         void CmdSendPlayerInputs(Vector2 movAxis, Vector2 rotAxis, InputFlag _inputFlags)
         {
+            ProcessPlayerInputs(movAxis, rotAxis, _inputFlags);
+        }
+
+        [Server]
+        void ProcessPlayerInputs(Vector2 movAxis, Vector2 rotAxis, InputFlag _inputFlags)
+        {
             movAxis.x = Mathf.Clamp(movAxis.x, -1, 1);
             movAxis.y = Mathf.Clamp(movAxis.y, -1, 1);
             rotAxis.x = Mathf.Clamp(rotAxis.x, -1, 1);
@@ -212,13 +218,13 @@ namespace HLProject.Characters
             if (CharCtrl.enabled) CharCtrl.Move(CalculateSpeedByWeight(playerSpeed) * Time.deltaTime * velocity);
         }
 
-        // TODO: Fix spectator camera movement
         void NoclipMovement()
         {
-            if (CheckInput(inputFlags, InputFlag.Sprint)) playerSpeed = maxRunSpeed * Time.deltaTime;
-            else playerSpeed = maxWalkSpeed;
+            if (CheckInput(inputFlags, InputFlag.Sprint)) playerSpeed = maxRunSpeed * spectatorSpeedMult;
+            else playerSpeed = maxWalkSpeed * spectatorSpeedMult;
 
-            velocity = new Vector3(playerVCam.transform.forward.x * playerMovInput.x, playerVCam.transform.forward.y * velocity.y, playerVCam.transform.forward.z * playerMovInput.y);
+            velocity += fakeCameraPivot.forward * playerMovInput.y;
+            velocity += fakeCameraPivot.right * playerMovInput.x;
             MyTransform.position += playerSpeed * Time.deltaTime * velocity;
         }
 
@@ -226,7 +232,7 @@ namespace HLProject.Characters
         {
             if (spectatorMov)
             {
-                velocity.y = CheckInput(inputFlags, InputFlag.Jump) ? 1 : velocity.y;
+                velocity.y = CheckInput(inputFlags, InputFlag.Jump) ? spectatorSpeedMult : velocity.y;
                 return;
             }
 
@@ -257,7 +263,8 @@ namespace HLProject.Characters
         {
             if (spectatorMov)
             {
-                velocity.y = CheckInput(inputFlags, InputFlag.Crouch) ? -1 : velocity.y;
+                velocity = Vector3.zero;
+                if (CheckInput(inputFlags, InputFlag.Crouch)) velocity.y = -spectatorSpeedMult;
                 return;
             }
 

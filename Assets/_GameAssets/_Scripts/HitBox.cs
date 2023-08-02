@@ -22,8 +22,6 @@ namespace HLProject.Characters
         public Transform CharacterTransform => characterScript.MyTransform;
         public bool CharacterIsDead => characterScript.IsDead;
 
-        //public Character GetCharacterScript() => characterScript;
-
         public void TakeDamage(float ammount, DamageType damageType = DamageType.Base)
         {
             if (CharacterIsDead) return;
@@ -31,5 +29,7 @@ namespace HLProject.Characters
         }
 
         public void OnBulletFlyby(Vector3 origin) => characterScript.OnBulletFlyby(origin);
+
+        public Character GetCharacterComponent() => characterScript;
     }
 }

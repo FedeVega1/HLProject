@@ -197,7 +197,7 @@ namespace HLProject.Characters
         {
             float dist = Vector3.Distance(MyTransform.position, origin);
             ApplySuppression(.2f * (dist / 1));
-            RpcOnBulletFlyBy(connectionToClient, origin);
+            if (connectionToClient != null) RpcOnBulletFlyBy(connectionToClient, origin);
             //Debug.LogFormat("Dist: {0} - Sup: {1}", dist, .1f * (dist / 1));
         }
 

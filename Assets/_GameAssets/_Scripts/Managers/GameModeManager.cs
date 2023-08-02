@@ -8,6 +8,8 @@ using UnityEngine.AddressableAssets;
 using HLProject.Scriptables;
 using HLProject.UI.HUD;
 using HLProject.Characters;
+using UnityEngine.Rendering.HighDefinition;
+using System.Net;
 
 namespace HLProject.Managers
 {
@@ -29,7 +31,7 @@ namespace HLProject.Managers
         [SerializeField] Transform clientCamera;
         [SerializeField] float scoreBoardUpdateTime = 2;
         [SerializeField] GameObject dummyPlayerPrefab;
-        [SerializeField] Camera clientVCamera;
+        [SerializeField] CustomPassVolume clientPassVolume;
 
         public TeamManager TeamManagerInstance => teamManager;
 
@@ -44,6 +46,7 @@ namespace HLProject.Managers
         int currentDisconnPlayerIndex, currentConnPlayerIndex;
         AsyncOperationHandle<IList<TeamClassData>> classDataHandle;
         Player localPlayer;
+        FPSForeground vWeaponForegroundPass;
 
         public System.Action<int> OnMatchEnded;
 
@@ -51,6 +54,16 @@ namespace HLProject.Managers
         {
             if (INS == null) INS = this;
             else Destroy(gameObject);
+
+            int size = clientPassVolume.customPasses.Count;
+            for (int i = 0; i < size; i++)
+            {
+                if (clientPassVolume.customPasses[i] is FPSForeground)
+                {
+                    vWeaponForegroundPass = clientPassVolume.customPasses[i] as FPSForeground;
+                    continue;
+                }
+            }
         }
 
         void Start()
@@ -450,6 +463,6 @@ namespace HLProject.Managers
         }
 
         [Client]
-        public void SetClientVCameraFOV(float fov) => clientVCamera.fieldOfView = Mathf.Clamp(fov, 40, 120);
+        public void SetClientVCameraFOV(float fov) => vWeaponForegroundPass.fov = Mathf.Clamp(fov, 40, 120);
     }
 }
