@@ -20,6 +20,8 @@ namespace HLProject.Characters
             KeyCode.Alpha5, KeyCode.Alpha6
         };
 
+        public enum DummyCommands { CycleWeapon, FirstShoot, Shoot, ReleaseShoot, ScopeIn, ScopeOut, Reload }
+
         [SerializeField] Transform wWeaponPivot;
         [SerializeField] PlayerClientHands[] clientHands;
 
@@ -112,6 +114,60 @@ namespace HLProject.Characters
         #region Server
 
         [Server]
+        public void ProcessCommand(DummyCommands command)
+        {
+            switch (command)
+            {
+                case DummyCommands.CycleWeapon:
+                    currentCyclerType++;
+                    if (currentCyclerType > WeaponType.BandAids) currentCyclerType = WeaponType.Melee;
+
+                    if (currentCyclerType == WeaponType.AltMode)
+                    {
+                        ProcessWeaponModeChange();
+                        break;
+                    }
+
+                    int size = weaponsInventoryOnServer.Count, weaponIndex = -1;
+                    for (int i = 0; i < size; i++)
+                    {
+                        if (weaponsInventoryOnServer[i].WType == currentCyclerType)
+                        {
+                            weaponIndex = i;
+                            break;
+                        }
+                    }
+
+                    ProcessWeaponChange(weaponIndex);
+                    break;
+
+                case DummyCommands.FirstShoot:
+                    weaponsInventoryOnServer[currentWeaponIndex].ForceFire(true);
+                    break;
+
+                case DummyCommands.Shoot:
+                    weaponsInventoryOnServer[currentWeaponIndex].ForceFire(false);
+                    break;
+
+                case DummyCommands.ReleaseShoot:
+                    weaponsInventoryOnServer[currentWeaponIndex].ForceReleaseFire();
+                    break;
+
+                case DummyCommands.ScopeIn:
+                    weaponsInventoryOnServer[currentWeaponIndex].ForceScopeIn();
+                    break;
+
+                case DummyCommands.ScopeOut:
+                    weaponsInventoryOnServer[currentWeaponIndex].ForceScopeOut();
+                    break;
+
+                case DummyCommands.Reload:
+                    weaponsInventoryOnServer[currentWeaponIndex].ForceReload();
+                    break;
+            }
+        }
+
+        [Server]
         public void SetupWeaponInventory(ClientHandType handType, WeaponData[] weaponsToLoad, int defaultWeaponIndex)
         {
             weaponsInventoryOnServer.Clear();
@@ -135,6 +191,7 @@ namespace HLProject.Characters
             playerScript.UpdateCurrentWeaponWeight(weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponWeight);
             weaponsInventoryOnServer[currentWeaponIndex].RpcToggleClientWeapon(true);
             animController.OnPlayerChangesWeapons(weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponName);
+            currentCyclerType = weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponType;
 
             Debug.LogFormat("Server: Default Weapon {0} of index {1}", weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponName, currentWeaponIndex);
             print("Finished server PlayerInventory Initialization");
@@ -162,7 +219,7 @@ namespace HLProject.Characters
         [Server]
         public Transform GetObjectFromPlayerAim()
         {
-            Ray ray = new Ray(wWeaponPivot.position + wWeaponPivot.forward * 2, wWeaponPivot.forward);
+            Ray ray = new Ray(wWeaponPivot.position + wWeaponPivot.forward * 1.5f, wWeaponPivot.forward);
             int quantity = Physics.SphereCastNonAlloc(ray, .35f, sphrCastHits);
 
             int closestIndex = -1;
@@ -180,6 +237,69 @@ namespace HLProject.Characters
             if (closestIndex == -1) return null;
             return sphrCastHits[closestIndex].transform;
         }
+
+        [Server]
+        public Vector3 GetPositionFromPlayerAim()
+        {
+            Ray ray = new Ray(wWeaponPivot.position + wWeaponPivot.forward * 1.5f, wWeaponPivot.forward);
+            if (Physics.Raycast(ray, out RaycastHit hit)) return hit.point;
+            return Vector3.positiveInfinity;
+        }
+
+        [Server]
+        void ProcessWeaponModeChange()
+        {
+            isSwappingWeapons = true;
+
+            int size = weaponsInventoryOnServer.Count, weaponIndex = -1;
+            for (int i = 0; i < size; i++)
+            {
+                if (weaponsInventoryOnServer[i].WType == WeaponType.Primary || weaponsInventoryOnServer[i].LastWType == WeaponType.Primary)
+                {
+                    weaponIndex = i;
+                    break;
+                }
+            }
+
+            if (weaponIndex == -1) return;
+            bool changeWeapon = weaponIndex != currentWeaponIndex;
+            int oldIndex = currentWeaponIndex;
+            if (changeWeapon)
+            {
+                weaponsInventoryOnServer[oldIndex].RpcToggleClientWeapon(false);
+                weaponsInventoryOnServer[oldIndex].OnWeaponSwitch();
+                weaponsInventoryOnServer[weaponIndex].RpcToggleClientWeapon(true);
+                currentWeaponIndex = weaponIndex;
+                playerScript.UpdateCurrentWeaponWeight(weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponWeight);
+            }
+
+            weaponsInventoryOnServer[weaponIndex].ToggleAltMode();
+            animController.OnPlayerChangesWeapons(weaponsInventoryOnServer[weaponIndex].GetWeaponData().weaponName);
+
+            if (connectionToClient != null) RpcChangeWeaponMode(connectionToClient, changeWeapon, weaponIndex, oldIndex);
+            isSwappingWeapons = false;
+        }
+
+        [Server]
+        void ProcessWeaponChange(int weaponIndex)
+        {
+            if (weaponIndex == currentWeaponIndex) return;
+
+            isSwappingWeapons = true;
+            weaponsInventoryOnServer[currentWeaponIndex].RpcToggleClientWeapon(false);
+            weaponsInventoryOnServer[currentWeaponIndex].OnWeaponSwitch();
+            weaponsInventoryOnServer[weaponIndex].RpcToggleClientWeapon(true);
+
+            if (connectionToClient != null) RpcChangeWeapon(connectionToClient, weaponIndex, currentWeaponIndex);
+            currentWeaponIndex = weaponIndex;
+            animController.OnPlayerChangesWeapons(weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponName);
+            isSwappingWeapons = false;
+
+            playerScript.UpdateCurrentWeaponWeight(weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponWeight);
+        }
+
+        [Server]
+        public NetWeapon GetCurrentWeapon() => weaponsInventoryOnServer[currentWeaponIndex];
 
         #endregion
 
@@ -313,56 +433,10 @@ namespace HLProject.Characters
         #region Commands
 
         [Command]
-        public void CmdRequestWeaponModeChange()
-        {
-            isSwappingWeapons = true;
-
-            int size = weaponsInventoryOnServer.Count, weaponIndex = -1;
-            for (int i = 0; i < size; i++)
-            {
-                if (weaponsInventoryOnServer[i].WType == WeaponType.Primary || weaponsInventoryOnServer[i].LastWType == WeaponType.Primary)
-                {
-                    weaponIndex = i;
-                    break;
-                }
-            }
-
-            if (weaponIndex == -1) return;
-            bool changeWeapon = weaponIndex != currentWeaponIndex;
-            int oldIndex = currentWeaponIndex;
-            if (changeWeapon)
-            {
-                weaponsInventoryOnServer[oldIndex].RpcToggleClientWeapon(false);
-                weaponsInventoryOnServer[oldIndex].OnWeaponSwitch();
-                weaponsInventoryOnServer[weaponIndex].RpcToggleClientWeapon(true);
-                currentWeaponIndex = weaponIndex;
-                playerScript.UpdateCurrentWeaponWeight(weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponWeight);
-            }
-
-            weaponsInventoryOnServer[weaponIndex].ToggleAltMode();
-            animController.OnPlayerChangesWeapons(weaponsInventoryOnServer[weaponIndex].GetWeaponData().weaponName);
-
-            RpcChangeWeaponMode(connectionToClient, changeWeapon, weaponIndex, oldIndex);
-            isSwappingWeapons = false;
-        }
+        public void CmdRequestWeaponModeChange() => ProcessWeaponModeChange();
 
         [Command]
-        public void CmdRequestWeaponChange(int weaponIndex)
-        {
-            if (weaponIndex == currentWeaponIndex) return;
-
-            isSwappingWeapons = true;
-            weaponsInventoryOnServer[currentWeaponIndex].RpcToggleClientWeapon(false);
-            weaponsInventoryOnServer[currentWeaponIndex].OnWeaponSwitch();
-            weaponsInventoryOnServer[weaponIndex].RpcToggleClientWeapon(true);
-
-            RpcChangeWeapon(connectionToClient, weaponIndex, currentWeaponIndex);
-            currentWeaponIndex = weaponIndex;
-            animController.OnPlayerChangesWeapons(weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponName);
-            isSwappingWeapons = false;
-
-            playerScript.UpdateCurrentWeaponWeight(weaponsInventoryOnServer[currentWeaponIndex].GetWeaponData().weaponWeight);
-        }
+        public void CmdRequestWeaponChange(int weaponIndex) => ProcessWeaponChange(weaponIndex);
 
         [Command(requiresAuthority = false)]
         void CmdRequestWeaponInventory()

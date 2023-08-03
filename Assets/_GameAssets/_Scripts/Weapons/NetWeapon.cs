@@ -21,6 +21,10 @@ namespace HLProject.Weapons
         [SyncVar] bool serverInitialized;
 
         public bool IsDroppingWeapons { get; private set; }
+        public double TimeForNextShoot => fireTime;
+        public int WeaponAmmo => bulletsInMag;
+        public int WeaponMags => mags;
+        public bool IsReloading => isReloading;
 
         bool IsMelee => weaponData.weaponType == WeaponType.Melee;
 
@@ -355,6 +359,18 @@ namespace HLProject.Weapons
             IsDroppingWeapons = true;
             RpcDropWeapon();
         }
+
+        [Server]
+        public void ForceFire(bool firstFire)
+        {
+            if (firstFire) holdingFireStartTime = NetworkTime.time;
+            Fire();
+        }
+
+        [Server] public void ForceReleaseFire() => owningPlayer.ResetRecoil();
+        [Server] public void ForceScopeIn() => ScopeIn();
+        [Server] public void ForceScopeOut() => ScopeOut();
+        [Server] public void ForceReload() => Reload(false);
 
         [Server]
         public void HideWeapons()

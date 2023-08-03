@@ -70,7 +70,7 @@ namespace HLProject
                 playersInCP.Add(playerScript);
                 CheckPlayerCount();
 
-                playerScript.RpcOnControlPoint(playerScript.connectionToClient, currentTeam, captureProgress, defyingTeam);
+                if (playerScript.connectionToClient != null) playerScript.RpcOnControlPoint(playerScript.connectionToClient, currentTeam, captureProgress, defyingTeam);
             }
             else
             {
@@ -93,7 +93,8 @@ namespace HLProject
             {
                 if (playersInCP[i].gameObject == other.gameObject)
                 {
-                    playersInCP[i].RpcExitControlPoint(playersInCP[i].connectionToClient);
+                    if (playersInCP[i].connectionToClient != null) 
+                        playersInCP[i].RpcExitControlPoint(playersInCP[i].connectionToClient);
                     playersInCP.RemoveAt(i);
                     break;
                 }
@@ -153,7 +154,10 @@ namespace HLProject
             {
                 int size = playersInCP.Count;
                 for (int i = 0; i < size; i++)
-                    playersInCP[i].RpcUpdateCPProgress(playersInCP[i].connectionToClient, captureProgress);
+                {
+                    if (playersInCP[i].connectionToClient != null)
+                        playersInCP[i].RpcUpdateCPProgress(playersInCP[i].connectionToClient, captureProgress);
+                }
             }
         }
 
@@ -177,7 +181,10 @@ namespace HLProject
 
             int size = playersInCP.Count;
             for (int i = 0; i < size; i++)
-                playersInCP[i].RpcOnControlPoint(playersInCP[i].connectionToClient, currentTeam, captureProgress, defyingTeam);
+            {
+                if (playersInCP[i].connectionToClient != null)
+                    playersInCP[i].RpcOnControlPoint(playersInCP[i].connectionToClient, currentTeam, captureProgress, defyingTeam);
+            }
         }
 
         public void SetPointOrder(int newOrder)

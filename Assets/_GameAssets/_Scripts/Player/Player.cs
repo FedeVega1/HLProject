@@ -14,7 +14,8 @@ namespace HLProject.Characters
     {
         [Header("Player")]
 
-        [SerializeField] GameObject playerCamera, playerCanvasPrefab;
+        [SerializeField] GameObject playerCamera;
+        [SerializeField] GameObject playerCanvasPrefab;
         [SerializeField] protected SkinnedMeshRenderer playerMesh;
         [SerializeField] protected PlayerMovement movementScript;
         [SerializeField] protected float woundedMaxTime;
@@ -187,6 +188,9 @@ namespace HLProject.Characters
             if (Input.GetKeyDown(KeyCode.F5)) movementScript.spectatorMov = !movementScript.spectatorMov;
             if (Input.GetKeyDown(KeyCode.F6)) OnBulletFlyby(MyTransform.position + MyTransform.right * Random.Range(-1f, 1f));
             if (Input.GetKeyDown(KeyCode.F7)) CmdRequestCommandToDummyPlayer();
+            if (Input.GetKeyDown(KeyCode.F8)) CmdRequestMovementOnCommandedDummy();
+            if (Input.GetKeyDown(KeyCode.F9)) CmdRequestWeaponCycleDummy();
+            if (Input.GetKeyDown(KeyCode.F10)) CmdRequestWeaponShootCycleDummy();
 
             //if (!PlayerCanvasScript.IsScoreboardMenuOpen && !PlayerCanvasScript.IsScoreboardMenuOpen && !PlayerCanvasScript.IsScoreboardMenuOpen && Input.GetKeyDown(KeyCode.Escape))
             //{
@@ -361,7 +365,7 @@ namespace HLProject.Characters
         }
 
         [Server]
-        public void SpawnPlayer(Vector3 spawnPosition, Quaternion spawnRotation, float spawnTime)
+        public virtual void SpawnPlayer(Vector3 spawnPosition, Quaternion spawnRotation, float spawnTime)
         {
             //print($"NewPos: {MyTransform.position}");
             InitCharacter();
@@ -460,15 +464,47 @@ namespace HLProject.Characters
         [Command] 
         void CmdRequestCommandToDummyPlayer()
         {
-            if (controlledDummy != null) return;
-
             Transform targetObject = inventory.GetObjectFromPlayerAim();
             if (targetObject == null) return;
+
+            if (controlledDummy != null)
+            {
+                if (targetObject != controlledDummy.MyTransform)
+                {
+                    controlledDummy.RpcOnPlayerLostControl(connectionToClient);
+                    controlledDummy = null;
+                }
+                else return;
+            }
+
             HitBox dummyHitBox = targetObject.GetComponent<HitBox>();
             if (dummyHitBox == null) return;
 
             controlledDummy = dummyHitBox.GetCharacterComponent() as DummyPlayer;
             controlledDummy.RpcOnPlayerControl(connectionToClient);
+        }
+
+        [Command]
+        void CmdRequestMovementOnCommandedDummy()
+        {
+            if (controlledDummy == null) return;
+            Vector3 targetPos = inventory.GetPositionFromPlayerAim();
+            if (targetPos == Vector3.positiveInfinity || targetPos == Vector3.negativeInfinity) return;
+            controlledDummy.CommandMoveTo(targetPos);
+        }
+
+        [Command]
+        void CmdRequestWeaponCycleDummy()
+        {
+            if (controlledDummy == null) return;
+            controlledDummy.CommandToCycleWeapon();
+        }
+
+        [Command]
+        void CmdRequestWeaponShootCycleDummy()
+        {
+            if (controlledDummy == null) return;
+            controlledDummy.CommandToShoot();
         }
 
         [Command]

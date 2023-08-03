@@ -10,7 +10,7 @@ namespace HLProject.Characters
     [RequireComponent(typeof(CharacterController))]
     public class PlayerMovement : CachedNetTransform
     {
-        [System.Flags] enum InputFlag { Empty = 0b0, Crouch = 0b1, Jump = 0b10, Sprint = 0b100 }
+        [System.Flags] public enum InputFlag { Empty = 0b0, Crouch = 0b1, Jump = 0b10, Sprint = 0b100 }
 
         [SerializeField] float maxWalkSpeed, maxCrouchSpeed, crouchAmmount, maxRunSpeed, jumpHeight, horizontalSens, verticalSens, timeBetweenJumps;
         [SerializeField] float maxWeaponWeight, maxScopeSpeed, crouchingSpeed, spectatorSpeedMult = 1;
@@ -180,7 +180,7 @@ namespace HLProject.Characters
         }
 
         [Server]
-        void ProcessPlayerInputs(Vector2 movAxis, Vector2 rotAxis, InputFlag _inputFlags)
+        public void ProcessPlayerInputs(Vector2 movAxis, Vector2 rotAxis, InputFlag _inputFlags)
         {
             movAxis.x = Mathf.Clamp(movAxis.x, -1, 1);
             movAxis.y = Mathf.Clamp(movAxis.y, -1, 1);
