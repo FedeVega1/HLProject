@@ -20,8 +20,10 @@ namespace HLProject.UI
         [SerializeField] RectTransform errorPanel;
         [SerializeField] TMP_Text lblPlay;
         [SerializeField] Button btnPlay;
+        [SerializeField] UIConsole uiConsole;
 
         public bool IsMainMenuEnabled { get; private set; }
+        public UIConsole MainUIConsole => uiConsole;
 
         bool onMatch;
         UIState currentState;
@@ -69,8 +71,7 @@ namespace HLProject.UI
         public void ToggleConnectPanel(bool toggle)
         {
             connectToServerPanel.localScale = toggle ? Vector3.one : Vector3.zero;
-            rayCastBlocker.alpha = toggle ? 1 : 0;
-            rayCastBlocker.blocksRaycasts = rayCastBlocker.interactable = toggle;
+            ToggleRayCastBlocker(toggle);
         }
 
         public void QuitGame() => GameManager.INS.QuitGame();
@@ -84,16 +85,14 @@ namespace HLProject.UI
         public void ToggleErrorPanel(bool toggle)
         {
             errorPanel.localScale = toggle ? Vector3.one : Vector3.zero;
-            rayCastBlocker.alpha = toggle ? 1 : 0;
-            rayCastBlocker.blocksRaycasts = rayCastBlocker.interactable = toggle;
+            ToggleRayCastBlocker(toggle);
         }
 
         public void ToggleOptionsPanel(bool toggle)
         {
             optionsMenu.TogglePanel(toggle);
             ToggleConnectPanel(false);
-            rayCastBlocker.alpha = toggle ? 1 : 0;
-            rayCastBlocker.blocksRaycasts = rayCastBlocker.interactable = toggle;
+
         }
 
         public void ToggleMainMenu(bool toggle)
@@ -126,6 +125,18 @@ namespace HLProject.UI
 
             onMatchBackground.alpha = 0;
             onMatchBackground.interactable = onMatchBackground.blocksRaycasts = false;
+        }
+
+        public void ToggleDebugConsole()
+        {
+            ToggleRayCastBlocker(!uiConsole.IsEnabled);
+            uiConsole.ToggleConsole();
+        }
+
+        void ToggleRayCastBlocker(bool toggle)
+        {
+            rayCastBlocker.alpha = toggle ? 1 : 0;
+            rayCastBlocker.blocksRaycasts = rayCastBlocker.interactable = toggle;
         }
     }
 }

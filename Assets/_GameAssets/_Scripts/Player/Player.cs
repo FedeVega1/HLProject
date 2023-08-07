@@ -736,7 +736,7 @@ namespace HLProject.Characters
                 PlayerCanvasScript.ToggleWeaponInfo(true);
                 movementScript.FreezeInputs = false;
                 inventory.DisablePlayerInputs = false;
-                playerMesh.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+                //playerMesh.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
                 //inventory.SetupWeaponInventory(classData.classWeapons, 0);
             }
 
