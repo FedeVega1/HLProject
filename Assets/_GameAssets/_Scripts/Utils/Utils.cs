@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEngine.EventSystems;
 using Mirror;
 using HLProject.Characters;
+using System.Drawing.Printing;
 
 namespace HLProject
 {
@@ -105,6 +106,12 @@ namespace HLProject
         public static Vector3 OnlyXY(this Vector3 main) => new Vector3(main.x, main.y, 0);
         public static Vector3 OnlyYZ(this Vector3 main) => new Vector3(0, main.y, main.z);
         public static Vector3 OnlyY(this Vector3 main) => Vector3.up * main.y;
+
+        public static bool CompareXYZ(this Vector3 main, Vector3 other, float dist)
+        {
+            Vector3 diff = other - main;
+            return diff.x < dist && diff.x > -dist && diff.y < dist && diff.y > -dist && diff.z < dist && diff.z > -dist;
+        }
     }
 
     public class PlayerTimer

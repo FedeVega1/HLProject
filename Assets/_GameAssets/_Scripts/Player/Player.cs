@@ -20,6 +20,7 @@ namespace HLProject.Characters
         [SerializeField] protected PlayerMovement movementScript;
         [SerializeField] protected float woundedMaxTime;
         [SerializeField] ClientEffectsController effectsController;
+        [SerializeField] ClientPlayerModel playerModel;
 
         [SyncVar(hook = nameof(OnTeamChange))] protected int playerTeam;
         [SyncVar] protected bool isWounded, firstSpawn;
@@ -30,6 +31,7 @@ namespace HLProject.Characters
         public float BonusWoundTime { get; set; }
         public PlayerCanvas PlayerCanvasScript { get; private set; }
         public PlayerAnimationController AnimController { get; private set; }
+        public ClientPlayerModel PlayerModel => playerModel;
 
         protected bool onControlPoint;
         protected int currentClassIndex, kills, deaths, revives, score;

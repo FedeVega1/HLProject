@@ -7,6 +7,14 @@ namespace HLProject.Characters
 {
     public class PlayerAnimationController : NetworkBehaviour
     {
+        [System.Serializable]
+        struct AnimArmOffset
+        {
+            public string animation;
+            public Vector3 offset;
+            public float transitionSpeed;
+        }
+
         static readonly Dictionary<string, int> WeaponMapping = new Dictionary<string, int>()
         {
             { "Crowbar", 0 }, { "Stunstick", 0 },
@@ -27,10 +35,13 @@ namespace HLProject.Characters
             { "Grenade", .2f }, { "TEST GRANADE", .2f },
         };
 
+        [SerializeField] AnimArmOffset[] armOffsets;
+
         NetworkAnimator playerAnim;
         Player owningPlayer;
 
         float movThreshold, runThreshold, crouchThreshold;
+        string currentAnim, lastAnim;
         Vector2 lerpedPlayerDir, playerDirTarget;
 
         public override void OnStartServer()
@@ -53,6 +64,20 @@ namespace HLProject.Characters
             lerpedPlayerDir = Vector2.Lerp(lerpedPlayerDir, playerDirTarget, Time.deltaTime * 4);
             playerAnim.animator.SetFloat("XMovement", lerpedPlayerDir.x);
             playerAnim.animator.SetFloat("ZMovement", lerpedPlayerDir.y);
+
+            if (movThreshold != 0) currentAnim = "Walk";
+            else currentAnim = "Idle";
+            if (runThreshold != 0) currentAnim = "Run";
+            if (crouchThreshold != 0 && movThreshold != 0) currentAnim = "CrouchWalk";
+            else if (crouchThreshold != 0) currentAnim = "Crouch";
+
+            if (currentAnim != lastAnim)
+            {
+                var data = GetOffset();
+                owningPlayer.PlayerModel.SetMultiAimOffset(data.Item1, data.Item2);
+            }
+
+            lastAnim = currentAnim;
         }
 
         [Server]
@@ -61,6 +86,7 @@ namespace HLProject.Characters
             playerAnim.animator.SetInteger("CurrentGun", WeaponMapping[newWeapon]);
             playerAnim.animator.SetFloat("CurrentGunF", WeaponMappingF[newWeapon]);
             playerAnim.SetTrigger("ChangeWeapon");
+            currentAnim = "Change Weapon";
         }
 
         [Server]
@@ -68,18 +94,21 @@ namespace HLProject.Characters
         {
             playerAnim.animator.SetBool("IsCrouched", toggle);
             playerAnim.SetTrigger("Idle");
+            currentAnim = "Idle";
         }
 
         [Server]
         public void OnPlayerJumps()
         {
             playerAnim.SetTrigger("Jump");
+            currentAnim = "Jump";
         }
 
         [Server]
         public void OnPlayerLands()
         {
             playerAnim.SetTrigger("Landed");
+            currentAnim = "Land";
         }
 
         [Server]
@@ -87,27 +116,46 @@ namespace HLProject.Characters
         {
             playerAnim.SetTrigger("Shoot");
             playerAnim.animator.SetBool("IsAltFire", onAltMode);
+            currentAnim = "Shoot";
         }
 
         [Server]
         public void OnPlayerReloads()
         {
             playerAnim.SetTrigger("Reload");
+            currentAnim = "Reload";
         }
 
         [Server]
         public void OnPlayerAims()
         {
             playerAnim.SetTrigger("Aim");
+            currentAnim = "Aim";
         }
 
         [Server]
-        public void ReturnToIdle() => playerAnim.SetTrigger("Idle");
+        public void ReturnToIdle()
+        {
+            playerAnim.SetTrigger("Idle");
+            currentAnim = "Idle";
+        }
 
         [Server]
         public void SetPlayerDirectionMovement(Vector2 dir)
         {
             playerDirTarget = dir;
+        }
+
+        (Vector3, float) GetOffset()
+        {
+            int size = armOffsets.Length;
+            for (int i = 0; i < size; i++)
+            {
+                if (currentAnim == armOffsets[i].animation)
+                    return (armOffsets[i].offset, armOffsets[i].transitionSpeed);
+            }
+
+            return (Vector3.positiveInfinity, 0);
         }
     }
 }
