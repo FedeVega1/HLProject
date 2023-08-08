@@ -53,6 +53,7 @@ namespace HLProject.Weapons
             viewModels[(int) currentActiveViewModel].SetActive(true);
 
             this.isServer = isServer;
+            enableWeaponSway = !isServer;
             gameObject.SetActive(false);
         }
 
@@ -111,7 +112,7 @@ namespace HLProject.Weapons
         {
             defaultWeaponRotation = MyTransform.localRotation;
             defaultWeaponPos = MyTransform.localPosition;
-            enableWeaponSway = true;
+            //enableWeaponSway = true;
         }
 
         protected virtual void Update()

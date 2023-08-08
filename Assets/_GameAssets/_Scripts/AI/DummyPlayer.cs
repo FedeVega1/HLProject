@@ -28,6 +28,7 @@ namespace HLProject.Characters
         protected override void Start()
         {
             base.Start();
+            LoadModelArray();
             if (isServer) Invoke(nameof(DummyStart), .25f);
         }
 

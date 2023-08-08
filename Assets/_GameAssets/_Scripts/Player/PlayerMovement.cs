@@ -384,5 +384,7 @@ namespace HLProject.Characters
             weaponRecoilOffset = Vector3.zero;
             //print("Reset!");
         }
+
+        public Transform GetFakePivot() => fakeCameraPivot;
     }
 }

@@ -17,10 +17,16 @@ namespace HLProject.Characters
         };
 
         [SerializeField] HitBoxType type;
-        [SerializeField] Character characterScript;
 
         public Transform CharacterTransform => characterScript.MyTransform;
         public bool CharacterIsDead => characterScript.IsDead;
+
+        Character characterScript;
+
+        void Awake()
+        {
+            characterScript = MyTransform.root.GetComponent<Character>();
+        }
 
         public void TakeDamage(float ammount, DamageType damageType = DamageType.Base)
         {

@@ -262,6 +262,11 @@ MonoBehaviour:
     m_SerializedLabels:
     - WeaponBulletScriptables
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 499a921ce78f8454ab7ab7ef219162c4
+    m_Address: Metrocop PlayerModel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 3cf91d3a9f4e16f4dbcc0b305a57378e, type: 2}
   m_SchemaSet:

@@ -576,7 +576,8 @@ namespace HLProject.Characters
         [Client]
         IEnumerator WaitForWeaponSync(Transform weaponToLookAt)
         {
-            while (weaponToLookAt.childCount <= 0) yield return new WaitForSeconds(.1f);
+            WaitForSeconds waitTime = new WaitForSeconds(.1f);
+            while (weaponToLookAt.childCount <= 0) yield return waitTime;
             BaseClientWeapon clientWeapon = weaponToLookAt.GetComponentInChildren<BaseClientWeapon>(true);
             if (clientWeapon != null) clientWeapon.DrawWeapon();
             else Debug.LogError("Couln't find IWeapon Component or NetWeapon doesn't have a client weapon child!");
@@ -585,6 +586,8 @@ namespace HLProject.Characters
         [Client]
         IEnumerator WaitForPlayerWeaponSync(System.Action OnWeaponSync)
         {
+            WaitForSeconds waitTime = new WaitForSeconds(.1f);
+
             int debug = 0, dataFoundCount = 0;
             while (wWeaponPivot.childCount == 0 || dataFoundCount != wWeaponPivot.childCount)
             {
@@ -597,7 +600,7 @@ namespace HLProject.Characters
                 }
 
                 Debug.LogFormat("Player waiting for weaponSync {0}", debug++);
-                yield return new WaitForSeconds(.1f);
+                yield return waitTime;
             }
 
             OnWeaponSync?.Invoke();

@@ -16,11 +16,10 @@ namespace HLProject.Characters
 
         [SerializeField] GameObject playerCamera;
         [SerializeField] GameObject playerCanvasPrefab;
-        [SerializeField] protected SkinnedMeshRenderer playerMesh;
         [SerializeField] protected PlayerMovement movementScript;
         [SerializeField] protected float woundedMaxTime;
         [SerializeField] ClientEffectsController effectsController;
-        [SerializeField] ClientPlayerModel playerModel;
+        [SerializeField] protected Transform playerMeshPivot;
 
         [SyncVar(hook = nameof(OnTeamChange))] protected int playerTeam;
         [SyncVar] protected bool isWounded, firstSpawn;
@@ -31,18 +30,22 @@ namespace HLProject.Characters
         public float BonusWoundTime { get; set; }
         public PlayerCanvas PlayerCanvasScript { get; private set; }
         public PlayerAnimationController AnimController { get; private set; }
-        public ClientPlayerModel PlayerModel => playerModel;
+        public ClientPlayerModel PlayerModel { get; private set; }
 
         protected bool onControlPoint;
         protected int currentClassIndex, kills, deaths, revives, score;
         protected double woundedTime;
         protected PlayerInventory inventory;
         protected TeamClassData classData;
+        protected PlayerModelData currentModelData;
+        protected SkinnedMeshRenderer playerMesh;
 
         bool connectionCheck_WaitingForServer;
         int connectionCheck_Tries;
         double connectionCheck_Time;
         DummyPlayer controlledDummy;
+
+        AsyncOperationHandle<IList<PlayerModelData>> modelDataArrayHandle;
 
         #region Hooks
 
@@ -69,16 +72,12 @@ namespace HLProject.Characters
             LoadAssets();
         }
 
-        //public override void OnStartClient()
-        //{
-        //    if (isLocalPlayer || IsDead || firstSpawn) return;
-        //    playerMesh.enabled = true;
-        //}
-
         protected virtual void Start()
         {
             if (!isLocalPlayer) Destroy(playerCamera);
-            if (!IsDead && firstSpawn) playerMesh.enabled = false;
+            //if (!IsDead && firstSpawn) playerMesh.enabled = false;
+
+            if (!isServer || isLocalPlayer) LoadModelArray();
 
             inventory = GetComponent<PlayerInventory>();
             inventory.DisablePlayerInputs = true;
@@ -116,6 +115,12 @@ namespace HLProject.Characters
 
         #region Client
 
+        protected void LoadModelArray()
+        {
+            modelDataArrayHandle = Addressables.LoadAssetsAsync<PlayerModelData>(new List<string>() { "Metrocop PlayerModel" }, null, Addressables.MergeMode.Union);
+            modelDataArrayHandle.Completed += OnPlayerModelsLoaded;
+        }
+
         /*[Client]
         public void CheckPlayerConnection()
         {
@@ -144,6 +149,13 @@ namespace HLProject.Characters
             connectionCheck_WaitingForServer = true;
             connectionCheck_Tries++;
         }*/
+
+        [Client]
+        void OnPlayerModelsLoaded(AsyncOperationHandle<IList<PlayerModelData>> operation)
+        {
+            if (operation.Status == AsyncOperationStatus.Failed)
+                Debug.LogErrorFormat("Couldn't load the player model array for player: {0} - {1}", playerName, operation.OperationException);
+        }
 
         [Client]
         public virtual void ForceClientReload()
@@ -280,7 +292,7 @@ namespace HLProject.Characters
         public void UpdateMatchTickets(int team, int tickets)
         {
             if (isLocalPlayer) PlayerCanvasScript.SetTeamTickets(team - 1, tickets);
-            print($"{TeamManager.FactionNames[team - 1]} tickets: {tickets}");
+            Debug.LogFormat("{0} tickets: {1}", TeamManager.FactionNames[team - 1], tickets);
         }
 
         [Client]
@@ -302,6 +314,29 @@ namespace HLProject.Characters
         {
             if (!isLocalPlayer) return;
             CmdRequestWoundedGiveUp();
+        }
+
+        [Client]
+        IEnumerator WaitForPlayerModelSync(string playerModelname)
+        {
+            WaitForSeconds waitTime = new WaitForSeconds(.1f);
+            while (playerMeshPivot.childCount == 1) yield return waitTime;
+            PlayerModel = playerMeshPivot.GetComponentInChildren<ClientPlayerModel>();
+            PlayerModel.SetIKParent(movementScript.GetFakePivot());
+            playerMesh = PlayerModel.ModelMeshRenderer;
+            AnimController.SetPlayerModelData(ref currentModelData, PlayerModel.ModelAnimator);
+
+            int size = modelDataArrayHandle.Result.Count;
+            for (int i = 0; i < size; i++)
+            {
+                if (modelDataArrayHandle.Result[i].modelName == playerModelname)
+                {
+                    currentModelData = modelDataArrayHandle.Result[i];
+                    break;
+                }
+            }
+
+            if (isLocalPlayer) playerMesh.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
         }
 
         #endregion
@@ -345,6 +380,8 @@ namespace HLProject.Characters
             MyTransform.position = specPoint.position;
             MyTransform.rotation = specPoint.rotation;
 
+            if (PlayerModel != null) Destroy(PlayerModel.gameObject);
+
             if (connectionToClient != null)
             {
                 RpcWoundedCanGiveUp(connectionToClient);
@@ -375,9 +412,16 @@ namespace HLProject.Characters
             movementScript.ForceMoveCharacter(spawnPosition, spawnRotation);
             movementScript.freezePlayer = false;
             //movementScript.RpcToggleFreezePlayer(connectionToClient, false);
+
+            currentModelData = classData.playerModels[Random.Range(0, classData.playerModels.Length)];
+            PlayerModel = Instantiate(currentModelData.playerModelObject, playerMeshPivot.position, playerMeshPivot.rotation, playerMeshPivot);
+            PlayerModel.SetIKParent(movementScript.GetFakePivot());
+            AnimController.SetPlayerModelData(ref currentModelData, PlayerModel.ModelAnimator);
+            NetworkServer.Spawn(PlayerModel.gameObject);
+
             Debug.LogFormat("Server: Setup weapon inventory for {0} player - ClassName: {1}", playerName, classData.className);
             inventory.SetupWeaponInventory(classData.classVHands, classData.classWeapons, 0);
-            RpcPlayerSpawns();
+            RpcPlayerSpawns(currentModelData.modelName);
         }
 
         [Server]
@@ -389,9 +433,16 @@ namespace HLProject.Characters
             timeToRespawn = NetworkTime.time + MaxRespawnTime;
             woundedTime = criticalHit ? 0 : NetworkTime.time + (woundedMaxTime - BonusWoundTime);
 
+            if (PlayerModel != null)
+            {
+                //PlayerModel.ReleaseRagdoll("", Vector3.forward, 5);
+                Destroy(PlayerModel);
+            }
+
             deaths++;
             isWounded = true;
             if (connectionToClient != null) RpcShowWoundedHUD(connectionToClient, woundedTime, timeToRespawn);
+            RpcCharacterIsWounded();
             movementScript.freezePlayer = true;
             OnPlayerDead?.Invoke();
             //movementScript.RpcToggleFreezePlayer(connectionToClient, true);
@@ -718,7 +769,8 @@ namespace HLProject.Characters
                 inventory.DisablePlayerInputs = true;
             }
 
-            playerMesh.enabled = false;
+            if (PlayerModel != null) Destroy(PlayerModel.gameObject);
+            //playerMesh.enabled = false;
         }
 
         [ClientRpc]
@@ -730,8 +782,10 @@ namespace HLProject.Characters
         }
 
         [ClientRpc]
-        public void RpcPlayerSpawns()
+        public void RpcPlayerSpawns(string playerModelName)
         {
+            StartCoroutine(WaitForPlayerModelSync(playerModelName));
+
             if (isLocalPlayer)
             {
                 PlayerCanvasScript.PlayerRespawn();
@@ -739,10 +793,7 @@ namespace HLProject.Characters
                 movementScript.FreezeInputs = false;
                 inventory.DisablePlayerInputs = false;
                 //playerMesh.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
-                //inventory.SetupWeaponInventory(classData.classWeapons, 0);
             }
-
-            playerMesh.enabled = true;
         }
 
         [ClientRpc]
@@ -753,7 +804,8 @@ namespace HLProject.Characters
                 PlayerCanvasScript.ShowGameOverScreen(loosingTeam, timeToChangeLevel);
             }
 
-            playerMesh.enabled = false;
+            if (PlayerModel != null) Destroy(PlayerModel.gameObject);
+            //playerMesh.enabled = false;
         }
 
         [ClientRpc]
@@ -762,6 +814,13 @@ namespace HLProject.Characters
             base.RpcCharacterTookDamage(ammount, type);
 
             if (isLocalPlayer) effectsController.OnPlayerTakesDamage(type);
+        }
+
+        [ClientRpc]
+        protected virtual void RpcCharacterIsWounded()
+        {
+            PlayerModel.ReleaseRagdoll("", Vector3.forward, 5);
+            if (PlayerModel != null) Destroy(PlayerModel.gameObject);
         }
 
         #endregion

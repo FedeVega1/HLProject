@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cac58539fdb0701478259c42113dc2e1, type: 3}
+  m_Name: Metrocop PlayerModel
+  m_EditorClassIdentifier: 
+  modelName: Metrocop
+  playerModelObject: {fileID: 7253327226043760252, guid: 596b65539286b82478a2286c52044fb3, type: 3}
+  armOffsets:
+  - animation: Idle
+    offset: {x: 35, y: 50, z: 20}
+    transitionSpeed: 8
+  - animation: Walk
+    offset: {x: 60, y: 40, z: 12}
+    transitionSpeed: 8
+  - animation: Crouch
+    offset: {x: -10, y: 55, z: 30}
+    transitionSpeed: 3
+  - animation: Jump
+    offset: {x: 70, y: 50, z: 20}
+    transitionSpeed: 8
+  - animation: Run
+    offset: {x: 65, y: 60, z: 20}
+    transitionSpeed: 8
+  - animation: CrouchWalk
+    offset: {x: 40, y: 70, z: 30}
+    transitionSpeed: 8

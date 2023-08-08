@@ -15,6 +15,8 @@ MonoBehaviour:
   className: Rebel Shotgunner
   classSprite: {fileID: 21300000, guid: 8707101abb6c3034b979a387117555ae, type: 3}
   teamSpecific: 2
+  playerModels:
+  - {fileID: 11400000, guid: 499a921ce78f8454ab7ab7ef219162c4, type: 2}
   classVHands: 1
   classWeapons:
   - {fileID: 11400000, guid: 5bed5d8b635cabd41a01bedae0d8e993, type: 2}

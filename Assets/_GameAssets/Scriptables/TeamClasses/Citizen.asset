@@ -15,6 +15,8 @@ MonoBehaviour:
   className: Armed Citizen
   classSprite: {fileID: 21300000, guid: 8707101abb6c3034b979a387117555ae, type: 3}
   teamSpecific: 2
+  playerModels:
+  - {fileID: 11400000, guid: 499a921ce78f8454ab7ab7ef219162c4, type: 2}
   classVHands: 0
   classWeapons:
   - {fileID: 11400000, guid: 1fe7f61ed922f3d4c99c2e6d8c0d9a13, type: 2}
