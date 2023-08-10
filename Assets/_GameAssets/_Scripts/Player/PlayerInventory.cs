@@ -475,7 +475,12 @@ namespace HLProject.Characters
         public void RpcHideWeapons(NetworkConnection target)
         {
             int size = weaponsInventoryOnClient.Count;
-            for (int i = 0; i < size; i++) weaponsInventoryOnClient[i].ToggleWeaponVisibility(false);
+            for (int i = 0; i < size; i++)
+            {
+                weaponsInventoryOnClient[i].ToggleWeaponVisibility(false);
+                weaponsInventoryOnClient[i].ReleaseSoundHandles();
+            }
+
             currentClassHands.gameObject.SetActive(false);
         }
 

@@ -69,7 +69,7 @@ namespace HLProject.Characters
         double jumpTimer;
         Quaternion currentShakeRotationTarget;
         Vector2 playerMovInput, lastPlayerMovInput, cameraRotInput, lastCameraRotInput;
-        Vector3 velocity, shakeAmplitude, targetCenter;
+        Vector3 velocity, shakeAmplitude, targetCenter, vcamOriginalOffset;
         PlayerAnimationController animController;
         CinemachineTransposer clientVCamTransposer;
 
@@ -386,5 +386,19 @@ namespace HLProject.Characters
         }
 
         public Transform GetFakePivot() => fakeCameraPivot;
+
+        public void LinkCameraToPivot(Transform newParent)
+        {
+            playerVCam.transform.SetParent(newParent);
+            vcamOriginalOffset = clientVCamTransposer.m_FollowOffset;
+            clientVCamTransposer.m_FollowOffset = Vector3.zero;
+        }
+
+        public void ResetCameraParent()
+        {
+            playerVCam.transform.SetParent(MyTransform);
+            clientVCamTransposer.m_FollowOffset = vcamOriginalOffset;
+            playerVCam.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+        }
     }
 }

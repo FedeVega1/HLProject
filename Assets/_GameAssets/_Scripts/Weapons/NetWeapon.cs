@@ -195,7 +195,8 @@ namespace HLProject.Weapons
                 {
                     float distance = Vector3.Distance(finalPos, hitBoxList[i].MyTransform.position);
                     float damageFalloff = Mathf.Clamp(bulletData.radius - distance, 0, bulletData.radius) / bulletData.radius;
-                    hitBoxList[i].TakeDamage(bulletData.explosionDamage * damageFalloff, bulletData.damageType);
+                    Vector3 direction = Vector3.Normalize(hitBoxList[i].MyTransform.position - finalPos);
+                    hitBoxList[i].TakeDamage(bulletData.explosionDamage * damageFalloff, bulletData.damageType, direction, finalPos, bulletData.radius);
                 }
             }
 
@@ -203,9 +204,9 @@ namespace HLProject.Weapons
         }
 
         [Server]
-        void OnBulletTouch(HitBox target)
+        void OnBulletTouch(HitBox target, Vector3 dir)
         {
-            target.TakeDamage(bulletData.damage, bulletData.damageType);
+            target.TakeDamage(bulletData.damage, bulletData.damageType, dir);
         }
 
         [Server]
@@ -229,7 +230,7 @@ namespace HLProject.Weapons
 
                     if (fallOffCheck)
                     {
-                        StartCoroutine(ApplyDistanceToDamage(hitVectors[i], rayHit.distance));
+                        StartCoroutine(ApplyDistanceToDamage(hitVectors[i], rayHit.distance, weaponRay.direction));
                         Debug.DrawLine(weaponRay.origin, hitVectors[i], Color.green, 5);
 
                         //HitBox hitBox = rayHit.transform.GetComponent<HitBox>();
@@ -375,6 +376,7 @@ namespace HLProject.Weapons
         [Server]
         public void HideWeapons()
         {
+            clientWeapon.ReleaseStaticSoundsHandles();
             RpcToggleClientWeapon(false);
         }
 
@@ -585,7 +587,7 @@ namespace HLProject.Weapons
                     HitBox hitBoxToHit = raycastShootlastCollider[i].GetComponent<HitBox>();
                     if (hitBoxToHit == null || hitBoxToHit.CharacterTransform == owningPlayer.MyTransform) continue;
 
-                    hitBoxToHit.TakeDamage(weaponData.meleeDamage, DamageType.Base);
+                    hitBoxToHit.TakeDamage(weaponData.meleeDamage, DamageType.Base, Vector3.Normalize(hitBoxToHit.CharacterTransform.position - firePivot.position));
                     meleeRoutine = null;
                     yield break;
                 }
@@ -604,7 +606,7 @@ namespace HLProject.Weapons
         }
 
         [Server]
-        IEnumerator ApplyDistanceToDamage(Vector3 hitOrigin, float distance)
+        IEnumerator ApplyDistanceToDamage(Vector3 hitOrigin, float distance, Vector3 hitDirection)
         {
             yield return new WaitForSeconds((distance / bulletData.initialSpeed) + weaponData.weaponAnimsTiming.initFire);
             int quantity = Physics.OverlapSphereNonAlloc(hitOrigin, .1f, raycastShootlastCollider, weaponLayerMask);
@@ -614,7 +616,7 @@ namespace HLProject.Weapons
                 HitBox hitBoxToHit = raycastShootlastCollider[i].GetComponent<HitBox>();
                 if (hitBoxToHit == null || hitBoxToHit.CharacterTransform == owningPlayer.MyTransform) continue;
 
-                hitBoxToHit.TakeDamage(bulletData.damage, DamageType.Bullet);
+                hitBoxToHit.TakeDamage(bulletData.damage, DamageType.Bullet, hitDirection);
                 yield break;
             }
         }

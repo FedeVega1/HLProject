@@ -360,6 +360,8 @@ namespace HLProject.Weapons
             clientWeapon.gameObject.SetActive(toggle);
         }
 
+        public void ReleaseSoundHandles() => clientWeapon.ReleaseStaticSoundsHandles();
+
         public double ToggleWeapon(bool toggle)
         {
             weaponDrawn = toggle;

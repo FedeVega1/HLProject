@@ -167,5 +167,11 @@ namespace HLProject.Characters
 
             return (Vector3.positiveInfinity, 0);
         }
+
+        public void OnPlayerDies()
+        {
+            IsReady = false;
+            playerAnim = null;
+        }
     }
 }

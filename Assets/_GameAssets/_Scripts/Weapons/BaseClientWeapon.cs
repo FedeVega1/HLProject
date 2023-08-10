@@ -102,7 +102,10 @@ namespace HLProject.Weapons
             AudioManager.INS.UnRegisterAudioSource(virtualAudioSource, AudioManager.AudioSourceTarget.CurrentWeapon);
             AudioManager.INS.UnRegisterAudioSource(worldAudioSource, AudioManager.AudioSourceTarget.CurrentWeapon);
             AudioManager.INS.UnRegisterAudioSource(virtualMovementSource, AudioManager.AudioSourceTarget.CurrentWeapon);
+        }
 
+        public void ReleaseStaticSoundsHandles()
+        {
             if (weaponWalkSoundsHandle.IsValid()) Addressables.Release(weaponWalkSoundsHandle);
             if (weaponWalkSoundsHandle.IsValid()) Addressables.Release(weaponSprintSoundsHandle);
             if (weaponWalkSoundsHandle.IsValid()) Addressables.Release(weaponMovSoundsHandle);

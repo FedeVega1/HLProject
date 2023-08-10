@@ -356,10 +356,10 @@ namespace HLProject.Characters
         }
 
         [Server]
-        public override void TakeDamage(float ammount, DamageType damageType = DamageType.Base)
+        public override void TakeDamage(float ammount, DamageType damageType = DamageType.Base, Vector3 hitDir = default, Vector3 explosionPos = default, float explosionRadius = 0)
         {
             if (isWounded) return;
-            base.TakeDamage(ammount, damageType);
+            base.TakeDamage(ammount, damageType, hitDir, explosionPos, explosionRadius);
 
             switch (damageType)
             {
@@ -380,7 +380,9 @@ namespace HLProject.Characters
             MyTransform.position = specPoint.position;
             MyTransform.rotation = specPoint.rotation;
 
-            if (PlayerModel != null) Destroy(PlayerModel.gameObject);
+            NetworkServer.Destroy(PlayerModel.gameObject);
+            print("Destroy!");
+            AnimController.OnPlayerDies();
 
             if (connectionToClient != null)
             {
@@ -425,10 +427,11 @@ namespace HLProject.Characters
         }
 
         [Server]
-        protected override void CharacterDies(bool criticalHit)
+        protected override void CharacterDies(bool criticalHit, LastDamageInfo damageInfo)
         {
             if (isDead || isInvencible) return;
 
+            print(criticalHit);
             isBleeding = false;
             timeToRespawn = NetworkTime.time + MaxRespawnTime;
             woundedTime = criticalHit ? 0 : NetworkTime.time + (woundedMaxTime - BonusWoundTime);
@@ -436,13 +439,14 @@ namespace HLProject.Characters
             if (PlayerModel != null)
             {
                 //PlayerModel.ReleaseRagdoll("", Vector3.forward, 5);
-                Destroy(PlayerModel);
+                PlayerModel.ToggleMainModel(false);
+                //NetworkServer.Destroy(PlayerModel.gameObject);
             }
 
             deaths++;
             isWounded = true;
             if (connectionToClient != null) RpcShowWoundedHUD(connectionToClient, woundedTime, timeToRespawn);
-            RpcCharacterIsWounded();
+            RpcCharacterIsWounded(damageInfo);
             movementScript.freezePlayer = true;
             OnPlayerDead?.Invoke();
             //movementScript.RpcToggleFreezePlayer(connectionToClient, true);
@@ -464,6 +468,9 @@ namespace HLProject.Characters
             Transform spectPoint = GameModeManager.INS.GetSpectatePointByIndex(0);
             movementScript.MyTransform.position = spectPoint.position;
             movementScript.MyTransform.rotation = spectPoint.rotation;
+
+            NetworkServer.Destroy(PlayerModel.gameObject);
+            AnimController.OnPlayerDies();
 
             inventory.HideWeapons();
             RpcMatchEndPlayerSetup(loosingTeam, GameModeManager.INS.timeToChangeLevel);
@@ -767,9 +774,9 @@ namespace HLProject.Characters
             {
                 movementScript.FreezeInputs = true;
                 inventory.DisablePlayerInputs = true;
+                movementScript.ResetCameraParent();
             }
 
-            if (PlayerModel != null) Destroy(PlayerModel.gameObject);
             //playerMesh.enabled = false;
         }
 
@@ -804,7 +811,6 @@ namespace HLProject.Characters
                 PlayerCanvasScript.ShowGameOverScreen(loosingTeam, timeToChangeLevel);
             }
 
-            if (PlayerModel != null) Destroy(PlayerModel.gameObject);
             //playerMesh.enabled = false;
         }
 
@@ -812,15 +818,26 @@ namespace HLProject.Characters
         protected override void RpcCharacterTookDamage(float ammount, DamageType type)
         {
             base.RpcCharacterTookDamage(ammount, type);
-
             if (isLocalPlayer) effectsController.OnPlayerTakesDamage(type);
         }
 
         [ClientRpc]
-        protected virtual void RpcCharacterIsWounded()
+        protected virtual void RpcCharacterIsWounded(LastDamageInfo damageInfo)
         {
-            PlayerModel.ReleaseRagdoll("", Vector3.forward, 5);
-            if (PlayerModel != null) Destroy(PlayerModel.gameObject);
+            if (PlayerModel == null) return;
+            switch (damageInfo.damageType)
+            {
+                case DamageType.Explosion:
+                    PlayerModel.ExplodeRagdoll(damageInfo.hitOriginalPosition, damageInfo.explosionRadius, damageInfo.damageForce);
+                    break;
+
+                default:
+                    PlayerModel.ReleaseRagdoll(damageInfo.hitDirection, damageInfo.damageForce);
+                    break;
+            }
+
+            if (isLocalPlayer) movementScript.LinkCameraToPivot(PlayerModel.GetRagdollHeadPivot());
+            PlayerModel.ToggleMainModel(false);
         }
 
         #endregion

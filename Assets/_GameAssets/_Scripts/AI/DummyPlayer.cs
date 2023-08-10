@@ -69,11 +69,11 @@ namespace HLProject.Characters
             base.PlayerWoundedUpdate();
         }
 
-        protected override void CharacterDies(bool criticalHit)
+        protected override void CharacterDies(bool criticalHit, LastDamageInfo damageInfo)
         {
             dummyPlayerOnDeadCooldown = true;
             dummyInit = false;
-            base.CharacterDies(criticalHit);
+            base.CharacterDies(criticalHit, damageInfo);
         }
 
         [Server]
@@ -147,7 +147,7 @@ namespace HLProject.Characters
         public void CommandToShoot()
         {
             dummyCanShoot = !dummyCanShoot;
-            if (dummyCanShoot) timeForNextShoot = NetworkTime.time + currentWeapon.TimeForNextShoot;
+            if (dummyCanShoot) timeForNextShoot = currentWeapon.TimeForNextShoot;
         }
 
         [Server]
@@ -174,7 +174,7 @@ namespace HLProject.Characters
             }
 
             inventory.ProcessCommand(PlayerInventory.DummyCommands.Shoot);
-            if (dummyCanShoot) timeForNextShoot = NetworkTime.time + currentWeapon.TimeForNextShoot;
+            if (dummyCanShoot) timeForNextShoot = currentWeapon.TimeForNextShoot;
         }
     }
 }

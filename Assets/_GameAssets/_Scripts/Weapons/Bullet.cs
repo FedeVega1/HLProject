@@ -6,6 +6,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using HLProject.Managers;
 using HLProject.Characters;
+using UnityEngine.Assertions.Must;
 
 namespace HLProject.Weapons
 {
@@ -40,7 +41,7 @@ namespace HLProject.Weapons
         //AsyncOperationHandle<AudioClip> grenadeTickSoundHandle;
 
         public System.Action<List<HitBox>, Vector3, Quaternion> OnExplode;
-        public System.Action<HitBox> OnTouch;
+        public System.Action<HitBox, Vector3> OnTouch;
 
         void Awake()
         {
@@ -215,7 +216,17 @@ namespace HLProject.Weapons
             if (bounceSoundsHandle.IsValid() && bounceSoundsHandle.Result != null) 
                 aSrc.PlayOneShot(bounceSoundsHandle.Result[Random.Range(0, bounceSoundsHandle.Result.Count)]);
 
-            if (!canExplode) return;
+            if (!canExplode)
+            {
+                if (collision.transform.CompareTag("BPhysCollide") && collision.rigidbody != null)
+                {
+                    print(rb.velocity.magnitude);
+                    collision.rigidbody.AddForce(-collision.contacts[0].normal * rb.velocity.magnitude, ForceMode.Impulse);
+                    return;
+                }
+
+                return;
+            }
 
             HitBox charHitBox;
             if (isBouncingExplosive)
@@ -223,7 +234,7 @@ namespace HLProject.Weapons
                 if (isServer)
                 {
                     charHitBox = collision.transform.GetComponent<HitBox>();
-                    if (charHitBox != null) OnTouch?.Invoke(charHitBox);
+                    if (charHitBox != null) OnTouch?.Invoke(charHitBox, -collision.contacts[0].normal);
                 }
 
                 currentBounces++;

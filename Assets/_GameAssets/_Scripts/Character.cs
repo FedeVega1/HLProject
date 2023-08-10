@@ -7,13 +7,21 @@ namespace HLProject.Characters
 {
     public enum DamageType { Base, Bleed, Bullet, Explosion, Blunt, Shock, Energy }
 
+    [System.Serializable]
+    public struct LastDamageInfo
+    {
+        public Vector3 hitDirection, hitOriginalPosition;
+        public DamageType damageType;
+        public float damageForce, explosionRadius;
+    }
+
     public class Character : CachedNetTransform
     {
         [Header("Character")]
 
         [SerializeField] protected float maxHealth, maxArmor;
         [SerializeField] protected float maxBleedTime, bleedThreshold, maxShockTime;
-        [SerializeField][SyncVar] protected bool isInvencible;
+        [SerializeField, SyncVar] protected bool isInvencible;
 
         [SyncVar] protected bool onShock;
         [SyncVar] protected double shockTime;
@@ -83,7 +91,7 @@ namespace HLProject.Characters
         }
 
         [Server]
-        public virtual void TakeDamage(float ammount, DamageType damageType = DamageType.Base)
+        public virtual void TakeDamage(float ammount, DamageType damageType = DamageType.Base, Vector3 hitDir = default, Vector3 explosionPos = default, float explosionRadius = 0)
         {
             if (!isServer || isDead || isInvencible) return;
 
@@ -143,8 +151,20 @@ namespace HLProject.Characters
             currentHealth -= Mathf.Clamp(dmgToHealth, 0, 9999999);
             RpcCharacterTookDamage(ammount, damageType);
 
-            Debug.LogFormat("Character {0} took {1} of {2} damage - DamageToArmor: {3} - DamageToHealth: {4}", name, ammount, damageType, damageToArmor, dmgToHealth);
-            if (currentHealth <= 0) CharacterDies(damageType == DamageType.Base || currentHealth < 100);
+            //Debug.LogFormat("Character {0} took {1} of {2} damage - DamageToArmor: {3} - DamageToHealth: {4}", name, ammount, damageType, damageToArmor, dmgToHealth);
+            if (currentHealth <= 0)
+            {
+                LastDamageInfo damageInfo = new LastDamageInfo()
+                {
+                    damageType = damageType,
+                    damageForce = ammount,
+                    hitDirection = hitDir,
+                    hitOriginalPosition = explosionPos,
+                    explosionRadius = explosionRadius
+                };
+
+                CharacterDies(damageType == DamageType.Base || currentHealth < -150, damageInfo);
+            }
         }
 
         [Server]
@@ -162,7 +182,7 @@ namespace HLProject.Characters
         }
 
         [Server]
-        protected virtual void CharacterDies(bool criticalHit)
+        protected virtual void CharacterDies(bool criticalHit, LastDamageInfo damageInfo)
         {
             if (!isServer || isDead || isInvencible) return;
             isBleeding = false;
@@ -189,7 +209,7 @@ namespace HLProject.Characters
         [ClientRpc]
         protected virtual void RpcCharacterTookDamage(float ammount, DamageType type)
         {
-            Debug.LogFormat("Character took {0} of {1}", ammount, type);
+            //Debug.LogFormat("Character took {0} of {1}", ammount, type);
         }
 
         [Server]

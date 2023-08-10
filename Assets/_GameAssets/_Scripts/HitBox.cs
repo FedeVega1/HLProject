@@ -28,10 +28,10 @@ namespace HLProject.Characters
             characterScript = MyTransform.root.GetComponent<Character>();
         }
 
-        public void TakeDamage(float ammount, DamageType damageType = DamageType.Base)
+        public void TakeDamage(float ammount, DamageType damageType = DamageType.Base, Vector3 hitDirection = default, Vector3 hitOriginalPosition = default, float explosionRadius = 0)
         {
             if (CharacterIsDead) return;
-            characterScript.TakeDamage(ammount * damageMultTable[type], damageType);
+            characterScript.TakeDamage(ammount * damageMultTable[type], damageType, hitDirection, hitOriginalPosition, explosionRadius);
         }
 
         public void OnBulletFlyby(Vector3 origin) => characterScript.OnBulletFlyby(origin);
