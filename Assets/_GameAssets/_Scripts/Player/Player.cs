@@ -110,6 +110,7 @@ namespace HLProject.Characters
         public bool PlayerIsMoving() => movementScript.PlayerIsMoving;
         public bool PlayerIsRunning() => movementScript.PlayerIsRunning;
         public bool PlayerIsCrouched() => movementScript.PlayerIsCrouched;
+        public bool PlayerIsGrounded() => movementScript.IsGrounded;
 
         #endregion
 
@@ -324,6 +325,7 @@ namespace HLProject.Characters
             PlayerModel = playerMeshPivot.GetComponentInChildren<ClientPlayerModel>();
             PlayerModel.SetIKParent(movementScript.GetFakePivot());
             playerMesh = PlayerModel.ModelMeshRenderer;
+            movementScript.SetStepController(PlayerModel.StepController);
             AnimController.SetPlayerModelData(ref currentModelData, PlayerModel.ModelAnimator);
 
             int size = modelDataArrayHandle.Result.Count;
@@ -464,6 +466,7 @@ namespace HLProject.Characters
         {
             movementScript.freezePlayer = true;
             movementScript.ToggleCharacterController(false);
+            movementScript.ReleaseStepSounds();
 
             Transform spectPoint = GameModeManager.INS.GetSpectatePointByIndex(0);
             movementScript.MyTransform.position = spectPoint.position;

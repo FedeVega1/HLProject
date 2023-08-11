@@ -28,13 +28,17 @@ namespace HLProject.Characters
             { "Grenade", .2f }, { "TEST GRANADE", .2f },
         };
 
+        [SerializeField] PlayerStepSoundController stepController;
+
         public bool IsReady { get; private set; }
 
         NetworkAnimator playerAnim;
         Player owningPlayer;
         PlayerModelData modelData;
 
-        float movThreshold, runThreshold, crouchThreshold;
+        [SyncVar] float movThreshold, runThreshold, crouchThreshold;
+
+        double stepTime;
         string currentAnim, lastAnim;
         Vector2 lerpedPlayerDir, playerDirTarget;
 
@@ -46,7 +50,8 @@ namespace HLProject.Characters
 
         void Update()
         {
-            if (!IsReady || !isServer) return;
+            if (!IsReady) return;
+
             movThreshold += (owningPlayer.PlayerIsMoving() ? 4 : -4) * Time.deltaTime;
             runThreshold += (owningPlayer.PlayerIsRunning() ? 4 : -4) * Time.deltaTime;
             crouchThreshold += (owningPlayer.PlayerIsCrouched() ? 4 : -.8f) * Time.deltaTime;
@@ -72,6 +77,13 @@ namespace HLProject.Characters
             }
 
             lastAnim = currentAnim;
+        }
+
+        void HandleStepSounds()
+        {
+            if (movThreshold < .1f || !owningPlayer.PlayerIsGrounded() || NetworkTime.localTime < stepTime) return;
+            stepController.PlayStepSound();
+            stepTime = NetworkTime.localTime + (.5 / (movThreshold + runThreshold));
         }
 
         [Server]

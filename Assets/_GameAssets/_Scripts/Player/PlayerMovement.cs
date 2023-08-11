@@ -5,6 +5,7 @@ using Cinemachine;
 using Mirror;
 using UnityEngine.Rendering;
 
+
 namespace HLProject.Characters
 {
     [RequireComponent(typeof(CharacterController))]
@@ -56,6 +57,7 @@ namespace HLProject.Characters
         public bool PlayerIsMoving => playerMovInput.magnitude > 0;
         public bool PlayerIsRunning => canRun && CheckInput(inputFlags, InputFlag.Sprint);
         public bool PlayerIsCrouched => CheckInput(inputFlags, InputFlag.Crouch);
+        public bool IsGrounded => CharCtrl.isGrounded;
 
         public float CameraSensMult { get; set; }
 
@@ -66,12 +68,16 @@ namespace HLProject.Characters
         bool jumped, canShakeCamera;
         InputFlag inputFlags;
         float startHeight, startYOffset, playerSpeed, yAxisRotation, shakeIntensity, shakeEndTime, targetHeight, startClientOffset, targetClientOffset;
-        double jumpTimer;
+        double jumpTimer, materialCheckTime;
+        Transform currentMaterialFloorTransform;
         Quaternion currentShakeRotationTarget;
         Vector2 playerMovInput, lastPlayerMovInput, cameraRotInput, lastCameraRotInput;
         Vector3 velocity, shakeAmplitude, targetCenter, vcamOriginalOffset;
         PlayerAnimationController animController;
         CinemachineTransposer clientVCamTransposer;
+        PlayerStepSoundController stepController;
+        Collider[] materialCheckArray;
+
 
         void OnFreezePlayerSet(bool oldValue, bool newValue)
         {
@@ -86,6 +92,7 @@ namespace HLProject.Characters
 
         void Start()
         {
+            materialCheckArray = new Collider[1];
             targetHeight = startHeight = CharCtrl.height;
             startYOffset = CharCtrl.center.y;
             targetCenter = CharCtrl.center;
@@ -118,8 +125,13 @@ namespace HLProject.Characters
                 clientVCamTransposer.m_FollowOffset.y = Mathf.MoveTowards(clientVCamTransposer.m_FollowOffset.y, targetClientOffset, Time.deltaTime * crouchingSpeed);
             }
 
-            if (!isServer) return;
+            if (!isServer)
+            {
+                CheckFloorMaterial();
+                return;
+            }
 
+            if (isLocalPlayer) CheckFloorMaterial(); // For Hosts
             HandleShake();
             Move();
             RotateServer();
@@ -171,6 +183,27 @@ namespace HLProject.Characters
             if (newInput) CmdSendPlayerInputs(playerMovInput, cameraRotInput, inputFlags);
             lastCameraRotInput = cameraRotInput;
             lastPlayerMovInput = playerMovInput;
+        }
+
+        [Client]
+        void CheckFloorMaterial()
+        {
+            if (stepController == null || !CharCtrl.isGrounded || NetworkTime.localTime < materialCheckTime) return;
+            materialCheckTime = NetworkTime.localTime + .2f;
+
+            int quantity = Physics.OverlapBoxNonAlloc(MyTransform.position, new Vector3(.25f, .25f, .25f), materialCheckArray, MyTransform.rotation);
+            if (quantity > 0)
+            {
+                if (materialCheckArray[0].transform == currentMaterialFloorTransform) return;
+                Renderer render = materialCheckArray[0].transform.GetComponent<Renderer>();
+
+                if (render == null) return;
+                stepController.SetCurrentFloorMaterial(MaterialProcessor.GetMaterialType(render.sharedMaterial.name));
+                return;
+            }
+
+            Debug.DrawRay(MyTransform.position, -MyTransform.up, Color.red, Time.deltaTime);
+            print("Miss");
         }
 
         [Command]
@@ -400,5 +433,8 @@ namespace HLProject.Characters
             clientVCamTransposer.m_FollowOffset = vcamOriginalOffset;
             playerVCam.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         }
+
+        public void ReleaseStepSounds() => stepController.ClearStepSounds();
+        public void SetStepController(PlayerStepSoundController newController) => stepController = newController;
     }
 }

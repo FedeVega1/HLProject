@@ -11,6 +11,7 @@ namespace HLProject.Characters
     {
         [SerializeField] Transform ragdollPivot, mainPivot, pivotIK;
         [SerializeField] MultiAimConstraint multiAim;
+        [SerializeField] PlayerStepSoundController stepController;
 
 #if UNITY_EDITOR
         [SerializeField] float testImpulse;
@@ -35,6 +36,8 @@ namespace HLProject.Characters
                 return _ModelMeshRenderer;
             }
         }
+
+        public PlayerStepSoundController StepController => stepController;
 
         Animator ragdollAnim;
         Rigidbody[] ragdollParts;
